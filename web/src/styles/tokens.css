@@ -1,0 +1,60 @@
+/* techRebels OS design tokens. Dark-first, one look only.
+   Pink is a rare accent (under 5% of any screen). Lime leads, mint follows. */
+:root {
+  color-scheme: dark;
+
+  --night: #0B0F0D;
+  --night-2: #131A17;
+  --line: #26302B;
+  --bone: #EDE7DC;
+  --muted: #8E9A94;
+
+  --lime: #CDDC27;
+  --mint: #3DDB9A;
+  --green: #114F40;
+  --purple: #342450;
+  --bug-brown: #8C5A3C;
+  --rebel-brown: #3C241F;
+  --ink: #2A1416;
+  --pink: #F4A5D4;
+
+  --f-display: "Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --r-tile: 22px;
+  --r-win: 14px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body {
+  background-color: var(--night);
+  background-image:
+    linear-gradient(rgba(237, 231, 220, .04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(237, 231, 220, .04) 1px, transparent 1px);
+  background-size: 80px 80px;
+  color: var(--bone);
+  font: 400 16px/1.55 var(--f-mono);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* faint scanlines over everything */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .12) 0 1px, transparent 1px 3px);
+  opacity: .25;
+  z-index: 9999;
+}
+
+:focus-visible { outline: 3px solid var(--lime); outline-offset: 3px; }
+
+a { color: var(--mint); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

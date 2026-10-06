@@ -1,0 +1,39 @@
+---
+// Foundation page: proves fonts, tokens and the bug renderer work.
+// The opening sequence and the techRebels OS main page replace this next.
+import Base from '../layouts/Base.astro';
+import Bug from '../components/Bug';
+import { site } from '../config/site';
+
+const crew = [
+  { tile: 'var(--lime)',   config: { role: 'dev', shape: 'round', shell: 'green', pattern: 'circuit', eyes: 'visor', mouth: 'grin', antennae: 'plug', hat: 'headphones', pose: 'stomp', attitude: 'rebel', accent: 'mint' } },
+  { tile: 'var(--mint)',   config: { role: 'ai', shape: 'tall', shell: 'purple', pattern: 'pixels', eyes: 'glitch', mouth: 'o', antennae: 'wifi', hat: 'none', pose: 'hype', attitude: 'excited', extra: 'sparkles' } },
+  { tile: 'var(--purple)', config: { role: 'marketing', shape: 'wide', shell: 'lime', pattern: 'dots', eyes: 'googly', mouth: 'tongue', antennae: 'match', hat: 'party', pose: 'wave', attitude: 'excited' } },
+  { tile: 'var(--bug-brown)', config: { role: 'sales', shape: 'round', shell: 'mint', pattern: 'stripes', eyes: 'googly', eyewear: 'shades', mouth: 'grin', antennae: 'classic', hat: 'headset', pose: 'wave', attitude: 'rebel' } },
+];
+---
+<Base>
+  <main class="wrap">
+    <p class="label">techRebels.os · booting</p>
+    <h1 class="wm"><span>tech</span><span>Rebels</span></h1>
+    <p class="claim">{site.claims.lunapark[0]}</p>
+    <div class="crew">
+      {crew.map((b) => (
+        <div class="tile" style={`background:${b.tile}`}>
+          <Bug config={b.config} size={220} label={`Rebel bug, ${b.config.role}`} />
+        </div>
+      ))}
+    </div>
+  </main>
+</Base>
+
+<style>
+  .wrap { max-width: 1200px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 48px 96px; display: grid; gap: 28px; }
+  .label { margin: 0; color: var(--muted); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; }
+  .wm { margin: 0; font: 800 clamp(4rem, 15vw, 13rem)/.8 var(--f-display); letter-spacing: -.05em; color: var(--lime); }
+  .wm span { display: block; }
+  .claim { margin: 0; color: var(--mint); font-weight: 700; font-size: clamp(1rem, 2.2vw, 1.6rem); }
+  .crew { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+  .tile { border-radius: var(--r-tile); padding: 10px; display: grid; place-items: center; }
+  .tile :global(svg) { width: 100%; height: auto; display: block; }
+</style>
