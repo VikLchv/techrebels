@@ -1,0 +1,34 @@
+---
+// A route that is coming soon: one OS window that says what will live here.
+import Os from '../layouts/Os.astro';
+import Win from './Win.astro';
+import Bug from './Bug';
+
+interface Props { file: string; title: string; heading: string; text: string; tile?: string; bug: Record<string, string> }
+const { file, title, heading, text, tile = 'var(--lime)', bug } = Astro.props;
+---
+<Os title={`${title} · techRebels`}>
+  <div class="ph">
+    <Win title={file} perms="--x--x--x" class="sh-pink" style="--rot:-.8deg" bodyClass="ph-body">
+      <div class="ph-tile" style={`background:${tile}`}><Bug config={bug} size={260} label={`Rebel bug, ${title}`} /></div>
+      <div class="ph-copy">
+        <p class="label">Loading {file} ... coming soon</p>
+        <h1 class="ph-h">{heading}</h1>
+        <p class="ph-text">{text}</p>
+        <slot />
+        <a class="btn btn-ghost" href="/">Back to the desktop</a>
+      </div>
+    </Win>
+  </div>
+</Os>
+
+<style is:global>
+  .ph { width: min(980px, 100% - 32px); margin: 0 auto; }
+  .ph-body { display: grid; grid-template-columns: minmax(0, 260px) 1fr; gap: clamp(20px, 4vw, 40px); align-items: center; }
+  .ph-tile { border-radius: var(--r-tile); padding: 10px; }
+  .ph-tile svg { width: 100%; height: auto; display: block; }
+  .ph-copy { display: grid; gap: 14px; justify-items: start; min-width: 0; }
+  .ph-h { margin: 0; font: 800 clamp(2rem, 5vw, 3.6rem)/.92 var(--f-display); letter-spacing: -.04em; color: var(--pink); text-wrap: balance; }
+  .ph-text { margin: 0; color: var(--muted); max-width: 52ch; }
+  @media (max-width: 640px) { .ph-body { grid-template-columns: 1fr; } .ph-tile { max-width: 220px; } }
+</style>

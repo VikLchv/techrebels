@@ -1,39 +1,394 @@
 ---
-// Foundation page: proves fonts, tokens and the bug renderer work.
-// The opening sequence and the techRebels OS main page replace this next.
-import Base from '../layouts/Base.astro';
+import Os from '../layouts/Os.astro';
+import Intro from '../components/Intro.astro';
+import Win from '../components/Win.astro';
 import Bug from '../components/Bug';
-import { site } from '../config/site';
+import { site, links, session } from '../config/site';
 
-const crew = [
-  { tile: 'var(--green)',  config: { role: 'dev', shape: 'round', shell: 'pink', pattern: 'code', eyes: 'visor', mouth: 'grin', antennae: 'plug', hat: 'headphones', pose: 'stomp', attitude: 'rebel' } },
-  { tile: 'var(--lime)',   config: { role: 'ai', shape: 'tall', shell: 'purple', pattern: 'pixels', eyes: 'glitch', mouth: 'o', antennae: 'wifi', hat: 'none', pose: 'hype', attitude: 'excited', extra: 'sparkles' } },
-  { tile: 'var(--pink)',   config: { role: 'marketing', shape: 'wide', shell: 'green', pattern: 'dots', eyes: 'googly', mouth: 'tongue', antennae: 'match', hat: 'party', pose: 'wave', attitude: 'excited' } },
-  { tile: 'var(--purple)', config: { role: 'sales', shape: 'round', shell: 'mint', pattern: 'stripes', eyes: 'googly', eyewear: 'shades', mouth: 'grin', antennae: 'classic', hat: 'headset', pose: 'wave', attitude: 'rebel' } },
+const heroBug = { role: 'dev', shape: 'round', shell: 'green', pattern: 'circuit', eyes: 'visor', mouth: 'grin', antennae: 'plug', hat: 'headphones', pose: 'stomp', attitude: 'rebel', accent: 'mint' };
+
+const icons = [
+  { name: 'bug_lab.exe', href: '/lab', tile: 'var(--lime)', bug: { role: 'design', shape: 'tall', shell: 'purple', pattern: 'dots', eyes: 'hearts', mouth: 'smirk', antennae: 'cursor', hat: 'beret' } },
+  { name: 'swarm.live', href: '/swarm', tile: 'var(--mint)', bug: { role: 'ai', shape: 'round', shell: 'pink', pattern: 'pixels', eyes: 'glitch', mouth: 'o', antennae: 'wifi', hat: 'none' } },
+  { name: 'session_01.ics', href: '#session', tile: 'var(--purple)', bug: { role: 'founder', shape: 'wide', shell: 'lime', pattern: 'code', eyes: 'visor', mouth: 'grin', antennae: 'match', hat: 'crown' } },
+  { name: 'drop_001.zip', href: '#drop', tile: 'var(--pink)', bug: { role: 'sales', shape: 'round', shell: 'brown', pattern: 'stripes', eyes: 'googly', eyewear: 'shades', mouth: 'grin', antennae: 'classic', hat: 'headset' } },
+];
+
+const marquee = [...site.claims.bugs, ...site.claims.rebels, ...site.claims.lunapark];
+
+const faq = [
+  { code: 'Error 403', q: 'Is this only for developers?', a: 'No. PMs, designers, marketers, data and AI people, founders and the curious are all welcome.' },
+  { code: 'Error 402', q: 'How much does it cost?', a: 'Joining is free. Some Sessions may have a small ticket.' },
+  { code: 'Error 418', q: 'What do I get as a member?', a: 'Your own bug, votes on Session topics, guest suggestions, early access to merch and events.' },
+  { code: 'Error 404', q: 'Where does it happen?', a: 'Prague. Every event is on our Luma calendar.' },
 ];
 ---
-<Base>
-  <main class="wrap">
-    <p class="label">techRebels.os · booting</p>
-    <h1 class="wm"><span>tech</span><span>Rebels</span></h1>
-    <p class="claim">{site.claims.lunapark[0]}</p>
-    <div class="crew">
-      {crew.map((b) => (
-        <div class="tile" style={`background:${b.tile}`}>
-          <Bug config={b.config} size={220} label={`Rebel bug, ${b.config.role}`} />
+<Os>
+  <Intro slot="before" />
+
+  <!-- 1. Desktop / hero -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <p class="label">A community for curious people in tech</p>
+      <h1 id="hero-title" class="wordmark hero-wm"><span>tech</span><span>Rebels</span></h1>
+      <p class="rotator" aria-live="polite"><span id="rotator">{site.rotator[0]}</span><i aria-hidden="true"></i></p>
+      <div class="hero-cta">
+        <a class="btn btn-lime" href="/lab">Build your bug</a>
+        <a class="btn btn-ghost" href={links.lumaSession}>Next Rebel Session</a>
+      </div>
+    </div>
+    <div class="hero-desk">
+      <div class="hero-tile">
+        <Bug config={heroBug} size={420} label="Rebel bug, a dev in a stomping rebel pose" />
+      </div>
+      <ul class="icons" aria-label="Desktop">
+        {icons.map((ic) => (
+          <li>
+            <a class="icon" href={ic.href}>
+              <span class="icon-tile" style={`background:${ic.tile}`}><Bug config={ic.bug} size={64} label={ic.name} /></span>
+              <span class="icon-name">{ic.name}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="sticky" aria-hidden="true">TODO: break something nice.</p>
+    </div>
+  </section>
+
+  <!-- 2. Claims marquee -->
+  <div class="marquee" aria-label="Claims">
+    <div class="marquee-track">
+      <span>{marquee.join(' · ')} · </span><span aria-hidden="true">{marquee.join(' · ')} · </span>
+    </div>
+  </div>
+
+  <div class="desk">
+    <!-- 3. Manifesto -->
+    <Win title="manifesto.txt" class="w-manifesto sh-pink" style="--rot:-.6deg">
+      <h2 class="win-h">A community, not a conference.</h2>
+      <ul class="typed">
+        <li><b>Real projects, bugs included.</b> We show the dead ends too.</li>
+        <li><b>The community sets the agenda.</b> Everyone brings a question, a problem or a speaker tip.</li>
+        <li><b>Not just for devs.</b> PMs, design, marketing, data, AI, founders, the curious.</li>
+      </ul>
+    </Win>
+
+    <!-- 4. Pillars -->
+    <Win title="bugs.exe" perms="rwxr-x---" class="w-pillar pillar-bugs sh-mint" style="--rot:1.2deg" bodyClass="pillar">
+      <p class="pillar-what">Chaos, glitches, unexpected behavior.</p>
+      <h2 class="pillar-claim">WORKING AS UNINTENDED.</h2>
+      <p class="pillar-list">BE THE BUG. · TOO WEIRD TO PATCH. · STATUS: WON'T FIX.</p>
+    </Win>
+    <Win title="rebels.sys" perms="r--r--r--" class="w-pillar pillar-rebels sh-pink" style="--rot:-1deg" bodyClass="pillar">
+      <p class="pillar-what">Attitude, rule-breaking, your own path.</p>
+      <h2 class="pillar-claim">NORMAL WAS NEVER THE PLAN.</h2>
+      <p class="pillar-list">ATTITUDE IS A FEATURE. · WE REBEL AGAINST BORING. · NOT MADE FOR SAFE MODE.</p>
+    </Win>
+    <Win title="lunapark.app" perms="rwxrwxrwx" class="w-pillar pillar-luna sh-purple" style="--rot:.8deg" bodyClass="pillar">
+      <p class="pillar-what">Experiments, play, weirdness, fun.</p>
+      <h2 class="pillar-claim">LESS CONFERENCE. MORE CARNIVAL.</h2>
+      <p class="pillar-list">NO INNOVATION WITHOUT PLAY. · COME FOR THE TECH. STAY FOR THE CHAOS. · SERIOUS EXPERIMENTS. STUPID AMOUNTS OF FUN.</p>
+    </Win>
+
+    <!-- 5. Bug lab -->
+    <Win title="bug_lab.exe" perms="rwx------" class="w-lab sh-lime" style="--rot:.5deg" bodyClass="lab">
+      <div class="lab-tile" id="lab-tile">
+        <div id="lab-bug"><Bug config={heroBug} size={320} label="Random rebel bug" /></div>
+      </div>
+      <div class="lab-side">
+        <h2 class="win-h">Every rebel gets a bug.</h2>
+        <p>No single mascot. A whole swarm. Your bug is your avatar, your name badge and your membership card.</p>
+        <dl class="readout" aria-live="polite">
+          <div><dt>role:</dt><dd id="ro-role">Dev</dd></div>
+          <div><dt>species:</dt><dd id="ro-species">Heisenbug</dd></div>
+          <div><dt>severity:</dt><dd id="ro-sev">Chaotic</dd></div>
+          <div><dt>status:</dt><dd>won't fix</dd></div>
+        </dl>
+        <div class="row">
+          <button type="button" class="btn btn-ghost" id="mutate">Mutate</button>
+          <a class="btn btn-lime" href="/lab">Build yours</a>
         </div>
+      </div>
+    </Win>
+
+    <!-- 6. Ticket -->
+    <section class="w-ticket" id="session" aria-labelledby="ticket-title">
+      <div class="ticket">
+        <div class="ticket-main">
+          <p class="ticket-admit">ADMIT ONE REBEL</p>
+          <h2 id="ticket-title" class="ticket-title">{session.name}</h2>
+          <p class="ticket-meta">{session.length} · {session.people} · {session.city} · {session.date} · {session.venue}</p>
+          <p class="ticket-text">A guest shows a real project, bugs and all. You dig in. Then drinks and a bug swap.</p>
+          <a class="btn btn-ticket" href={links.lumaSession}>Get on the list</a>
+        </div>
+        <div class="ticket-stub" aria-hidden="true"><span>No. 001</span></div>
+      </div>
+    </section>
+
+    <!-- 7. Swarm -->
+    <Win title="swarm.live" perms="rw-rw-rw-" class="w-swarm sh-pink" style="--rot:-1.4deg">
+      <p class="label">Click anywhere. Every click is a bug.</p>
+      <p class="big-count"><span id="swarm-count">0</span><small>bugs online</small></p>
+      <div class="row">
+        <button type="button" class="btn btn-pink" id="release">Release 50 bugs</button>
+        <a href="/swarm">See the real Swarm</a>
+      </div>
+    </Win>
+
+    <!-- 8. Merch -->
+    <Win title="drop_001.zip" perms="r--------" id="drop" class="w-drop sh-mint" style="--rot:.9deg">
+      <h2 class="win-h">Founding Drop 001. Limited. Numbered. Never reprinted.</h2>
+      <ul class="files">
+        {['tee.png', 'hoodie.png', 'cap.png', 'tote.png'].map((f, i) => (
+          <li><span>{f}</span><span class="bar"><i style={`--d:${i * 0.35}s`}></i></span></li>
+        ))}
+      </ul>
+      <p class="extracted">4 files extracted</p>
+      <p>Pre-order only. Members get first access.</p>
+      <a class="btn btn-lime" href="/lab">Join for early access</a>
+    </Win>
+  </div>
+
+  <!-- 9. FAQ -->
+  <section class="faq" id="faq" aria-labelledby="faq-title">
+    <h2 id="faq-title" class="section-h">Known issues</h2>
+    <div class="dialogs">
+      {faq.map((f) => (
+        <details class="dlg">
+          <summary>
+            <span class="dlg-bar">{f.code}</span>
+            <span class="dlg-q"><span class="dlg-icon" aria-hidden="true">!</span>{f.q}</span>
+            <span class="dlg-btns" aria-hidden="true"><span>Details</span><span>Ignore</span></span>
+          </summary>
+          <p class="dlg-a">{f.a}</p>
+        </details>
       ))}
     </div>
-  </main>
-</Base>
+  </section>
+</Os>
 
-<style>
-  .wrap { max-width: 1200px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 48px 96px; display: grid; gap: 28px; }
-  .label { margin: 0; color: var(--muted); font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; }
-  .wm { margin: 0; font: 800 clamp(4rem, 15vw, 13rem)/.8 var(--f-display); letter-spacing: -.05em; color: var(--pink); }
-  .wm span { display: block; }
-  .claim { margin: 0; color: var(--lime); font-weight: 700; font-size: clamp(1rem, 2.2vw, 1.6rem); }
-  .crew { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
-  .tile { border-radius: var(--r-tile); padding: 10px; display: grid; place-items: center; }
-  .tile :global(svg) { width: 100%; height: auto; display: block; }
+<style is:global>
+  main { display: grid; gap: clamp(56px, 8vw, 104px); padding-block: clamp(28px, 5vw, 56px) clamp(72px, 10vw, 120px); overflow-x: clip; }
+  main > :not(.marquee) { width: min(1280px, 100% - 2 * clamp(16px, 4vw, 40px)); margin-inline: auto; }
+
+  /* hero */
+  .hero { display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(28px, 4vw, 56px); align-items: center; }
+  .hero-copy { display: grid; gap: 20px; min-width: 0; }
+  .hero-wm { font-size: clamp(5rem, 15vw, 15.5rem); }
+  .hero-wm:hover { animation: glitch .35s steps(4) 2; }
+  .rotator { margin: 0; min-height: 2.8em; font-weight: 700; font-size: clamp(1rem, 2.2vw, 1.6rem); color: var(--mint); }
+  .rotator i { display: inline-block; width: .6em; height: 1.05em; margin-left: .2em; vertical-align: -.15em; background: var(--mint); animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
+
+  .hero-desk { position: relative; display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: start; }
+  .hero-tile { background: var(--pink); border-radius: var(--r-tile); padding: 14px; box-shadow: 8px 8px 0 var(--lime); transform: rotate(-2deg); }
+  .hero-tile svg { width: 100%; height: auto; display: block; }
+  .icons { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+  .icon { display: grid; justify-items: center; gap: 6px; text-decoration: none; color: var(--bone); font-size: .7rem; }
+  .icon-tile { width: 72px; aspect-ratio: 1; border-radius: 24%; display: grid; place-items: center; padding: 6px; transition: transform .2s; }
+  .icon-tile svg { width: 100%; height: auto; display: block; }
+  .icon:hover .icon-tile, .icon:focus-visible .icon-tile { animation: wobble .5s ease-in-out; }
+  @keyframes wobble { 25% { transform: rotate(-8deg) scale(1.06); } 75% { transform: rotate(6deg) scale(1.06); } }
+  .sticky {
+    position: absolute; left: -26px; bottom: -34px; margin: 0; width: 170px; padding: 18px 14px 14px;
+    background: var(--pink); color: var(--night); font-weight: 700; font-size: .82rem; line-height: 1.3;
+    transform: rotate(-7deg); box-shadow: 0 10px 24px rgba(0, 0, 0, .35);
+  }
+  .sticky::before { content: ""; position: absolute; top: -10px; left: 50%; width: 70px; height: 20px; translate: -50% 0; background: rgba(237, 231, 220, .55); transform: rotate(3deg); }
+
+  /* marquee */
+  .marquee { background: var(--lime); color: var(--night); overflow: hidden; white-space: nowrap; font-weight: 700; font-size: .95rem; letter-spacing: .08em; padding-block: 14px; transform: rotate(-1deg); }
+  .marquee-track { display: inline-flex; animation: marquee 60s linear infinite; }
+  .marquee-track span { padding-right: .5em; }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+  @keyframes marquee { to { transform: translateX(-50%); } }
+
+  /* desktop grid */
+  .desk { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: clamp(28px, 3vw, 40px); align-items: start; }
+  .w-manifesto { grid-column: 1 / span 8; }
+  .w-pillar { grid-column: span 4; }
+  .pillar-bugs { margin-top: 24px; }
+  .pillar-luna { margin-top: 48px; }
+  .w-lab { grid-column: 2 / span 10; }
+  .w-ticket { grid-column: 1 / span 7; }
+  .w-swarm { grid-column: 8 / span 5; margin-top: 40px; }
+  .w-drop { grid-column: 3 / span 8; }
+
+  .win-h { margin: 0 0 16px; font: 800 clamp(1.7rem, 3.4vw, 2.8rem)/.95 var(--f-display); letter-spacing: -.035em; color: var(--bone); text-wrap: balance; }
+  .typed { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; color: var(--muted); }
+  .typed li::before { content: "> "; color: var(--pink); }
+  .typed b { color: var(--bone); }
+
+  .pillar-bugs .pillar { background: var(--purple); color: var(--mint); }
+  .pillar-rebels .pillar { background: var(--green); color: var(--pink); }
+  .pillar-luna .pillar { background: var(--lime); color: var(--green); }
+  .pillar { display: grid; gap: 14px; min-height: 280px; align-content: start; }
+  .pillar-what { margin: 0; font-size: .85rem; opacity: .9; }
+  .pillar-claim { margin: 0; font: 800 clamp(1.6rem, 2.6vw, 2.3rem)/.95 var(--f-display); letter-spacing: -.03em; }
+  .pillar-list { margin: 0; font-size: .72rem; letter-spacing: .06em; line-height: 1.7; opacity: .9; }
+
+  /* lab */
+  .lab { display: grid; grid-template-columns: minmax(0, 340px) 1fr; gap: clamp(20px, 3vw, 40px); align-items: center; }
+  .lab-tile { border-radius: var(--r-tile); padding: 12px; background: var(--lime); transition: background-color .3s; }
+  .lab-tile svg { width: 100%; height: auto; display: block; }
+  .lab-side { display: grid; gap: 14px; min-width: 0; }
+  .lab-side p { margin: 0; color: var(--muted); }
+  .readout { margin: 0; display: grid; gap: 4px; font-size: .9rem; padding: 14px 16px; background: var(--night); border: 1px solid var(--line); border-radius: 10px; }
+  .readout div { display: flex; gap: 10px; }
+  .readout dt { color: var(--muted); min-width: 6.5em; }
+  .readout dd { margin: 0; color: var(--lime); }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .wig { animation: wig .45s ease-in-out; transform-origin: 50% 70%; }
+  @keyframes wig { 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
+
+  /* ticket */
+  .w-ticket { transform: rotate(-2deg); }
+  .ticket {
+    display: grid; grid-template-columns: 1fr auto; background: var(--lime); color: var(--night); border-radius: 18px;
+    -webkit-mask: radial-gradient(circle 18px at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat, radial-gradient(circle 18px at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat;
+    mask: radial-gradient(circle 18px at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat, radial-gradient(circle 18px at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat;
+    filter: drop-shadow(8px 8px 0 var(--pink));
+  }
+  .ticket-main { padding: clamp(22px, 3vw, 34px) clamp(28px, 4vw, 44px); display: grid; gap: 10px; }
+  .ticket-admit { margin: 0; font-size: .72rem; font-weight: 700; letter-spacing: .3em; }
+  .ticket-title { margin: 0; font: 800 clamp(2rem, 4.6vw, 3.6rem)/.9 var(--f-display); letter-spacing: -.04em; }
+  .ticket-meta { margin: 0; font-weight: 700; font-size: .85rem; }
+  .ticket-text { margin: 0; font-size: .9rem; max-width: 46ch; }
+  .btn-ticket { justify-self: start; background: var(--night); color: var(--lime); margin-top: 6px; }
+  .btn-ticket:hover { box-shadow: 4px 4px 0 var(--pink); }
+  .ticket-stub { border-left: 3px dashed rgba(11, 15, 13, .45); padding: 20px 28px; display: grid; place-items: center; }
+  .ticket-stub span { writing-mode: vertical-rl; font-weight: 700; letter-spacing: .2em; font-size: .85rem; }
+
+  /* swarm */
+  .big-count { margin: 6px 0 18px; display: flex; align-items: baseline; gap: 12px; }
+  .big-count span { font: 800 clamp(3.5rem, 8vw, 6rem)/.9 var(--f-display); color: var(--pink); font-variant-numeric: tabular-nums; }
+  .big-count small { color: var(--muted); }
+
+  /* merch */
+  .files { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 10px; }
+  .files li { display: grid; grid-template-columns: 7.5em 1fr; gap: 14px; align-items: center; font-size: .85rem; }
+  .bar { height: 14px; background: #1D2622; border-radius: 4px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: repeating-linear-gradient(90deg, var(--lime) 0 10px, var(--mint) 10px 20px); transition: width 1.4s cubic-bezier(.5, 0, .2, 1) var(--d, 0s); }
+  html.entered .bar i { width: 100%; }
+  .extracted { margin: 0 0 8px; color: var(--mint); font-weight: 700; opacity: 0; transition: opacity .4s 2.6s; }
+  html.entered .extracted { opacity: 1; }
+  .w-drop p { color: var(--muted); }
+
+  /* faq */
+  .section-h { margin: 0 0 22px; font: 800 clamp(2rem, 4vw, 3.2rem)/.95 var(--f-display); letter-spacing: -.035em; color: var(--pink); }
+  .dialogs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+  .dlg { background: var(--night-2); border: 2px solid var(--bone); border-radius: 10px; box-shadow: 6px 6px 0 var(--purple); overflow: hidden; }
+  .dlg:nth-child(2) { box-shadow: 6px 6px 0 var(--pink); }
+  .dlg:nth-child(3) { box-shadow: 6px 6px 0 var(--mint); }
+  .dlg:nth-child(4) { box-shadow: 6px 6px 0 var(--lime); }
+  .dlg summary { list-style: none; cursor: pointer; display: grid; }
+  .dlg summary::-webkit-details-marker { display: none; }
+  .dlg-bar { background: var(--bone); color: var(--night); font-weight: 700; font-size: .75rem; padding: 6px 12px; letter-spacing: .06em; }
+  .dlg-q { display: flex; align-items: center; gap: 14px; padding: 18px 16px 8px; font-weight: 700; }
+  .dlg-icon { flex: none; width: 32px; height: 32px; display: grid; place-items: center; background: var(--lime); color: var(--night); font-weight: 800; clip-path: polygon(50% 0, 100% 100%, 0 100%); padding-top: 8px; }
+  .dlg-btns { display: flex; justify-content: flex-end; gap: 8px; padding: 6px 16px 16px; font-size: .75rem; }
+  .dlg-btns span { border: 1px solid var(--line); border-radius: 6px; padding: 4px 12px; color: var(--muted); }
+  .dlg-btns span:first-child { border-color: var(--bone); color: var(--bone); }
+  .dlg[open] .dlg-btns span:first-child { background: var(--bone); color: var(--night); }
+  .dlg-a { margin: 0; padding: 0 16px 18px 62px; color: var(--mint); }
+
+  /* responsive */
+  @media (max-width: 1000px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-desk { max-width: 560px; }
+    .sticky { left: auto; right: 0; bottom: -40px; }
+  }
+  @media (max-width: 900px) {
+    .desk { grid-template-columns: 1fr; }
+    .desk > * { grid-column: 1 / -1 !important; margin-top: 0 !important; }
+    .desk .win { --rot: 0deg !important; }
+    .lab { grid-template-columns: 1fr; }
+    .lab-tile { max-width: 340px; }
+    .dialogs { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 520px) {
+    .hero-desk { grid-template-columns: 1fr; }
+    .icons { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .icon-tile { width: 58px; }
+    .sticky { position: relative; left: 0; bottom: 0; justify-self: start; margin-top: 8px; }
+    .ticket { grid-template-columns: 1fr; }
+    .ticket-stub { border-left: 0; border-top: 3px dashed rgba(11, 15, 13, .45); padding: 12px; }
+    .ticket-stub span { writing-mode: horizontal-tb; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track { animation: none; }
+    .bar i { width: 100%; }
+    .extracted { opacity: 1; }
+  }
 </style>
+
+<script>
+  import { bugSVG, OPTS, SPECIES, ROLES, SEVERITY } from '../lib/bug/render.js';
+  import { site } from '../config/site';
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- claim rotator with scramble ----------
+  const rot = document.getElementById('rotator');
+  const GLYPHS = '!<>-_\\/[]{}=+*^?#01';
+  let ci = 0;
+  const scramble = (el: HTMLElement, to: string) => {
+    if (reduce) { el.textContent = to; return; }
+    const start = performance.now();
+    const step = (now: number) => {
+      const p = Math.min(1, (now - start) / 300);
+      const keep = Math.floor(to.length * p);
+      let out = to.slice(0, keep);
+      for (let i = keep; i < to.length; i++) out += to[i] === ' ' ? ' ' : GLYPHS[(Math.random() * GLYPHS.length) | 0];
+      el.textContent = out;
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+  if (rot) setInterval(() => { ci = (ci + 1) % site.rotator.length; scramble(rot, site.rotator[ci]); }, 2500);
+
+  // ---------- bug_lab.exe: a bug that keeps mutating ----------
+  const pick = <T,>(a: readonly T[]) => a[(Math.random() * a.length) | 0];
+  const val = (k: string) => pick(OPTS[k].items)[0];
+  const SHELLS = ['green', 'lime', 'purple', 'mint', 'brown', 'white', 'pink', 'pink'];
+  const TILES: Record<string, string> = { lime: 'var(--lime)', mint: 'var(--mint)', purple: 'var(--purple)', green: 'var(--green)', pink: 'var(--pink)', brown: 'var(--bug-brown)' };
+  const hash = (s: string) => { let x = 2166136261; for (const ch of s) { x ^= ch.charCodeAt(0); x = Math.imul(x, 16777619); } return x >>> 0; };
+
+  const labBug = document.getElementById('lab-bug');
+  const labTile = document.getElementById('lab-tile');
+  const out = (id: string, v: string) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+
+  const mutate = () => {
+    if (!labBug || !labTile) return;
+    const role = pick(ROLES)[0];
+    const shell = pick(SHELLS);
+    const cfg = {
+      role, shell,
+      shape: val('shape'), pose: val('pose'), attitude: val('attitude'), pattern: val('pattern'),
+      eyes: val('eyes'), mouth: val('mouth'), antennae: val('antennae'),
+      hat: Math.random() < 0.55 ? val('hat') : 'none',
+      eyewear: Math.random() < 0.25 ? val('eyewear') : 'none',
+      extra: Math.random() < 0.3 ? val('extra') : 'none',
+    };
+    const species = SPECIES.map((s, i) => [s, i] as const).filter(([s]) => s[2] === role);
+    const sp = species.length ? pick(species)[0] : SPECIES[0];
+    const tiles = Object.keys(TILES).filter((t) => t !== shell);
+    labTile.style.background = TILES[pick(tiles)];
+    labBug.innerHTML = bugSVG(cfg, 320);
+    if (!reduce) { labBug.classList.remove('wig'); void labBug.offsetWidth; labBug.classList.add('wig'); }
+    out('ro-role', ROLES.find((r) => r[0] === role)?.[1] ?? role);
+    out('ro-species', sp[0]);
+    out('ro-sev', SEVERITY[hash(JSON.stringify(cfg)) % SEVERITY.length]);
+  };
+  document.getElementById('mutate')?.addEventListener('click', mutate);
+  let paused = false;
+  labTile?.addEventListener('pointerenter', () => { paused = true; });
+  labTile?.addEventListener('pointerleave', () => { paused = false; });
+  setInterval(() => { if (!paused && !document.hidden) mutate(); }, 1600);
+
+  // ---------- swarm.live ----------
+  const sc = document.getElementById('swarm-count');
+  document.addEventListener('tr:count', (e) => { if (sc) sc.textContent = String((e as CustomEvent<number>).detail); });
+  document.getElementById('release')?.addEventListener('click', () => document.dispatchEvent(new CustomEvent('tr:release', { detail: 50 })));
+</script>

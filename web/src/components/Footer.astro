@@ -1,0 +1,24 @@
+---
+import { links } from '../config/links';
+---
+<footer class="site-footer">
+  <p class="wordmark" aria-label="techRebels"><span>tech</span><span>Rebels</span></p>
+  <div>
+    <ul>
+      <li><a href={links.instagram}>Instagram</a></li>
+      <li><a href={links.linkedin}>LinkedIn</a></li>
+      <li><a href={links.lumaCalendar}>Luma</a></li>
+      <li><a href="/privacy">Privacy</a></li>
+    </ul>
+    <p class="meta">Status: won't fix · © 2026 techRebels</p>
+  </div>
+  <button type="button" class="btn btn-ghost" id="shutdown">Shut down</button>
+</footer>
+
+<script>
+  document.getElementById('shutdown')?.addEventListener('click', () => {
+    try { sessionStorage.removeItem('tr-intro-seen'); } catch {}
+    window.scrollTo(0, 0);
+    location.href = '/';
+  });
+</script>

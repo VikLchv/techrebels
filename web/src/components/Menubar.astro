@@ -1,0 +1,48 @@
+---
+---
+<header class="menubar" id="menubar">
+  <nav aria-label="techRebels OS">
+    <a class="os" href="/"><i aria-hidden="true"></i>techRebels.os</a>
+    <span class="menu-item">File</span>
+    <span class="menu-item">Edit</span>
+    <a class="menu-item" href="/lab">Bugs</a>
+    <button type="button" class="menu-item chaos" id="chaos-btn">Chaos</button>
+    <a class="menu-item" href="/#faq">Help</a>
+  </nav>
+  <div class="status">
+    <span>bugs online: <b id="bug-count">0</b></span>
+    <span class="clock" id="clock" aria-label="Current time">--:--</span>
+    <button type="button" class="menu-toggle" id="menu-toggle" aria-expanded="false">Menu</button>
+  </div>
+</header>
+
+<script>
+  const clock = document.getElementById('clock');
+  const tick = () => {
+    if (clock) clock.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  };
+  tick();
+  setInterval(tick, 15000);
+
+  const count = document.getElementById('bug-count');
+  document.addEventListener('tr:count', (e) => {
+    if (count) count.textContent = String((e as CustomEvent<number>).detail);
+  });
+
+  document.getElementById('chaos-btn')?.addEventListener('click', () => {
+    document.dispatchEvent(new CustomEvent('tr:release', { detail: 60 }));
+    const main = document.querySelector('main');
+    if (!main || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    main.classList.remove('shake');
+    void (main as HTMLElement).offsetWidth;
+    main.classList.add('shake');
+    setTimeout(() => main.classList.remove('shake'), 450);
+  });
+
+  const bar = document.getElementById('menubar');
+  const toggle = document.getElementById('menu-toggle');
+  toggle?.addEventListener('click', () => {
+    const open = bar?.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(!!open));
+  });
+</script>

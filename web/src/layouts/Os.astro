@@ -1,0 +1,52 @@
+---
+// techRebels OS shell: menu bar, ambient bugs, page content, footer, draggable windows.
+import Base from './Base.astro';
+import Menubar from '../components/Menubar.astro';
+import Ambient from '../components/Ambient.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props { title?: string; description?: string }
+const { title, description } = Astro.props;
+---
+<Base title={title} description={description}>
+  <slot name="before" />
+  <Menubar />
+  <Ambient />
+  <main id="main">
+    <slot />
+  </main>
+  <Footer />
+</Base>
+
+<script>
+  // Drag windows by their title bar (desktop with a fine pointer only). Translate only, so the layout never jumps.
+  const canDrag = matchMedia('(min-width: 901px) and (pointer: fine)');
+  let z = 10;
+  document.querySelectorAll<HTMLElement>('.win[data-drag]').forEach((win) => {
+    const bar = win.querySelector<HTMLElement>('.win-bar');
+    if (!bar) return;
+    let sx = 0, sy = 0, dx = 0, dy = 0, active = false;
+    win.addEventListener('pointerdown', () => { if (canDrag.matches) win.style.zIndex = String(++z); });
+    bar.addEventListener('pointerdown', (e) => {
+      if (!canDrag.matches || e.button !== 0) return;
+      active = true;
+      sx = e.clientX - dx; sy = e.clientY - dy;
+      bar.setPointerCapture(e.pointerId);
+      win.classList.add('dragging');
+    });
+    bar.addEventListener('pointermove', (e) => {
+      if (!active) return;
+      dx = e.clientX - sx; dy = e.clientY - sy;
+      win.style.setProperty('--dx', `${dx}px`);
+      win.style.setProperty('--dy', `${dy}px`);
+    });
+    const end = () => { active = false; win.classList.remove('dragging'); };
+    bar.addEventListener('pointerup', end);
+    bar.addEventListener('pointercancel', end);
+    bar.addEventListener('dblclick', () => {
+      dx = dy = 0;
+      win.style.removeProperty('--dx');
+      win.style.removeProperty('--dy');
+    });
+  });
+</script>

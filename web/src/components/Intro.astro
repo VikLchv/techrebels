@@ -1,0 +1,322 @@
+---
+// Opening sequence: boot terminal > glitch > bug invasion > bugs form the wordmark > enter > screen tears.
+---
+<script is:inline>
+  // Decide before first paint so the main page never flashes and the intro never flashes for repeat visits.
+  (function () {
+    var root = document.documentElement, skip = false;
+    try { skip = sessionStorage.getItem('tr-intro-seen') === '1'; } catch (e) {}
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) skip = true;
+    root.classList.add(skip ? 'no-intro' : 'intro-on');
+  })();
+</script>
+
+<div id="intro" role="dialog" aria-modal="true" aria-label="techRebels intro">
+  <div class="slices" aria-hidden="true">
+    <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+  </div>
+  <canvas id="intro-canvas" aria-hidden="true"></canvas>
+  <pre id="intro-term" aria-hidden="true"></pre>
+  <div id="intro-ui" hidden>
+    <p class="intro-claim">Less conference. More carnival.</p>
+    <button type="button" id="intro-enter">Enter the lunapark</button>
+    <span class="intro-hint">or press any key</span>
+  </div>
+  <button type="button" id="intro-skip">Skip intro</button>
+</div>
+
+<style is:global>
+  html.no-intro #intro { display: none; }
+  html.intro-on, html.intro-on body { overflow: hidden; }
+
+  #intro { position: fixed; inset: 0; z-index: 100; }
+  #intro .slices { position: absolute; inset: 0; display: grid; grid-template-rows: repeat(8, 1fr); }
+  #intro .slices i { background: var(--night); transition: transform .75s cubic-bezier(.75, 0, .25, 1); }
+  #intro.tear .slices i:nth-child(odd) { transform: translateX(-105%); }
+  #intro.tear .slices i:nth-child(even) { transform: translateX(105%); }
+  #intro .slices i:nth-child(1) { transition-delay: 0s; }
+  #intro .slices i:nth-child(2) { transition-delay: .04s; }
+  #intro .slices i:nth-child(3) { transition-delay: .08s; }
+  #intro .slices i:nth-child(4) { transition-delay: .12s; }
+  #intro .slices i:nth-child(5) { transition-delay: .16s; }
+  #intro .slices i:nth-child(6) { transition-delay: .2s; }
+  #intro .slices i:nth-child(7) { transition-delay: .24s; }
+  #intro .slices i:nth-child(8) { transition-delay: .28s; }
+
+  #intro-canvas { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity .45s; }
+  #intro.tear #intro-canvas, #intro.tear #intro-ui, #intro.tear #intro-skip { opacity: 0; transition: opacity .3s; }
+
+  #intro-term {
+    position: absolute; left: clamp(16px, 5vw, 64px); top: clamp(28px, 9vh, 96px); right: 16px; margin: 0;
+    color: var(--lime); font: 500 clamp(12px, 1.5vw, 17px)/1.75 var(--f-mono); white-space: pre-wrap;
+    transition: opacity .35s;
+  }
+  #intro-term .ok { color: var(--mint); }
+  #intro-term .bad { color: var(--pink); }
+  #intro-term .warn { color: var(--bone); }
+  #intro-term.glitch { animation: glitch .5s steps(5) both; }
+  #intro-term.gone { opacity: 0; }
+  #intro.shake { animation: shake .45s steps(6) both; }
+
+  #intro-ui {
+    position: absolute; left: 16px; right: 16px; bottom: clamp(28px, 9vh, 90px);
+    display: grid; justify-items: center; gap: 14px; text-align: center;
+    animation: intro-up .6s ease both;
+  }
+  #intro-ui[hidden] { display: none; }
+  .intro-claim { margin: 0; font: 800 clamp(1.4rem, 3.4vw, 2.4rem)/1 var(--f-display); letter-spacing: -.03em; color: var(--bone); }
+  #intro-enter {
+    font: 700 clamp(.9rem, 1.6vw, 1.05rem) var(--f-mono); text-transform: uppercase; letter-spacing: .14em;
+    background: var(--pink); color: var(--night); border: 0; border-radius: 999px; padding: 18px 32px; cursor: pointer;
+    animation: intro-pulse 1.8s ease-in-out infinite;
+  }
+  #intro-enter:hover { background: var(--lime); }
+  .intro-hint { font-size: .75rem; color: var(--muted); }
+  #intro-skip {
+    position: absolute; top: calc(env(safe-area-inset-top, 0px) + 14px); right: 14px;
+    background: transparent; color: var(--muted); border: 1px solid var(--line); border-radius: 999px;
+    font: 500 .75rem var(--f-mono); padding: 7px 14px; cursor: pointer;
+  }
+  #intro-skip:hover { color: var(--bone); border-color: var(--bone); }
+
+  @keyframes intro-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes intro-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(244, 165, 212, .55); }
+    50% { box-shadow: 0 0 0 16px rgba(244, 165, 212, 0); }
+  }
+</style>
+
+<script>
+  import { Swarm } from '../lib/swarm/canvasBugs';
+
+  const root = document.documentElement;
+  const intro = document.getElementById('intro');
+
+  const entered = () => {
+    root.classList.remove('intro-on');
+    root.classList.add('entered');
+    document.dispatchEvent(new CustomEvent('tr:entered'));
+  };
+
+  if (!intro || root.classList.contains('no-intro')) {
+    intro?.remove();
+    entered();
+  } else {
+    run(intro);
+  }
+
+  function run(intro: HTMLElement) {
+    const canvas = document.getElementById('intro-canvas') as HTMLCanvasElement;
+    const term = document.getElementById('intro-term')!;
+    const ui = document.getElementById('intro-ui')!;
+    const sw = new Swarm(canvas, 1500);
+    const mobile = () => sw.W < 700;
+
+    type Phase = 'boot' | 'pour' | 'form' | 'explode';
+    let phase: Phase = 'boot', phaseAt = performance.now(), raf = 0, finishing = false, uiShown = false;
+    let mx = -9999, my = -9999;
+
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+    // ---------- 1. boot terminal ----------
+    const BOOT: [string, string, string][] = [
+      ['> booting techRebels.os', '', ''],
+      ['> loading curiosity ........... ', 'ok', 'ok'],
+      ['> loading conference_mode ..... ', 'FAILED', 'bad'],
+      ['> loading small_talk.dll ...... ', 'not found', 'bad'],
+      ['> scanning for bugs ........... ', '1 found', 'ok'],
+      ['> scanning for bugs ........... ', '42 found', 'ok'],
+      ['> scanning for bugs ........... ', '404 found', 'warn'],
+      ['> WARNING: bugs are not the problem. bugs are the point.', '', 'warn'],
+    ];
+
+    async function boot() {
+      for (const [text, result, cls] of BOOT) {
+        if (finishing) return;
+        const line = document.createElement('div');
+        if (!result && cls) line.className = cls;
+        term.appendChild(line);
+        for (let i = 0; i < text.length; i += 2) {
+          if (finishing) return;
+          line.textContent = text.slice(0, i + 2);
+          await sleep(8);
+        }
+        if (result) {
+          await sleep(110);
+          const r = document.createElement('span');
+          r.className = cls;
+          r.textContent = result;
+          line.appendChild(r);
+        }
+        await sleep(90);
+      }
+      await sleep(350);
+      if (finishing) return;
+      // ---------- 2. glitch ----------
+      term.classList.add('glitch');
+      intro.classList.add('shake');
+      await sleep(500);
+      term.classList.add('gone');
+      intro.classList.remove('shake');
+      if (!finishing) invade();
+    }
+
+    // ---------- 4. logo target points ----------
+    function sampleTargets() {
+      const W = Math.round(sw.W), H = Math.round(sw.H);
+      const oc = document.createElement('canvas');
+      oc.width = W; oc.height = H;
+      const c = oc.getContext('2d', { willReadFrequently: true })!;
+      const fs = Math.min(W * 0.2, H * 0.33);
+      c.font = `800 ${fs}px "Bricolage Grotesque", "Arial Black", sans-serif`;
+      if ('letterSpacing' in c) (c as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = `${-fs * 0.05}px`;
+      const w = Math.max(c.measureText('tech').width, c.measureText('Rebels').width);
+      const x0 = (W - w) / 2;
+      const y1 = H * 0.4 - fs * 0.14;
+      c.fillStyle = '#fff';
+      c.fillText('tech', x0, y1);
+      c.fillText('Rebels', x0, y1 + fs * 0.8);
+      const data = c.getImageData(0, 0, W, H).data;
+      const max = mobile() ? 650 : 1300;
+      const sample = (step: number) => {
+        const pts: [number, number][] = [];
+        for (let y = step / 2; y < H; y += step)
+          for (let x = step / 2; x < W; x += step)
+            if (data[((y | 0) * W + (x | 0)) * 4 + 3] > 128) pts.push([x, y]);
+        return pts;
+      };
+      let step = Math.max(3, Math.round(fs / 30));
+      let pts = sample(step);
+      while (pts.length > max * 1.15 && step < 40) pts = sample(++step);
+      for (let i = pts.length - 1; i > 0; i--) {
+        const j = (Math.random() * (i + 1)) | 0;
+        [pts[i], pts[j]] = [pts[j], pts[i]];
+      }
+      return { pts: pts.slice(0, max), step };
+    }
+
+    // ---------- 3. bug invasion ----------
+    function invade() {
+      const { pts, step } = sampleTargets();
+      const s = Math.max(1.6, step * 0.42);
+      const cx = sw.W / 2, cy = sw.H / 2;
+      for (const [tx, ty] of pts) {
+        const edge = (Math.random() * 4) | 0;
+        const x = edge === 0 ? -20 : edge === 1 ? sw.W + 20 : Math.random() * sw.W;
+        const y = edge === 2 ? -20 : edge === 3 ? sw.H + 20 : Math.random() * sw.H;
+        const a = Math.atan2(cy - y, cx - x) + (Math.random() - 0.5) * 0.9;
+        const sp = 3 + Math.random() * 4;
+        const i = sw.add(x, y, Math.cos(a) * sp, Math.sin(a) * sp, s * (0.85 + Math.random() * 0.3));
+        if (i >= 0) { sw.tx[i] = tx; sw.ty[i] = ty; }
+      }
+      phase = 'pour';
+      phaseAt = performance.now();
+    }
+
+    function retarget() {
+      if (!sw.n) return;
+      const { pts } = sampleTargets();
+      for (let i = 0; i < sw.n; i++) {
+        const p = pts[i % pts.length];
+        sw.tx[i] = p[0]; sw.ty[i] = p[1];
+      }
+    }
+
+    function showUI() {
+      if (finishing || uiShown) return;
+      uiShown = true;
+      ui.hidden = false;
+      (document.getElementById('intro-enter') as HTMLButtonElement).focus({ preventScroll: true });
+    }
+
+    // ---------- animation loop ----------
+    function frame(now: number) {
+      raf = requestAnimationFrame(frame);
+      if (document.hidden) return;
+      const t = now - phaseAt;
+      const cx = sw.W / 2, cy = sw.H / 2;
+      for (let i = 0; i < sw.n; i++) {
+        let vx = sw.vx[i], vy = sw.vy[i];
+        if (phase === 'pour') {
+          vx = (vx + (cx - sw.x[i]) * 0.0006 + (Math.random() - 0.5) * 0.5) * 0.97;
+          vy = (vy + (cy - sw.y[i]) * 0.0006 + (Math.random() - 0.5) * 0.5) * 0.97;
+        } else if (phase === 'form') {
+          const dx = sw.tx[i] - sw.x[i], dy = sw.ty[i] - sw.y[i];
+          vx = (vx + dx * 0.018) * 0.84;
+          vy = (vy + dy * 0.018) * 0.84;
+          if (dx * dx + dy * dy < 4) { vx += (Math.random() - 0.5) * 0.22; vy += (Math.random() - 0.5) * 0.22; }
+        } else {
+          vx *= 0.985; vy *= 0.985;
+        }
+        if (phase !== 'pour') {
+          const ex = sw.x[i] - mx, ey = sw.y[i] - my, d2 = ex * ex + ey * ey;
+          if (d2 < 8100 && d2 > 0.01) {
+            const d = Math.sqrt(d2), f = ((90 - d) / 90) * 5;
+            vx += (ex / d) * f; vy += (ey / d) * f;
+          }
+        }
+        sw.vx[i] = vx; sw.vy[i] = vy;
+        sw.step(i);
+      }
+      if (phase === 'explode') sw.alpha = Math.max(0, 1 - t / 700);
+      sw.draw();
+      if (phase === 'pour' && t > 900) {
+        phase = 'form';
+        phaseAt = now;
+        setTimeout(showUI, 2000);
+      }
+    }
+
+    // ---------- 7. enter / skip ----------
+    function finish(fast = false) {
+      if (finishing) return;
+      finishing = true;
+      try { sessionStorage.setItem('tr-intro-seen', '1'); } catch {}
+      if (!fast && sw.n) {
+        const cx = sw.W / 2, cy = sw.H / 2;
+        for (let i = 0; i < sw.n; i++) {
+          const dx = sw.x[i] - cx, dy = sw.y[i] - cy, d = Math.hypot(dx, dy) || 1;
+          const f = 8 + Math.random() * 14;
+          sw.vx[i] += (dx / d) * f; sw.vy[i] += (dy / d) * f;
+        }
+        phase = 'explode';
+        phaseAt = performance.now();
+        setTimeout(tear, 420);
+      } else {
+        tear();
+      }
+    }
+
+    function tear() {
+      intro.classList.add('tear');
+      root.classList.remove('intro-on');
+      setTimeout(() => {
+        cancelAnimationFrame(raf);
+        removeEventListener('keydown', onKey);
+        removeEventListener('resize', onResize);
+        intro.remove();
+        entered();
+      }, 1100);
+    }
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') finish(true);
+      else if (phase === 'form' || phase === 'pour') { e.preventDefault(); finish(); }
+    };
+    const onResize = () => { sw.resize(); if (phase === 'form' || phase === 'pour') retarget(); };
+
+    addEventListener('keydown', onKey);
+    addEventListener('resize', onResize);
+    intro.addEventListener('pointermove', (e) => { mx = e.clientX; my = e.clientY; });
+    intro.addEventListener('pointerleave', () => { mx = my = -9999; });
+    document.getElementById('intro-enter')?.addEventListener('click', () => finish());
+    document.getElementById('intro-skip')?.addEventListener('click', () => finish(true));
+
+    raf = requestAnimationFrame(frame);
+    const fontReady = Promise.race([
+      document.fonts?.load('800 100px "Bricolage Grotesque"') ?? Promise.resolve(),
+      sleep(1500),
+    ]);
+    fontReady.then(boot, boot);
+  }
+</script>

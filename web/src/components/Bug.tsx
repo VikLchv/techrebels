@@ -1,7 +1,6 @@
-// @ts-expect-error: plain JS module, the source of truth for drawing bugs
-import { bugSVG } from '../lib/bug/render.js';
+import { bugSVG, type BugConfig } from '../lib/bug/render.js';
 
-export type BugConfig = Record<string, string | number | undefined>;
+export type { BugConfig };
 
 type Props = { config: BugConfig; size?: number; label?: string; className?: string };
 

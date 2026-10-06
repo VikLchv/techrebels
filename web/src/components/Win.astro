@@ -1,0 +1,23 @@
+---
+// An OS window: title bar with dots, file name and fake permissions, plus a body.
+interface Props {
+  title: string;
+  perms?: string;
+  id?: string;
+  class?: string;
+  style?: string;
+  drag?: boolean;
+  bodyClass?: string;
+}
+const { title, perms = 'rw-r--r--', id, class: className, style, drag = true, bodyClass } = Astro.props;
+---
+<section class:list={['win', className]} id={id} style={style} data-drag={drag ? '' : undefined} aria-label={title}>
+  <div class="win-bar">
+    <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="win-title">{title}</span>
+    <span class="win-perms" aria-hidden="true">{perms}</span>
+  </div>
+  <div class:list={['win-body', bodyClass]}>
+    <slot />
+  </div>
+</section>
