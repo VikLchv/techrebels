@@ -1,0 +1,18 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# deps and builds
+node_modules/
+dist/
+.astro/
+.vercel/
+
+# supabase local
+supabase/.temp/
+supabase/.branches/
+
+# os
+.DS_Store
+Thumbs.db
