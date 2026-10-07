@@ -32,7 +32,7 @@ export const crew = [
     bug: { role: 'dev', shape: 'round', shell: 'pink', pattern: 'code', accent: 'brown', eyes: 'visor', eyewear: 'none', mouth: 'fangs', antennae: 'plug', hat: 'none', extra: 'none', pose: 'stand', attitude: 'smug' },
   },
   {
-    name: 'Tom Kos', short: 'Tom', role: '[role]', photo: '/crew/tom.webp', linkedin: '#',
+    name: 'Tom Kos', short: 'Tom', role: 'TBD', photo: '/crew/tom.webp', linkedin: '#',
     bugNumber: 2, bugName: '[bug name]', line: '[one line about Tom]', tile: 'var(--mint)',
     bug: { role: 'design', shape: 'wide', shell: 'lime', pattern: 'pixels', eyes: 'visor', eyewear: 'shades', mouth: 'smirk', antennae: 'cursor', hat: 'none', pose: 'lean', attitude: 'smug' },
   },
