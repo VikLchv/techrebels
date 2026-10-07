@@ -1,4 +1,4 @@
-export { links, session, plausibleDomain } from './links';
+export { links, session, plausibleDomain, crew, contactEmail } from './links';
 
 export const site = {
   name: 'techRebels',

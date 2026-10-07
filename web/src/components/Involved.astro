@@ -1,0 +1,216 @@
+---
+// "Get involved": speaker / crew / partner forms. Preview only: nothing is sent yet.
+import { contactEmail } from '../config/links';
+
+const helpAreas = ['Events & venue', 'Design', 'Dev & web', 'Marketing & social', 'Photo & video', 'Merch', 'Community care'];
+---
+<section class="block involved" id="involved">
+  <div class="head rv">
+    <p class="eyebrow">Get involved</p>
+    <h2 class="h2">Speak. Build. Host.</h2>
+    <p class="lede">techRebels is built by the people in it. Pick how you want to jump in.</p>
+  </div>
+
+  <div class="inv rv">
+    <div class="inv-tabs" role="tablist" aria-label="How to get involved">
+      <button type="button" role="tab" id="tab-speak" aria-controls="panel-speak" aria-selected="true">I want to speak</button>
+      <button type="button" role="tab" id="tab-crew" aria-controls="panel-crew" aria-selected="false" tabindex="-1">I want to help build it</button>
+      <button type="button" role="tab" id="tab-partner" aria-controls="panel-partner" aria-selected="false" tabindex="-1">Partner or host</button>
+    </div>
+
+    <!-- Speaker -->
+    <div class="inv-panel" role="tabpanel" id="panel-speak" aria-labelledby="tab-speak">
+      <div class="inv-intro">
+        <h3>Show your bugs on stage.</h3>
+        <p>A Rebel Session is one real project and everything that went wrong on the way. No polished keynote, no slides about how great it all was. 20 minutes of story, then the room digs in.</p>
+        <ul>
+          <li>Any field: dev, AI, data, design, product, marketing, sales, founding.</li>
+          <li>First-timers welcome. We help you shape the story.</li>
+        </ul>
+      </div>
+      <form class="inv-form" data-form="speaker" novalidate>
+        <div class="f2">
+          <label>Your name<input name="name" id="sp-name" required autocomplete="name" maxlength="80" /></label>
+          <label>Email<input name="email" id="sp-email" type="email" required autocomplete="email" maxlength="120" /></label>
+        </div>
+        <label>What would you show?<input name="topic" id="sp-topic" required maxlength="120" placeholder="The project, in one line" /></label>
+        <label>Best bug of the story <span class="opt">optional</span><textarea name="bug" id="sp-bug" rows="3" maxlength="500" placeholder="Where did it break, and what did you learn?"></textarea></label>
+        <label>Link <span class="opt">optional</span><input name="link" id="sp-link" type="url" maxlength="300" placeholder="https://" /></label>
+        <label class="check"><input type="checkbox" name="consent" id="sp-consent" required /> I agree that techRebels may contact me about this.</label>
+        <button class="pill pill-pink" type="submit" data-track="submit speaker form">Pitch my talk <span aria-hidden="true">→</span></button>
+      </form>
+    </div>
+
+    <!-- Crew -->
+    <div class="inv-panel" role="tabpanel" id="panel-crew" aria-labelledby="tab-crew" hidden>
+      <div class="inv-intro">
+        <h3>Help build the lunapark.</h3>
+        <p>We're a small crew and the community grows with the people who show up. Give an hour a month or run a whole corner of a Session.</p>
+        <ul>
+          <li>Pick what you enjoy, skip what you don't.</li>
+          <li>Crew members get early access and their bug on the crew wall.</li>
+        </ul>
+      </div>
+      <form class="inv-form" data-form="crew" novalidate>
+        <div class="f2">
+          <label>Your name<input name="name" id="cr-name" required autocomplete="name" maxlength="80" /></label>
+          <label>Email<input name="email" id="cr-email" type="email" required autocomplete="email" maxlength="120" /></label>
+        </div>
+        <fieldset>
+          <legend>Where could you help?</legend>
+          <div class="chips-in">
+            {helpAreas.map((a, i) => <label class="chip-in"><input type="checkbox" name="areas" value={a} id={`cr-area-${i}`} /><span>{a}</span></label>)}
+          </div>
+        </fieldset>
+        <label>Anything else <span class="opt">optional</span><textarea name="note" id="cr-note" rows="3" maxlength="500" placeholder="Skills, ideas, how much time you have"></textarea></label>
+        <label class="check"><input type="checkbox" name="consent" id="cr-consent" required /> I agree that techRebels may contact me about this.</label>
+        <button class="pill pill-lime" type="submit" data-track="submit crew form">Count me in <span aria-hidden="true">→</span></button>
+      </form>
+    </div>
+
+    <!-- Partner -->
+    <div class="inv-panel" role="tabpanel" id="panel-partner" aria-labelledby="tab-partner" hidden>
+      <div class="inv-intro" id="partners">
+        <h3>For partners & hosts.</h3>
+        <p>Meet curious people in tech without a booth, a lanyard or a sales pitch. Partners make the Sessions happen and get to be part of them.</p>
+        <ul>
+          <li><b>Host a Session</b> in your space, for 30 to 50 people.</li>
+          <li><b>Bring a real project</b> your team is proud of, bugs included.</li>
+          <li><b>Support the night:</b> drinks, merch or the big lunapark event.</li>
+        </ul>
+        <p class="contact">Rather write directly? <span class="mono">{contactEmail}</span></p>
+      </div>
+      <form class="inv-form" data-form="partner" novalidate>
+        <div class="f2">
+          <label>Your name<input name="name" id="pa-name" required autocomplete="name" maxlength="80" /></label>
+          <label>Company<input name="company" id="pa-company" required autocomplete="organization" maxlength="120" /></label>
+        </div>
+        <label>Email<input name="email" id="pa-email" type="email" required autocomplete="email" maxlength="120" /></label>
+        <label>What are you thinking?
+          <select name="kind" id="pa-kind" required>
+            <option value="">Choose one</option>
+            <option>Host a Session in our space</option>
+            <option>Bring a project or a speaker</option>
+            <option>Support drinks or merch</option>
+            <option>Partner on the big event</option>
+            <option>Something else</option>
+          </select>
+        </label>
+        <label>Message <span class="opt">optional</span><textarea name="message" id="pa-message" rows="3" maxlength="800"></textarea></label>
+        <label class="check"><input type="checkbox" name="consent" id="pa-consent" required /> I agree that techRebels may contact me about this.</label>
+        <button class="pill pill-pink" type="submit" data-track="submit partner form">Let's talk <span aria-hidden="true">→</span></button>
+      </form>
+    </div>
+
+    <p class="inv-note">Preview: these forms don't send anything yet. Nothing you type leaves this page.</p>
+  </div>
+</section>
+
+<style is:global>
+  .inv { border-radius: 28px; background: var(--night-2); border: 1px solid rgba(237, 231, 220, .08); padding: clamp(20px, 3vw, 40px); display: grid; gap: 28px; }
+  .inv-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .inv-tabs button { font: 700 .95rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: transparent; border: 1.5px solid rgba(237, 231, 220, .2); border-radius: 999px; padding: 11px 18px; cursor: pointer; }
+  .inv-tabs button:hover { border-color: var(--bone); }
+  .inv-tabs button[aria-selected="true"] { background: var(--bone); color: var(--night); border-color: var(--bone); }
+  .inv-panel { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(24px, 4vw, 56px); align-items: start; }
+  .inv-panel[hidden] { display: none; }
+  .inv-intro h3 { margin: 0 0 12px; font: 800 clamp(1.8rem, 3vw, 2.6rem)/.95 var(--f-display); letter-spacing: -.035em; color: var(--pink); }
+  .inv-intro p { margin: 0 0 14px; color: #C3CBC6; }
+  .inv-intro ul { margin: 0; padding-left: 1.1em; display: grid; gap: 8px; color: #C3CBC6; }
+  .inv-intro li::marker { color: var(--lime); }
+  .inv-intro b { color: var(--bone); }
+  .inv-intro .contact { margin-top: 18px; }
+  .mono { font-family: var(--f-mono); color: var(--lime); user-select: all; }
+
+  .inv-form { display: grid; gap: 16px; min-width: 0; }
+  .inv-form .f2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .inv-form label { display: grid; gap: 7px; font-weight: 700; font-size: .92rem; }
+  .inv-form .opt { font: 500 .75rem var(--f-mono); color: var(--muted); margin-left: 6px; }
+  .inv-form input:not([type=checkbox]), .inv-form textarea, .inv-form select {
+    font: 500 1rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night); width: 100%;
+    border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 14px; padding: 13px 15px; resize: vertical;
+  }
+  .inv-form input:focus, .inv-form textarea:focus, .inv-form select:focus { outline: none; border-color: var(--lime); }
+  .inv-form [aria-invalid="true"] { border-color: var(--pink) !important; }
+  .inv-form fieldset { border: 0; margin: 0; padding: 0; }
+  .inv-form legend { font-weight: 700; font-size: .92rem; margin-bottom: 10px; padding: 0; }
+  .chips-in { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip-in { display: inline-flex !important; }
+  .chip-in input { position: absolute; opacity: 0; pointer-events: none; }
+  .chip-in span { padding: 9px 14px; border-radius: 999px; border: 1.5px solid rgba(237, 231, 220, .2); font-weight: 500; cursor: pointer; }
+  .chip-in input:checked + span { background: var(--lime); color: var(--night); border-color: var(--lime); }
+  .chip-in input:focus-visible + span { outline: 3px solid var(--lime); outline-offset: 2px; }
+  .inv-form .check { display: flex; align-items: flex-start; gap: 10px; font-weight: 500; color: #C3CBC6; }
+  .inv-form .check input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--lime); flex: none; }
+  .inv-form .pill { justify-self: start; }
+  .inv-error { margin: 0; color: var(--pink); font-weight: 700; }
+  .inv-done { border-radius: 20px; background: var(--night); border: 1.5px solid var(--lime); padding: 24px; display: grid; gap: 10px; }
+  .inv-done h4 { margin: 0; font: 800 1.6rem/1 var(--f-display); color: var(--lime); letter-spacing: -.03em; }
+  .inv-done p { margin: 0; color: #C3CBC6; }
+  .inv-note { margin: 0; font: 500 .8rem var(--f-mono); color: var(--muted); }
+  @media (max-width: 860px) { .inv-panel { grid-template-columns: 1fr; } }
+  @media (max-width: 520px) { .inv-form .f2 { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  import { track } from '../lib/track';
+
+  // tabs
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>('.inv-tabs [role="tab"]')];
+  const select = (tab: HTMLButtonElement, focus = false) => {
+    for (const t of tabs) {
+      const on = t === tab;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      const panel = document.getElementById(t.getAttribute('aria-controls')!);
+      if (panel) panel.hidden = !on;
+    }
+    if (focus) tab.focus();
+  };
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => { select(t); track('form_open', t.id.replace('tab-', '')); });
+    t.addEventListener('keydown', (e) => {
+      const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (d) { e.preventDefault(); select(tabs[(i + d + tabs.length) % tabs.length], true); }
+    });
+  });
+  // deep links like /#partners open the partner tab
+  if (location.hash === '#partners') { const p = document.getElementById('tab-partner') as HTMLButtonElement | null; if (p) select(p); }
+
+  // forms: validate, then show a preview confirmation. Nothing is sent anywhere yet.
+  document.querySelectorAll<HTMLFormElement>('.inv-form').forEach((form) => {
+    let started = false;
+    form.addEventListener('input', () => { if (!started) { started = true; track('form_start', form.dataset.form); } });
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      form.querySelector('.inv-error')?.remove();
+      let firstBad: HTMLElement | null = null;
+      form.querySelectorAll<HTMLInputElement>('input, textarea, select').forEach((el) => {
+        const bad = !el.checkValidity();
+        if (el.type !== 'checkbox') el.setAttribute('aria-invalid', String(bad));
+        if (bad && !firstBad) firstBad = el;
+      });
+      if (firstBad) {
+        const msg = document.createElement('p');
+        msg.className = 'inv-error';
+        msg.setAttribute('role', 'alert');
+        msg.textContent = 'Please fill in your name, a valid email and tick the consent box.';
+        form.querySelector('.pill')?.before(msg);
+        (firstBad as HTMLElement).focus();
+        track('form_invalid', form.dataset.form);
+        return;
+      }
+      const name = (form.elements.namedItem('name') as HTMLInputElement | null)?.value.trim() || 'rebel';
+      track('form_submit', form.dataset.form);
+      const done = document.createElement('div');
+      done.className = 'inv-done';
+      done.setAttribute('role', 'status');
+      const h = document.createElement('h4');
+      h.textContent = `Thanks, ${name}.`;
+      const p = document.createElement('p');
+      p.textContent = "This is a preview, so nothing was sent yet. Once the form is live, we'll get back to you.";
+      done.append(h, p);
+      form.replaceWith(done);
+    });
+  });
+</script>

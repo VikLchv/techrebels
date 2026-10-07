@@ -17,7 +17,7 @@ import { links } from '../config/links';
 
 <script>
   document.getElementById('shutdown')?.addEventListener('click', () => {
-    try { sessionStorage.removeItem('tr-intro-seen'); } catch {}
+    try { localStorage.removeItem('tr-intro-seen'); sessionStorage.removeItem('tr-intro-seen'); } catch {}
     window.scrollTo(0, 0);
     location.href = '/';
   });
