@@ -56,11 +56,8 @@ const garments = [
 
 const wall = [
   ['ATTITUDE IS A FEATURE.', 'w-pink'],
-  ['TOO WEIRD TO PATCH.', 'w-night'],
-  ['NO INNOVATION WITHOUT PLAY.', 'w-green'],
-  ['WORKING AS UNINTENDED.', 'w-purple'],
-  ['NOT MADE FOR SAFE MODE.', 'w-lime'],
-  ['WE REBEL AGAINST BORING.', 'w-brown'],
+  ['REBELS BREAK THINGS NICELY.', 'w-green'],
+  ["REBELS DON'T DO SAFE MODE.", 'w-lime'],
 ];
 
 const faq = [
@@ -78,7 +75,7 @@ const faq = [
   <section class="hero">
     <div class="hero-copy">
       <p class="eyebrow">A community for curious people in tech · Prague</p>
-      <h1 class="hero-h">Less conference.<br /><em>More carnival.</em></h1>
+      <h1 class="hero-h">Rebels don't follow <em>roadmaps.</em></h1>
       <p class="hero-lede">techRebels is a club for people who build, break and rethink tech. Devs, PMs, designers, marketers, founders and the just curious. Real projects, real bugs, zero status games.</p>
       <div class="hero-cta">
         <a class="pill pill-pink" href="/lab">Join the swarm <span aria-hidden="true">→</span></a>
@@ -103,7 +100,7 @@ const faq = [
     <div class="ticker-track">
       {[0, 1].map((k) => (
         <span aria-hidden={k === 1 ? 'true' : undefined}>
-          {[...site.claims.bugs, ...site.claims.rebels, ...site.claims.lunapark].map((c) => <><b>{c}</b><i>✦</i></>)}
+          {site.claims.web.map((c) => <><b>{c}</b><i>✦</i></>)}
         </span>
       ))}
     </div>
@@ -362,7 +359,7 @@ const faq = [
   @media (max-width: 760px) {
     .pillars, .values { grid-template-columns: 1fr; }
     .pillar { min-height: 380px; }
-    .wall { grid-template-columns: 1fr 1fr; }
+    .wall { grid-template-columns: 1fr; }
     .hero-meta { grid-template-columns: 1fr 1fr; }
   }
   @media (max-width: 480px) {
