@@ -203,7 +203,7 @@ const swatch = (key: string, v: string) => {
 
   const cleanName = (s: string) => s.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 22);
   const visual = () => { const c: State = {}; for (const k of KEYS) c[k] = state[k]; return c; };
-  const idText = () => (bugNumber ? `BUG-${String(bugNumber).padStart(4, '0')}` : 'BUG-????');
+  const idText = () => (bugNumber !== null ? `BUG-${String(bugNumber).padStart(4, '0')}` : 'BUG-????'); // 0 is a valid founder number
 
   // ---------- render ----------
   function syncControls() {
