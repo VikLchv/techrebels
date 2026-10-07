@@ -17,7 +17,7 @@ const pillars = [
     bug: { role: 'ai', shape: 'round', shell: 'mint', pattern: 'pixels', eyes: 'glitch', mouth: 'zigzag', antennae: 'wifi', hat: 'none', pose: 'hype', attitude: 'excited', extra: 'sparkles' } },
   { name: 'Rebels', what: 'Attitude, rule-breaking, your own path.', claim: 'Normal was never the plan.', cls: 'p-rebels',
     bug: { role: 'security', shape: 'tall', shell: 'pink', pattern: 'code', eyes: 'visor', mouth: 'fangs', antennae: 'plug', hat: 'bandana', pose: 'stomp', attitude: 'rebel' } },
-  { name: 'Tech Lunapark', what: 'Experiments, play, weirdness, fun.', claim: 'Less conference. More carnival.', cls: 'p-luna',
+  { name: 'Tech Lunapark', what: 'Experiments, play, weirdness, fun.', claim: 'Every demo is a ride.', cls: 'p-luna',
     bug: { role: 'founder', shape: 'wide', shell: 'purple', pattern: 'stripes', eyes: 'googly', mouth: 'grin', antennae: 'match', hat: 'crown', pose: 'jump', attitude: 'excited' } },
 ];
 
@@ -57,7 +57,10 @@ const garments = [
 const wall = [
   ['ATTITUDE IS A FEATURE.', 'w-pink'],
   ['REBELS BREAK THINGS NICELY.', 'w-green'],
-  ["REBELS DON'T DO SAFE MODE.", 'w-lime'],
+  ["REBELS DON'T FOLLOW ROADMAPS.", 'w-lime'],
+  ['RIDES, DEMOS AND BAD IDEAS.', 'w-purple'],
+  ['EXPERIMENTS OVER KEYNOTES.', 'w-night'],
+  ['THE FUTURE IS A FUNFAIR.', 'w-brown'],
 ];
 
 const faq = [
@@ -75,7 +78,7 @@ const faq = [
   <section class="hero">
     <div class="hero-copy">
       <p class="eyebrow">A community for curious people in tech · Prague</p>
-      <h1 class="hero-h">Rebels don't follow <em>roadmaps.</em></h1>
+      <h1 class="hero-h">Rebels don't<br /><span class="nw">do <em>safe mode.</em></span></h1>
       <p class="hero-lede">techRebels is a club for people who build, break and rethink tech. Devs, PMs, designers, marketers, founders and the just curious. Real projects, real bugs, zero status games.</p>
       <div class="hero-cta">
         <a class="pill pill-pink" href="/lab">Join the swarm <span aria-hidden="true">→</span></a>
@@ -222,7 +225,7 @@ const faq = [
 </Club>
 
 <style is:global>
-  .club main { display: grid; gap: clamp(88px, 12vw, 160px); padding-bottom: clamp(80px, 10vw, 140px); overflow-x: clip; }
+  .club main { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(88px, 12vw, 160px); padding-bottom: clamp(80px, 10vw, 140px); overflow-x: clip; }
   .club main > :not(.ticker):not(.wall) { width: min(1240px, 100% - 2 * clamp(16px, 4vw, 48px)); margin-inline: auto; }
   .h2 { margin: 0; font: 800 clamp(2.4rem, 5.6vw, 4.6rem)/.92 var(--f-display); letter-spacing: -.04em; color: var(--bone); text-wrap: balance; }
   .lede { margin: 0; max-width: 58ch; color: #B9C2BD; font-size: 1.12rem; }
@@ -232,8 +235,9 @@ const faq = [
   /* hero */
   .hero { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(32px, 5vw, 72px); align-items: center; padding-top: clamp(40px, 7vw, 96px); }
   .hero-copy { display: grid; gap: 26px; min-width: 0; }
-  .hero-h { margin: 0; font: 800 clamp(3.4rem, 8.4vw, 7.6rem)/.86 var(--f-display); letter-spacing: -.05em; color: var(--bone); }
+  .hero-h { margin: 0; font: 800 clamp(3rem, 7.6vw, 7rem)/.86 var(--f-display); letter-spacing: -.05em; color: var(--bone); }
   .hero-h em { font-style: normal; color: var(--pink); }
+  .hero-h .nw { white-space: nowrap; }
   .hero-lede { margin: 0; max-width: 46ch; font-size: clamp(1.05rem, 1.5vw, 1.25rem); color: #C7CFCA; }
   .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
   .hero-meta { margin: 8px 0 0; display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 28px; padding-top: 22px; border-top: 1px solid rgba(237, 231, 220, .1); }
@@ -350,7 +354,8 @@ const faq = [
 
   /* responsive */
   @media (max-width: 1000px) {
-    .hero { grid-template-columns: 1fr; }
+    .hero { grid-template-columns: minmax(0, 1fr); }
+    .hero-h { font-size: min(11vw, 6.5rem); }
     .hero-art { max-width: 560px; width: 100%; justify-self: center; }
     .roles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .garments { grid-template-columns: repeat(2, minmax(0, 1fr)); }

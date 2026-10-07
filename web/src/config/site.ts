@@ -2,7 +2,7 @@ export { links, session, plausibleDomain } from './links';
 
 export const site = {
   name: 'techRebels',
-  title: "techRebels · Rebels don't follow roadmaps.",
+  title: "techRebels · Rebels don't do safe mode.",
   description: 'A tech lunapark in Prague for curious people in tech. Real projects, real bugs, zero status games.',
 
   claims: {
@@ -17,6 +17,10 @@ export const site = {
       'REBELS BREAK THINGS NICELY.',
       'NORMAL WAS NEVER THE PLAN.',
       "REBELS DON'T DO SAFE MODE.",
+      'EVERY DEMO IS A RIDE.',
+      'RIDES, DEMOS AND BAD IDEAS.',
+      'EXPERIMENTS OVER KEYNOTES.',
+      'THE FUTURE IS A FUNFAIR.',
       'BE THE BUG.',
     ],
     // "Rebels ..." lines. The first one is the V2 hero headline.
