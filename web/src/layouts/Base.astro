@@ -31,5 +31,12 @@ const og = new URL('/og.png', Astro.site ?? Astro.url).href;
   </head>
   <body>
     <slot />
+    <script is:inline>
+      // Pages without the intro are "entered" right away, so bugs and reveal animations start.
+      if (!document.getElementById('intro')) {
+        document.documentElement.classList.add('entered');
+        document.dispatchEvent(new CustomEvent('tr:entered'));
+      }
+    </script>
   </body>
 </html>

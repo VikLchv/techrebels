@@ -1,0 +1,62 @@
+---
+// The crew: who's behind techRebels. Linked from the nav and the footer.
+import Club from '../layouts/Club.astro';
+import Bug from '../components/Bug';
+import { crew } from '../config/site';
+---
+<Club title="The crew · techRebels" description="The people behind techRebels, a community for curious people in tech in Prague.">
+  <!-- Crew -->
+  <section class="block crew crew-page" id="crew">
+    <div class="head">
+      <p class="eyebrow">Who's behind it</p>
+      <h1 class="h2">A small crew of rebels.</h1>
+      <p class="lede">People from tech who wanted a community that is actually fun to be part of. Say hi at the next Session.</p>
+    </div>
+    <div class="crew-grid">
+      {crew.map((m) => (
+        <article class="member">
+          <div class="member-photo" style={`--tile:${m.tile}`}>
+            <img src={m.photo} alt={`${m.name}, ${m.role} of techRebels`} width="512" height="512" loading="lazy" decoding="async" />
+            <div class="member-bug"><Bug config={m.bug} size={200} label={`${m.short}'s bug, ${m.bugName}`} /></div>
+            <span class="member-tag">{m.bugName}</span>
+          </div>
+          <div class="member-copy">
+            <p class="member-role">{m.role}</p>
+            <h3>{m.name}</h3>
+            <p>{m.line}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="block crew-cta rv">
+    <p class="lede">Want to be part of it? We're always looking for speakers, crew and hosts.</p>
+    <a class="pill pill-pink" href="/#involved">Get involved <span aria-hidden="true">→</span></a>
+  </section>
+</Club>
+
+<style is:global>
+  .crew-page { padding-top: clamp(40px, 7vw, 96px); }
+  .crew-cta { display: grid; justify-items: start; gap: 18px; }
+  /* crew: photo on a brand tile, the member's bug stuck on as a sticker */
+  .crew-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(28px, 4vw, 56px); max-width: 980px; }
+  .member { display: grid; gap: 22px; }
+  .member-photo { position: relative; aspect-ratio: 1; max-width: 100%; margin: 14px 14px 0 0; }
+  .member-photo::before { content: ""; position: absolute; inset: 0; border-radius: 28px; background: var(--tile); transform: translate(14px, 14px) rotate(3deg); transition: transform .45s cubic-bezier(.2, .7, .2, 1); }
+  .member-photo img { position: relative; display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 28px; transform: rotate(-2deg); transition: transform .45s cubic-bezier(.2, .7, .2, 1); filter: contrast(1.04) saturate(1.05); }
+  .member:hover .member-photo img { transform: rotate(0deg) translateY(-4px); }
+  .member:hover .member-photo::before { transform: translate(18px, 18px) rotate(5deg); }
+  .member-bug { position: absolute; right: -6%; bottom: -10%; width: 42%; transform: rotate(10deg); transition: transform .45s cubic-bezier(.2, .7, .2, 1);
+    filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 12px 18px rgba(0, 0, 0, .45)); }
+  .member-bug svg { display: block; width: 100%; height: auto; }
+  .member:hover .member-bug { animation: sticker .6s ease-in-out; }
+  @keyframes sticker { 30% { transform: rotate(2deg) scale(1.06); } 60% { transform: rotate(14deg) scale(1.02); } 100% { transform: rotate(10deg); } }
+  .member-tag { position: absolute; left: 16px; top: 16px; background: var(--night); color: var(--lime); font: 700 .78rem var(--f-mono); padding: 6px 12px; border-radius: 999px; transform: rotate(-2deg); }
+  .member-copy { display: grid; gap: 6px; }
+  .member-copy h3 { margin: 0; font: 800 clamp(1.9rem, 3vw, 2.4rem)/1 var(--f-display); letter-spacing: -.035em; }
+  .member-copy p { margin: 0; color: #C3CBC6; }
+  .member-role { font: 700 .8rem var(--f-mono) !important; letter-spacing: .14em; text-transform: uppercase; color: var(--pink) !important; }
+  @media (max-width: 640px) { .crew-grid { grid-template-columns: 1fr; } }
+
+</style>
