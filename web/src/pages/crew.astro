@@ -14,13 +14,13 @@ import { crew } from '../config/site';
     </div>
     <div class="crew-grid">
       {crew.map((m) => (
-        <article class="member">
+        <article class="member" data-bug-number={m.bugNumber ?? undefined}>
           <div class="member-photo" style={`--tile:${m.tile}`}>
             {m.photo
               ? <img src={m.photo} alt={`${m.name}, ${m.role} of techRebels`} width="512" height="512" loading="lazy" decoding="async" />
-              : <div class="member-nophoto" style={`background:${m.tile}`}><Bug config={m.bug} size={320} label={`${m.short}'s bug, ${m.bugName}`} /></div>}
-            {m.photo && <div class="member-bug"><Bug config={m.bug} size={200} label={`${m.short}'s bug, ${m.bugName}`} /></div>}
-            <span class="member-tag">{m.bugName}</span>
+              : <div class="member-nophoto" data-live-bug style={`background:${m.tile}`}><Bug config={m.bug} size={320} label={`${m.short}'s bug, ${m.bugName}`} /></div>}
+            {m.photo && <div class="member-bug" data-live-bug><Bug config={m.bug} size={200} label={`${m.short}'s bug, ${m.bugName}`} /></div>}
+            <span class="member-tag">{m.bugNumber !== undefined && m.bugName && !m.bugName.startsWith('[') ? `BUG-${String(m.bugNumber).padStart(4, '0')} · ${m.bugName}` : m.bugName}</span>
           </div>
           <div class="member-copy">
             <p class="member-role">{m.role}</p>
@@ -38,6 +38,31 @@ import { crew } from '../config/site';
     <a class="pill pill-pink" href="/get-involved">Get involved <span aria-hidden="true">→</span></a>
   </section>
 </Club>
+
+<script>
+  // Swap each founder's fallback bug for their live saved bug (by founder bug number, never by email).
+  import { supabase } from '../lib/supabase';
+  import { bugSVG } from '../lib/bug/render.js';
+
+  const cards = [...document.querySelectorAll<HTMLElement>('.member[data-bug-number]')];
+  if (supabase && cards.length) {
+    supabase.rpc('get_swarm', { max_rows: 1000 }).then(({ data }) => {
+      if (!Array.isArray(data)) return;
+      for (const card of cards) {
+        const n = Number(card.dataset.bugNumber);
+        const bug = data.find((b: { bug_number: number }) => b.bug_number === n);
+        if (!bug) continue;
+        const size = card.querySelector('.member-nophoto') ? 320 : 200;
+        card.querySelectorAll<HTMLElement>('[data-live-bug] [role="img"]').forEach((el) => {
+          el.innerHTML = bugSVG(bug.config, size);
+          el.setAttribute('aria-label', `Rebel bug ${bug.name}`);
+        });
+        const tag = card.querySelector('.member-tag');
+        if (tag) tag.textContent = `BUG-${String(n).padStart(4, '0')} · ${bug.name}`;
+      }
+    });
+  }
+</script>
 
 <style is:global>
   .crew-page { padding-top: clamp(40px, 7vw, 96px); }
