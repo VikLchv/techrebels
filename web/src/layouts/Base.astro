@@ -27,6 +27,7 @@ const og = new URL('/og.png', Astro.site ?? Astro.url).href;
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=JetBrains+Mono:wght@400;500;700&display=swap" />
     {plausibleDomain && <script is:inline defer data-domain={plausibleDomain} src="https://plausible.io/js/script.js"></script>}
+    <slot name="head" />
   </head>
   <body>
     <slot />

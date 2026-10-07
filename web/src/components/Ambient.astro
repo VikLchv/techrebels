@@ -63,7 +63,9 @@
     const start = () => {
       if (running) return;
       running = true;
+      sw.resize();
       for (let k = 0; k < 16; k++) spawn(40 + Math.random() * (sw.W - 80), 80 + Math.random() * (sw.H - 120));
+      setTimeout(() => emit(sw.n), 0); // listeners in later scripts may not exist yet
       requestAnimationFrame(frame);
     };
 

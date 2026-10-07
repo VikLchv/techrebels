@@ -1,394 +1,376 @@
 ---
-import Os from '../layouts/Os.astro';
+// Version 2: a fancy community of rebels. Version 1 (techRebels OS) lives at /v1.
+import Club from '../layouts/Club.astro';
 import Intro from '../components/Intro.astro';
-import Win from '../components/Win.astro';
 import Bug from '../components/Bug';
+import { bugSVG, SPECIES } from '../lib/bug/render.js';
 import { site, links, session } from '../config/site';
 
-const heroBug = { role: 'dev', shape: 'round', shell: 'green', pattern: 'circuit', eyes: 'visor', mouth: 'grin', antennae: 'plug', hat: 'headphones', pose: 'stomp', attitude: 'rebel', accent: 'mint' };
+const hero = {
+  main: { role: 'dev', shape: 'round', shell: 'green', pattern: 'circuit', eyes: 'visor', mouth: 'grin', antennae: 'plug', hat: 'headphones', pose: 'stomp', attitude: 'rebel', accent: 'mint' },
+  left: { role: 'design', shape: 'tall', shell: 'purple', pattern: 'dots', eyes: 'hearts', mouth: 'smirk', antennae: 'cursor', hat: 'beret', pose: 'lean', attitude: 'smug' },
+  right: { role: 'marketing', shape: 'wide', shell: 'lime', pattern: 'pixels', eyes: 'googly', eyewear: 'heartshades', mouth: 'tongue', antennae: 'match', hat: 'party', pose: 'wave', attitude: 'excited' },
+};
 
-const icons = [
-  { name: 'bug_lab.exe', href: '/lab', tile: 'var(--lime)', bug: { role: 'design', shape: 'tall', shell: 'purple', pattern: 'dots', eyes: 'hearts', mouth: 'smirk', antennae: 'cursor', hat: 'beret' } },
-  { name: 'swarm.live', href: '/swarm', tile: 'var(--mint)', bug: { role: 'ai', shape: 'round', shell: 'pink', pattern: 'pixels', eyes: 'glitch', mouth: 'o', antennae: 'wifi', hat: 'none' } },
-  { name: 'session_01.ics', href: '#session', tile: 'var(--purple)', bug: { role: 'founder', shape: 'wide', shell: 'lime', pattern: 'code', eyes: 'visor', mouth: 'grin', antennae: 'match', hat: 'crown' } },
-  { name: 'drop_001.zip', href: '#drop', tile: 'var(--pink)', bug: { role: 'sales', shape: 'round', shell: 'brown', pattern: 'stripes', eyes: 'googly', eyewear: 'shades', mouth: 'grin', antennae: 'classic', hat: 'headset' } },
+const pillars = [
+  { name: 'Bugs', what: 'Chaos, glitches, unexpected behavior.', claim: 'Working as unintended.', cls: 'p-bugs',
+    bug: { role: 'ai', shape: 'round', shell: 'mint', pattern: 'pixels', eyes: 'glitch', mouth: 'zigzag', antennae: 'wifi', hat: 'none', pose: 'hype', attitude: 'excited', extra: 'sparkles' } },
+  { name: 'Rebels', what: 'Attitude, rule-breaking, your own path.', claim: 'Normal was never the plan.', cls: 'p-rebels',
+    bug: { role: 'security', shape: 'tall', shell: 'pink', pattern: 'code', eyes: 'visor', mouth: 'fangs', antennae: 'plug', hat: 'bandana', pose: 'stomp', attitude: 'rebel' } },
+  { name: 'Tech Lunapark', what: 'Experiments, play, weirdness, fun.', claim: 'Less conference. More carnival.', cls: 'p-luna',
+    bug: { role: 'founder', shape: 'wide', shell: 'purple', pattern: 'stripes', eyes: 'googly', mouth: 'grin', antennae: 'match', hat: 'crown', pose: 'jump', attitude: 'excited' } },
 ];
 
-const marquee = [...site.claims.bugs, ...site.claims.rebels, ...site.claims.lunapark];
+const steps = [
+  ['Bug birth at the door', 'Build your bug when you arrive. It prints as your name badge. No job titles on it.'],
+  ['A real project, bugs and all', 'A guest shows what they built and exactly where it broke. No polished keynote.'],
+  ['You dig in', 'Questions, problems, hot takes. The room decides where the conversation goes.'],
+  ['Pink drinks and a bug swap', 'Swap stickers, collect species, meet people without the networking.'],
+];
+
+const sp = (name: string) => SPECIES.findIndex((s) => s[0] === name);
+const roleBugs = [
+  ['Dev', 'Merge conflict', 'var(--green)', { role: 'dev', shape: 'round', shell: 'pink', pattern: 'code', eyes: 'visor', mouth: 'grin', antennae: 'plug', hat: 'headphones', pose: 'stomp', attitude: 'rebel' }],
+  ['AI', 'Hallucination', 'var(--lime)', { role: 'ai', shape: 'tall', shell: 'purple', pattern: 'circuit', eyes: 'glitch', mouth: 'o', antennae: 'wifi', hat: 'none', pose: 'hype', attitude: 'excited', extra: 'sparkles' }],
+  ['Marketing', 'Viral loop', 'var(--purple)', { role: 'marketing', shape: 'round', shell: 'pink', pattern: 'dots', eyes: 'googly', eyewear: 'heartshades', mouth: 'tongue', antennae: 'match', hat: 'party', pose: 'wave', attitude: 'excited' }],
+  ['Sales', 'Pipeline leak', 'var(--mint)', { role: 'sales', shape: 'wide', shell: 'brown', pattern: 'stripes', eyes: 'googly', eyewear: 'shades', mouth: 'grin', antennae: 'classic', hat: 'headset', pose: 'wave', attitude: 'rebel' }],
+  ['Product', 'Scope creep', 'var(--pink)', { role: 'product', shape: 'tall', shell: 'lime', pattern: 'stripes', eyes: 'sleepy', mouth: 'o', antennae: 'classic', hat: 'cap', pose: 'jump', attitude: 'worried', extra: 'sweat' }],
+  ['Design', 'Pixel pusher', 'var(--bug-brown)', { role: 'design', shape: 'round', shell: 'white', pattern: 'dots', eyes: 'hearts', mouth: 'smirk', antennae: 'cursor', hat: 'beret', pose: 'lean', attitude: 'smug' }],
+] as const;
+
+// Merch: simple garment silhouettes with a real bug print from the renderer
+const inner = (svg: string) => svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
+const print = (cfg: Record<string, string>, x: number, y: number, w: number) =>
+  `<svg x="${x}" y="${y}" width="${w}" height="${(w * 332) / 300}" viewBox="0 -12 300 332">${inner(bugSVG(cfg, 300))}</svg>`;
+const smallBug = { role: 'curious', shape: 'round', shell: 'pink', pattern: 'code', eyes: 'visor', mouth: 'grin', antennae: 'plug', hat: 'none' };
+const garments = [
+  { name: 'The Tee', tag: 'Everyday', note: 'Cream, oversized. Small bug on the chest, STATUS: WON’T FIX at the neck.', bg: 'var(--pink)',
+    svg: `<svg viewBox="0 0 200 200" aria-hidden="true"><path d="M62 30 L86 21 Q100 33 114 21 L138 30 L176 58 L159 82 L143 72 L143 180 L57 180 L57 72 L41 82 L24 58 Z" fill="#F1EBDD" stroke="#2A1416" stroke-width="3" stroke-linejoin="round"/>${print(smallBug, 106, 52, 26)}</svg>` },
+  { name: 'The Hoodie', tag: 'Everyday', note: 'Deep green. Wordmark on the chest, your BUG ID as a sleeve patch.', bg: 'var(--lime)',
+    svg: `<svg viewBox="0 0 200 200" aria-hidden="true"><path d="M70 42 Q100 8 130 42 L152 52 L182 124 L163 131 L147 96 L147 182 L53 182 L53 96 L37 131 L18 124 L48 52 Z" fill="#114F40" stroke="#2A1416" stroke-width="3" stroke-linejoin="round"/><path d="M78 44 Q100 22 122 44 Q100 60 78 44 Z" fill="#0B2E25"/><path d="M93 54 L91 82 M107 54 L109 82" stroke="#EDE7DC" stroke-width="2" stroke-linecap="round"/><path d="M70 140 H130 L136 168 H64 Z" fill="none" stroke="#0B2E25" stroke-width="3"/><text x="100" y="118" text-anchor="middle" font-family="Bricolage Grotesque, Arial Black, sans-serif" font-weight="800" font-size="16" fill="#F4A5D4" letter-spacing="-0.8">techRebels</text></svg>` },
+  { name: 'The Cap', tag: 'Everyday', note: 'Rebel brown, embroidered pink bug. Small details, big attitude.', bg: 'var(--purple)',
+    svg: `<svg viewBox="0 0 200 200" aria-hidden="true"><path d="M44 124 Q42 62 100 58 Q158 62 156 124 Z" fill="#3C241F" stroke="#2A1416" stroke-width="3" stroke-linejoin="round"/><path d="M36 124 Q100 110 182 132 Q156 148 100 140 Q58 138 36 124 Z" fill="#3C241F" stroke="#2A1416" stroke-width="3" stroke-linejoin="round"/><circle cx="100" cy="60" r="5" fill="#3C241F" stroke="#2A1416" stroke-width="2"/>${print({ ...smallBug, shell: 'pink' }, 84, 80, 32)}</svg>` },
+  { name: 'The Tote', tag: 'Event', note: 'Natural canvas, green handles, the big bug that started it all.', bg: 'var(--mint)',
+    svg: `<svg viewBox="0 0 200 200" aria-hidden="true"><path d="M74 72 Q74 30 100 30 Q126 30 126 72" fill="none" stroke="#114F40" stroke-width="7"/><rect x="44" y="68" width="112" height="118" rx="6" fill="#F1EBDD" stroke="#2A1416" stroke-width="3"/>${print({ role: 'dev', shape: 'round', shell: 'pink', pattern: 'code', eyes: 'visor', mouth: 'grin', antennae: 'plug', hat: 'none', pose: 'stomp', attitude: 'rebel' }, 62, 76, 76)}</svg>` },
+];
+
+const wall = [
+  ['ATTITUDE IS A FEATURE.', 'w-pink'],
+  ['TOO WEIRD TO PATCH.', 'w-night'],
+  ['NO INNOVATION WITHOUT PLAY.', 'w-green'],
+  ['WORKING AS UNINTENDED.', 'w-purple'],
+  ['NOT MADE FOR SAFE MODE.', 'w-lime'],
+  ['WE REBEL AGAINST BORING.', 'w-brown'],
+];
 
 const faq = [
-  { code: 'Error 403', q: 'Is this only for developers?', a: 'No. PMs, designers, marketers, data and AI people, founders and the curious are all welcome.' },
-  { code: 'Error 402', q: 'How much does it cost?', a: 'Joining is free. Some Sessions may have a small ticket.' },
-  { code: 'Error 418', q: 'What do I get as a member?', a: 'Your own bug, votes on Session topics, guest suggestions, early access to merch and events.' },
-  { code: 'Error 404', q: 'Where does it happen?', a: 'Prague. Every event is on our Luma calendar.' },
+  ['Is this only for developers?', 'No. PMs, designers, marketers, data and AI people, founders and the just curious are all welcome. The jokes are for everyone too.'],
+  ['How much does it cost?', 'Joining is free. Some Rebel Sessions may have a small ticket, which covers the venue and the drinks.'],
+  ['What do I get as a member?', 'Your own bug, a vote on Session topics, guest suggestions, early access to events and to every merch drop.'],
+  ['Where does it happen?', 'Prague. Every event is on our Luma calendar.'],
+  ['Who runs techRebels?', 'A small crew of people from tech who wanted a community that is actually fun to be part of.'],
 ];
 ---
-<Os>
+<Club>
   <Intro slot="before" />
 
-  <!-- 1. Desktop / hero -->
-  <section class="hero" aria-labelledby="hero-title">
+  <!-- Hero -->
+  <section class="hero">
     <div class="hero-copy">
-      <p class="label">A community for curious people in tech</p>
-      <h1 id="hero-title" class="wordmark hero-wm"><span>tech</span><span>Rebels</span></h1>
-      <p class="rotator" aria-live="polite"><span id="rotator">{site.rotator[0]}</span><i aria-hidden="true"></i></p>
+      <p class="eyebrow">A community for curious people in tech · Prague</p>
+      <h1 class="hero-h">Less conference.<br /><em>More carnival.</em></h1>
+      <p class="hero-lede">techRebels is a club for people who build, break and rethink tech. Devs, PMs, designers, marketers, founders and the just curious. Real projects, real bugs, zero status games.</p>
       <div class="hero-cta">
-        <a class="btn btn-lime" href="/lab">Build your bug</a>
-        <a class="btn btn-ghost" href={links.lumaSession}>Next Rebel Session</a>
+        <a class="pill pill-pink" href="/lab">Join the swarm <span aria-hidden="true">→</span></a>
+        <a class="pill pill-ghost" href="#session">Next Rebel Session</a>
       </div>
+      <dl class="hero-meta">
+        <div><dt>Next session</dt><dd>{session.name} · {session.date}</dd></div>
+        <div><dt>Merch</dt><dd>Founding Drop 001 · soon</dd></div>
+        <div><dt>Status</dt><dd>won't fix</dd></div>
+      </dl>
     </div>
-    <div class="hero-desk">
-      <div class="hero-tile">
-        <Bug config={heroBug} size={420} label="Rebel bug, a dev in a stomping rebel pose" />
-      </div>
-      <ul class="icons" aria-label="Desktop">
-        {icons.map((ic) => (
-          <li>
-            <a class="icon" href={ic.href}>
-              <span class="icon-tile" style={`background:${ic.tile}`}><Bug config={ic.bug} size={64} label={ic.name} /></span>
-              <span class="icon-name">{ic.name}</span>
-            </a>
-          </li>
-        ))}
-      </ul>
-      <p class="sticky" aria-hidden="true">TODO: break something nice.</p>
+    <div class="hero-art" aria-hidden="true">
+      <div class="card c-main"><Bug config={hero.main} size={440} /><span class="tag">BUG-0100 · Merge conflict</span></div>
+      <div class="card c-left"><Bug config={hero.left} size={220} /></div>
+      <div class="card c-right"><Bug config={hero.right} size={220} /></div>
+      <span class="stamp">Status:<br />won't fix</span>
     </div>
   </section>
 
-  <!-- 2. Claims marquee -->
-  <div class="marquee" aria-label="Claims">
-    <div class="marquee-track">
-      <span>{marquee.join(' · ')} · </span><span aria-hidden="true">{marquee.join(' · ')} · </span>
+  <!-- Marquee -->
+  <div class="ticker" aria-label="Claims">
+    <div class="ticker-track">
+      {[0, 1].map((k) => (
+        <span aria-hidden={k === 1 ? 'true' : undefined}>
+          {[...site.claims.bugs, ...site.claims.rebels, ...site.claims.lunapark].map((c) => <><b>{c}</b><i>✦</i></>)}
+        </span>
+      ))}
     </div>
   </div>
 
-  <div class="desk">
-    <!-- 3. Manifesto -->
-    <Win title="manifesto.txt" class="w-manifesto sh-pink" style="--rot:-.6deg">
-      <h2 class="win-h">A community, not a conference.</h2>
-      <ul class="typed">
-        <li><b>Real projects, bugs included.</b> We show the dead ends too.</li>
-        <li><b>The community sets the agenda.</b> Everyone brings a question, a problem or a speaker tip.</li>
-        <li><b>Not just for devs.</b> PMs, design, marketing, data, AI, founders, the curious.</li>
-      </ul>
-    </Win>
+  <!-- Manifesto -->
+  <section class="block manifesto" id="manifesto">
+    <p class="eyebrow rv">Manifesto</p>
+    <p class="statement rv">We're not a conference. We're where tech people show their <span class="hl-pink">bugs</span>, not just their wins. No stage. No titles. No status games. Just curious people, real projects and a serious amount of <span class="hl-lime">play</span>.</p>
+    <div class="values">
+      <div class="rv"><h3>Honest</h3><p>We show the mistakes and dead ends too. A bug is a feature, not a shame.</p></div>
+      <div class="rv"><h3>Community-driven</h3><p>Everyone brings a question, a problem or a speaker tip. The agenda grows bottom-up.</p></div>
+      <div class="rv"><h3>Self-aware</h3><p>We take tech seriously. Ourselves, not so much.</p></div>
+    </div>
+  </section>
 
-    <!-- 4. Pillars -->
-    <Win title="bugs.exe" perms="rwxr-x---" class="w-pillar pillar-bugs sh-mint" style="--rot:1.2deg" bodyClass="pillar">
-      <p class="pillar-what">Chaos, glitches, unexpected behavior.</p>
-      <h2 class="pillar-claim">WORKING AS UNINTENDED.</h2>
-      <p class="pillar-list">BE THE BUG. · TOO WEIRD TO PATCH. · STATUS: WON'T FIX.</p>
-    </Win>
-    <Win title="rebels.sys" perms="r--r--r--" class="w-pillar pillar-rebels sh-pink" style="--rot:-1deg" bodyClass="pillar">
-      <p class="pillar-what">Attitude, rule-breaking, your own path.</p>
-      <h2 class="pillar-claim">NORMAL WAS NEVER THE PLAN.</h2>
-      <p class="pillar-list">ATTITUDE IS A FEATURE. · WE REBEL AGAINST BORING. · NOT MADE FOR SAFE MODE.</p>
-    </Win>
-    <Win title="lunapark.app" perms="rwxrwxrwx" class="w-pillar pillar-luna sh-purple" style="--rot:.8deg" bodyClass="pillar">
-      <p class="pillar-what">Experiments, play, weirdness, fun.</p>
-      <h2 class="pillar-claim">LESS CONFERENCE. MORE CARNIVAL.</h2>
-      <p class="pillar-list">NO INNOVATION WITHOUT PLAY. · COME FOR THE TECH. STAY FOR THE CHAOS. · SERIOUS EXPERIMENTS. STUPID AMOUNTS OF FUN.</p>
-    </Win>
+  <!-- Pillars -->
+  <section class="block">
+    <div class="head rv">
+      <p class="eyebrow">What we're made of</p>
+      <h2 class="h2">Three ideas. One swarm.</h2>
+    </div>
+    <div class="pillars">
+      {pillars.map((p) => (
+        <article class={`pillar ${p.cls} rv`}>
+          <p class="pillar-name">{p.name}</p>
+          <p class="pillar-what">{p.what}</p>
+          <h3 class="pillar-claim">{p.claim}</h3>
+          <div class="pillar-bug" aria-hidden="true"><Bug config={p.bug} size={200} /></div>
+        </article>
+      ))}
+    </div>
+  </section>
 
-    <!-- 5. Bug lab -->
-    <Win title="bug_lab.exe" perms="rwx------" class="w-lab sh-lime" style="--rot:.5deg" bodyClass="lab">
-      <div class="lab-tile" id="lab-tile">
-        <div id="lab-bug"><Bug config={heroBug} size={320} label="Random rebel bug" /></div>
-      </div>
-      <div class="lab-side">
-        <h2 class="win-h">Every rebel gets a bug.</h2>
-        <p>No single mascot. A whole swarm. Your bug is your avatar, your name badge and your membership card.</p>
-        <dl class="readout" aria-live="polite">
-          <div><dt>role:</dt><dd id="ro-role">Dev</dd></div>
-          <div><dt>species:</dt><dd id="ro-species">Heisenbug</dd></div>
-          <div><dt>severity:</dt><dd id="ro-sev">Chaotic</dd></div>
-          <div><dt>status:</dt><dd>won't fix</dd></div>
-        </dl>
-        <div class="row">
-          <button type="button" class="btn btn-ghost" id="mutate">Mutate</button>
-          <a class="btn btn-lime" href="/lab">Build yours</a>
-        </div>
-      </div>
-    </Win>
+  <!-- Session -->
+  <section class="block session" id="session">
+    <div class="session-card rv">
+      <p class="eyebrow">The format</p>
+      <h2 class="session-h">{session.name}</h2>
+      <dl class="facts">
+        <div><dt>Length</dt><dd>{session.length}</dd></div>
+        <div><dt>People</dt><dd>{session.people}</dd></div>
+        <div><dt>Where</dt><dd>{session.city}, {session.venue}</dd></div>
+        <div><dt>When</dt><dd>{session.date}</dd></div>
+      </dl>
+      <a class="pill pill-lime" href={links.lumaSession}>Get on the list <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="session-steps rv">
+      <p class="eyebrow">How a night goes</p>
+      <ol>
+        {steps.map(([t, d]) => <li><h3>{t}</h3><p>{d}</p></li>)}
+      </ol>
+    </div>
+  </section>
 
-    <!-- 6. Ticket -->
-    <section class="w-ticket" id="session" aria-labelledby="ticket-title">
-      <div class="ticket">
-        <div class="ticket-main">
-          <p class="ticket-admit">ADMIT ONE REBEL</p>
-          <h2 id="ticket-title" class="ticket-title">{session.name}</h2>
-          <p class="ticket-meta">{session.length} · {session.people} · {session.city} · {session.date} · {session.venue}</p>
-          <p class="ticket-text">A guest shows a real project, bugs and all. You dig in. Then drinks and a bug swap.</p>
-          <a class="btn btn-ticket" href={links.lumaSession}>Get on the list</a>
-        </div>
-        <div class="ticket-stub" aria-hidden="true"><span>No. 001</span></div>
-      </div>
-    </section>
+  <!-- Bug lab -->
+  <section class="block lab" id="lab">
+    <div class="head rv">
+      <p class="eyebrow">Bug Lab</p>
+      <h2 class="h2">Every rebel gets a bug.</h2>
+      <p class="lede">No single mascot. A whole swarm. Pick a role, a body, a pose and an attitude. Your bug becomes your avatar, your name badge and your membership card.</p>
+    </div>
+    <div class="roles">
+      {roleBugs.map(([role, species, tile, cfg]) => (
+        <figure class="role rv">
+          <div class="role-tile" style={`background:${tile}`}><Bug config={{ ...cfg, species: sp(species) }} size={220} label={`${role} bug`} /></div>
+          <figcaption><b>{role}</b><span>{species}</span></figcaption>
+        </figure>
+      ))}
+    </div>
+    <div class="center rv"><a class="pill pill-pink" href="/lab">Build your bug <span aria-hidden="true">→</span></a></div>
+  </section>
 
-    <!-- 7. Swarm -->
-    <Win title="swarm.live" perms="rw-rw-rw-" class="w-swarm sh-pink" style="--rot:-1.4deg">
-      <p class="label">Click anywhere. Every click is a bug.</p>
-      <p class="big-count"><span id="swarm-count">0</span><small>bugs online</small></p>
-      <div class="row">
-        <button type="button" class="btn btn-pink" id="release">Release 50 bugs</button>
-        <a href="/swarm">See the real Swarm</a>
-      </div>
-    </Win>
+  <!-- Claims wall -->
+  <section class="wall" aria-label="Claims">
+    {wall.map(([c, cls]) => <p class={`wall-tile ${cls} rv`}>{c}</p>)}
+  </section>
 
-    <!-- 8. Merch -->
-    <Win title="drop_001.zip" perms="r--------" id="drop" class="w-drop sh-mint" style="--rot:.9deg">
-      <h2 class="win-h">Founding Drop 001. Limited. Numbered. Never reprinted.</h2>
-      <ul class="files">
-        {['tee.png', 'hoodie.png', 'cap.png', 'tote.png'].map((f, i) => (
-          <li><span>{f}</span><span class="bar"><i style={`--d:${i * 0.35}s`}></i></span></li>
-        ))}
-      </ul>
-      <p class="extracted">4 files extracted</p>
-      <p>Pre-order only. Members get first access.</p>
-      <a class="btn btn-lime" href="/lab">Join for early access</a>
-    </Win>
-  </div>
+  <!-- Drop -->
+  <section class="block drop" id="drop">
+    <div class="head rv">
+      <p class="eyebrow">Merch · Founding Drop 001</p>
+      <h2 class="h2">Limited. Numbered.<br />Never reprinted.</h2>
+      <p class="lede">Pre-order only, so we make exactly what you want. Members get first access and a sleeve patch with their own bug ID.</p>
+    </div>
+    <div class="garments">
+      {garments.map((g) => (
+        <article class="garment rv">
+          <div class="garment-art" style={`background:${g.bg}`} set:html={g.svg} />
+          <div class="garment-copy">
+            <h3>{g.name}</h3><span class="chip">{g.tag}</span>
+            <p>{g.note}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+    <div class="center rv"><a class="pill pill-lime" href="/lab">Get early access <span aria-hidden="true">→</span></a></div>
+  </section>
 
-  <!-- 9. FAQ -->
-  <section class="faq" id="faq" aria-labelledby="faq-title">
-    <h2 id="faq-title" class="section-h">Known issues</h2>
-    <div class="dialogs">
-      {faq.map((f) => (
-        <details class="dlg">
-          <summary>
-            <span class="dlg-bar">{f.code}</span>
-            <span class="dlg-q"><span class="dlg-icon" aria-hidden="true">!</span>{f.q}</span>
-            <span class="dlg-btns" aria-hidden="true"><span>Details</span><span>Ignore</span></span>
-          </summary>
-          <p class="dlg-a">{f.a}</p>
+  <!-- FAQ -->
+  <section class="block faq" id="faq">
+    <div class="head rv"><p class="eyebrow">FAQ</p><h2 class="h2">Known issues.</h2></div>
+    <div class="qa rv">
+      {faq.map(([q, a]) => (
+        <details>
+          <summary>{q}<span aria-hidden="true">+</span></summary>
+          <p>{a}</p>
         </details>
       ))}
     </div>
   </section>
-</Os>
+
+  <!-- Final CTA -->
+  <section class="final rv">
+    <h2 class="final-h">Be the bug.</h2>
+    <p>Build your bug, join the swarm and get first dibs on Rebel Session #01.</p>
+    <a class="pill pill-pink" href="/lab">Join the swarm <span aria-hidden="true">→</span></a>
+  </section>
+</Club>
 
 <style is:global>
-  main { display: grid; gap: clamp(56px, 8vw, 104px); padding-block: clamp(28px, 5vw, 56px) clamp(72px, 10vw, 120px); overflow-x: clip; }
-  main > :not(.marquee) { width: min(1280px, 100% - 2 * clamp(16px, 4vw, 40px)); margin-inline: auto; }
+  .club main { display: grid; gap: clamp(88px, 12vw, 160px); padding-bottom: clamp(80px, 10vw, 140px); overflow-x: clip; }
+  .club main > :not(.ticker):not(.wall) { width: min(1240px, 100% - 2 * clamp(16px, 4vw, 48px)); margin-inline: auto; }
+  .h2 { margin: 0; font: 800 clamp(2.4rem, 5.6vw, 4.6rem)/.92 var(--f-display); letter-spacing: -.04em; color: var(--bone); text-wrap: balance; }
+  .lede { margin: 0; max-width: 58ch; color: #B9C2BD; font-size: 1.12rem; }
+  .head { display: grid; gap: 16px; margin-bottom: clamp(32px, 4vw, 56px); }
+  .center { display: flex; justify-content: center; margin-top: clamp(32px, 4vw, 52px); }
 
   /* hero */
-  .hero { display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(28px, 4vw, 56px); align-items: center; }
-  .hero-copy { display: grid; gap: 20px; min-width: 0; }
-  .hero-wm { font-size: clamp(5rem, 15vw, 15.5rem); }
-  .hero-wm:hover { animation: glitch .35s steps(4) 2; }
-  .rotator { margin: 0; min-height: 2.8em; font-weight: 700; font-size: clamp(1rem, 2.2vw, 1.6rem); color: var(--mint); }
-  .rotator i { display: inline-block; width: .6em; height: 1.05em; margin-left: .2em; vertical-align: -.15em; background: var(--mint); animation: blink 1s steps(1) infinite; }
-  @keyframes blink { 50% { opacity: 0; } }
+  .hero { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(32px, 5vw, 72px); align-items: center; padding-top: clamp(40px, 7vw, 96px); }
+  .hero-copy { display: grid; gap: 26px; min-width: 0; }
+  .hero-h { margin: 0; font: 800 clamp(3.4rem, 8.4vw, 7.6rem)/.86 var(--f-display); letter-spacing: -.05em; color: var(--bone); }
+  .hero-h em { font-style: normal; color: var(--pink); }
+  .hero-lede { margin: 0; max-width: 46ch; font-size: clamp(1.05rem, 1.5vw, 1.25rem); color: #C7CFCA; }
   .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
+  .hero-meta { margin: 8px 0 0; display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 28px; padding-top: 22px; border-top: 1px solid rgba(237, 231, 220, .1); }
+  .hero-meta dt { font: 500 .68rem var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .hero-meta dd { margin: 4px 0 0; font-weight: 700; font-size: .95rem; }
 
-  .hero-desk { position: relative; display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: start; }
-  .hero-tile { background: var(--pink); border-radius: var(--r-tile); padding: 14px; box-shadow: 8px 8px 0 var(--lime); transform: rotate(-2deg); }
-  .hero-tile svg { width: 100%; height: auto; display: block; }
-  .icons { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
-  .icon { display: grid; justify-items: center; gap: 6px; text-decoration: none; color: var(--bone); font-size: .7rem; }
-  .icon-tile { width: 72px; aspect-ratio: 1; border-radius: 24%; display: grid; place-items: center; padding: 6px; transition: transform .2s; }
-  .icon-tile svg { width: 100%; height: auto; display: block; }
-  .icon:hover .icon-tile, .icon:focus-visible .icon-tile { animation: wobble .5s ease-in-out; }
-  @keyframes wobble { 25% { transform: rotate(-8deg) scale(1.06); } 75% { transform: rotate(6deg) scale(1.06); } }
-  .sticky {
-    position: absolute; left: -26px; bottom: -34px; margin: 0; width: 170px; padding: 18px 14px 14px;
-    background: var(--pink); color: var(--night); font-weight: 700; font-size: .82rem; line-height: 1.3;
-    transform: rotate(-7deg); box-shadow: 0 10px 24px rgba(0, 0, 0, .35);
-  }
-  .sticky::before { content: ""; position: absolute; top: -10px; left: 50%; width: 70px; height: 20px; translate: -50% 0; background: rgba(237, 231, 220, .55); transform: rotate(3deg); }
+  .hero-art { position: relative; aspect-ratio: 1 / 1.02; max-width: 100%; }
+  .hero-art .card { position: absolute; border-radius: 28px; padding: 14px; box-shadow: 0 30px 70px rgba(0, 0, 0, .45); transition: transform .5s cubic-bezier(.2, .7, .2, 1); }
+  .hero-art .card svg { display: block; width: 100%; height: auto; }
+  .c-main { width: 64%; left: 18%; top: 6%; background: var(--pink); transform: rotate(-3deg); z-index: 2; }
+  .c-left { width: 36%; left: 0; top: 52%; background: var(--lime); transform: rotate(-9deg); z-index: 3; }
+  .c-right { width: 34%; right: 0; top: 0; background: var(--purple); transform: rotate(8deg); z-index: 1; }
+  .hero-art:hover .c-main { transform: rotate(-1deg) translateY(-6px); }
+  .hero-art:hover .c-left { transform: rotate(-12deg) translate(-6px, 4px); }
+  .hero-art:hover .c-right { transform: rotate(11deg) translate(6px, -4px); }
+  .c-main .tag { position: absolute; left: 18px; bottom: 16px; background: var(--night); color: var(--bone); font: 700 .72rem var(--f-mono); padding: 6px 12px; border-radius: 999px; }
+  .stamp { position: absolute; right: 2%; bottom: 6%; z-index: 4; width: 112px; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; text-align: center; background: var(--mint); color: var(--night); font: 700 .78rem/1.25 var(--f-mono); text-transform: uppercase; transform: rotate(12deg); box-shadow: 0 12px 30px rgba(0, 0, 0, .35); }
 
-  /* marquee */
-  .marquee { background: var(--lime); color: var(--night); overflow: hidden; white-space: nowrap; font-weight: 700; font-size: .95rem; letter-spacing: .08em; padding-block: 14px; transform: rotate(-1deg); }
-  .marquee-track { display: inline-flex; animation: marquee 60s linear infinite; }
-  .marquee-track span { padding-right: .5em; }
-  .marquee:hover .marquee-track { animation-play-state: paused; }
-  @keyframes marquee { to { transform: translateX(-50%); } }
+  /* ticker */
+  .ticker { overflow: hidden; border-block: 1px solid rgba(237, 231, 220, .1); padding-block: 22px; }
+  .ticker-track { display: inline-flex; white-space: nowrap; animation: tick 70s linear infinite; }
+  .ticker-track span { display: inline-flex; align-items: center; }
+  .ticker b { font: 800 clamp(1.6rem, 3vw, 2.6rem) var(--f-display); letter-spacing: -.03em; color: var(--bone); }
+  .ticker b:nth-of-type(3n+1) { color: var(--pink); }
+  .ticker b:nth-of-type(3n+2) { color: var(--lime); }
+  .ticker i { font-style: normal; color: var(--mint); margin-inline: 28px; font-size: 1.2rem; }
+  .ticker:hover .ticker-track { animation-play-state: paused; }
+  @keyframes tick { to { transform: translateX(-50%); } }
 
-  /* desktop grid */
-  .desk { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: clamp(28px, 3vw, 40px); align-items: start; }
-  .w-manifesto { grid-column: 1 / span 8; }
-  .w-pillar { grid-column: span 4; }
-  .pillar-bugs { margin-top: 24px; }
-  .pillar-luna { margin-top: 48px; }
-  .w-lab { grid-column: 2 / span 10; }
-  .w-ticket { grid-column: 1 / span 7; }
-  .w-swarm { grid-column: 8 / span 5; margin-top: 40px; }
-  .w-drop { grid-column: 3 / span 8; }
+  /* manifesto */
+  .manifesto { display: grid; gap: 40px; }
+  .statement { margin: 0; font: 800 clamp(2rem, 4.6vw, 4rem)/1.04 var(--f-display); letter-spacing: -.035em; color: var(--bone); max-width: 22ch; text-wrap: pretty; }
+  .hl-pink { color: var(--pink); }
+  .hl-lime { color: var(--night); background: var(--lime); padding: 0 .12em; border-radius: .12em; }
+  .values { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding-top: 32px; border-top: 1px solid rgba(237, 231, 220, .1); }
+  .values h3 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 700; color: var(--lime); }
+  .values p { margin: 0; color: #B9C2BD; }
 
-  .win-h { margin: 0 0 16px; font: 800 clamp(1.7rem, 3.4vw, 2.8rem)/.95 var(--f-display); letter-spacing: -.035em; color: var(--bone); text-wrap: balance; }
-  .typed { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; color: var(--muted); }
-  .typed li::before { content: "> "; color: var(--pink); }
-  .typed b { color: var(--bone); }
+  /* pillars */
+  .pillars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .pillar { position: relative; overflow: hidden; border-radius: 28px; padding: clamp(24px, 3vw, 36px); min-height: 460px; display: grid; align-content: start; gap: 12px; transition: transform .4s cubic-bezier(.2, .7, .2, 1); }
+  .pillar:hover { transform: translateY(-6px) rotate(-.6deg); }
+  .pillar-name { margin: 0; font: 500 .72rem var(--f-mono); letter-spacing: .16em; text-transform: uppercase; opacity: .85; }
+  .pillar-what { margin: 0; font-weight: 500; opacity: .9; }
+  .pillar-claim { margin: 8px 0 0; font: 800 clamp(1.9rem, 2.8vw, 2.6rem)/.95 var(--f-display); letter-spacing: -.035em; max-width: 12ch; }
+  .pillar-bug { position: absolute; right: -6%; bottom: -8%; width: 62%; transform: rotate(-8deg); transition: transform .5s; }
+  .pillar:hover .pillar-bug { transform: rotate(-2deg) translateY(-8px); }
+  .pillar-bug svg { display: block; width: 100%; height: auto; }
+  .p-bugs { background: var(--purple); color: var(--mint); }
+  .p-rebels { background: var(--green); color: var(--pink); }
+  .p-luna { background: var(--lime); color: var(--green); }
 
-  .pillar-bugs .pillar { background: var(--purple); color: var(--mint); }
-  .pillar-rebels .pillar { background: var(--green); color: var(--pink); }
-  .pillar-luna .pillar { background: var(--lime); color: var(--green); }
-  .pillar { display: grid; gap: 14px; min-height: 280px; align-content: start; }
-  .pillar-what { margin: 0; font-size: .85rem; opacity: .9; }
-  .pillar-claim { margin: 0; font: 800 clamp(1.6rem, 2.6vw, 2.3rem)/.95 var(--f-display); letter-spacing: -.03em; }
-  .pillar-list { margin: 0; font-size: .72rem; letter-spacing: .06em; line-height: 1.7; opacity: .9; }
+  /* session */
+  .session { display: grid; grid-template-columns: .9fr 1.1fr; gap: 24px; align-items: stretch; }
+  .session-card { border-radius: 28px; padding: clamp(28px, 4vw, 48px); background: var(--pink); color: var(--night); display: grid; gap: 22px; align-content: start; }
+  .session-card .eyebrow { color: rgba(11, 15, 13, .6); }
+  .session-h { margin: 0; font: 800 clamp(2.6rem, 5vw, 4.4rem)/.9 var(--f-display); letter-spacing: -.045em; }
+  .facts { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; padding-block: 22px; border-block: 1.5px solid rgba(11, 15, 13, .15); }
+  .facts dt { font: 500 .68rem var(--f-mono); letter-spacing: .14em; text-transform: uppercase; opacity: .65; }
+  .facts dd { margin: 4px 0 0; font-weight: 700; font-size: 1.1rem; }
+  .session-card .pill { justify-self: start; }
+  .session-steps { border-radius: 28px; padding: clamp(28px, 4vw, 48px); background: var(--night-2); border: 1px solid rgba(237, 231, 220, .08); display: grid; gap: 22px; align-content: start; }
+  .session-steps ol { list-style: none; counter-reset: step; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .session-steps li { counter-increment: step; display: grid; grid-template-columns: 56px 1fr; column-gap: 12px; padding: 18px 0; border-bottom: 1px solid rgba(237, 231, 220, .08); }
+  .session-steps li:last-child { border-bottom: 0; }
+  .session-steps li::before { content: "0" counter(step); grid-row: span 2; font: 800 1.6rem/1 var(--f-display); color: var(--lime); }
+  .session-steps h3 { margin: 0; font-size: 1.2rem; font-weight: 700; }
+  .session-steps p { margin: 4px 0 0; color: #B9C2BD; }
 
   /* lab */
-  .lab { display: grid; grid-template-columns: minmax(0, 340px) 1fr; gap: clamp(20px, 3vw, 40px); align-items: center; }
-  .lab-tile { border-radius: var(--r-tile); padding: 12px; background: var(--lime); transition: background-color .3s; }
-  .lab-tile svg { width: 100%; height: auto; display: block; }
-  .lab-side { display: grid; gap: 14px; min-width: 0; }
-  .lab-side p { margin: 0; color: var(--muted); }
-  .readout { margin: 0; display: grid; gap: 4px; font-size: .9rem; padding: 14px 16px; background: var(--night); border: 1px solid var(--line); border-radius: 10px; }
-  .readout div { display: flex; gap: 10px; }
-  .readout dt { color: var(--muted); min-width: 6.5em; }
-  .readout dd { margin: 0; color: var(--lime); }
-  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-  .wig { animation: wig .45s ease-in-out; transform-origin: 50% 70%; }
-  @keyframes wig { 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
+  .roles { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; }
+  .role { margin: 0; display: grid; gap: 12px; }
+  .role-tile { border-radius: 22px; padding: 10px; transition: transform .35s cubic-bezier(.2, .7, .2, 1); }
+  .role:hover .role-tile { transform: translateY(-6px) rotate(-3deg); }
+  .role-tile svg { display: block; width: 100%; height: auto; }
+  .role figcaption { display: grid; gap: 2px; padding-left: 4px; }
+  .role figcaption b { font-size: 1rem; }
+  .role figcaption span { font: 500 .75rem var(--f-mono); color: var(--muted); }
 
-  /* ticket */
-  .w-ticket { transform: rotate(-2deg); }
-  .ticket {
-    display: grid; grid-template-columns: 1fr auto; background: var(--lime); color: var(--night); border-radius: 18px;
-    -webkit-mask: radial-gradient(circle 18px at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat, radial-gradient(circle 18px at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat;
-    mask: radial-gradient(circle 18px at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat, radial-gradient(circle 18px at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat;
-    filter: drop-shadow(8px 8px 0 var(--pink));
-  }
-  .ticket-main { padding: clamp(22px, 3vw, 34px) clamp(28px, 4vw, 44px); display: grid; gap: 10px; }
-  .ticket-admit { margin: 0; font-size: .72rem; font-weight: 700; letter-spacing: .3em; }
-  .ticket-title { margin: 0; font: 800 clamp(2rem, 4.6vw, 3.6rem)/.9 var(--f-display); letter-spacing: -.04em; }
-  .ticket-meta { margin: 0; font-weight: 700; font-size: .85rem; }
-  .ticket-text { margin: 0; font-size: .9rem; max-width: 46ch; }
-  .btn-ticket { justify-self: start; background: var(--night); color: var(--lime); margin-top: 6px; }
-  .btn-ticket:hover { box-shadow: 4px 4px 0 var(--pink); }
-  .ticket-stub { border-left: 3px dashed rgba(11, 15, 13, .45); padding: 20px 28px; display: grid; place-items: center; }
-  .ticket-stub span { writing-mode: vertical-rl; font-weight: 700; letter-spacing: .2em; font-size: .85rem; }
+  /* claims wall */
+  .wall { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; }
+  .wall-tile { margin: 0; aspect-ratio: 1.6; display: flex; align-items: flex-end; padding: clamp(20px, 3vw, 40px); font: 800 clamp(1.6rem, 3.4vw, 3.2rem)/.92 var(--f-display); letter-spacing: -.035em; }
+  .w-pink { background: var(--pink); color: var(--rebel-brown); }
+  .w-night { background: var(--night-2); color: var(--lime); }
+  .w-green { background: var(--green); color: var(--pink); }
+  .w-purple { background: var(--purple); color: var(--mint); }
+  .w-lime { background: var(--lime); color: var(--green); }
+  .w-brown { background: var(--rebel-brown); color: var(--pink); }
 
-  /* swarm */
-  .big-count { margin: 6px 0 18px; display: flex; align-items: baseline; gap: 12px; }
-  .big-count span { font: 800 clamp(3.5rem, 8vw, 6rem)/.9 var(--f-display); color: var(--pink); font-variant-numeric: tabular-nums; }
-  .big-count small { color: var(--muted); }
-
-  /* merch */
-  .files { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 10px; }
-  .files li { display: grid; grid-template-columns: 7.5em 1fr; gap: 14px; align-items: center; font-size: .85rem; }
-  .bar { height: 14px; background: #1D2622; border-radius: 4px; overflow: hidden; }
-  .bar i { display: block; height: 100%; width: 0; background: repeating-linear-gradient(90deg, var(--lime) 0 10px, var(--mint) 10px 20px); transition: width 1.4s cubic-bezier(.5, 0, .2, 1) var(--d, 0s); }
-  html.entered .bar i { width: 100%; }
-  .extracted { margin: 0 0 8px; color: var(--mint); font-weight: 700; opacity: 0; transition: opacity .4s 2.6s; }
-  html.entered .extracted { opacity: 1; }
-  .w-drop p { color: var(--muted); }
+  /* drop */
+  .garments { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+  .garment { display: grid; gap: 16px; align-content: start; }
+  .garment-art { border-radius: 24px; padding: 18px; aspect-ratio: 1; display: grid; place-items: center; transition: transform .35s cubic-bezier(.2, .7, .2, 1); }
+  .garment:hover .garment-art { transform: translateY(-6px); }
+  .garment-art svg { width: 100%; height: 100%; display: block; }
+  .garment-copy { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 10px; }
+  .garment-copy h3 { margin: 0; font-size: 1.15rem; font-weight: 700; }
+  .garment-copy p { grid-column: 1 / -1; margin: 0; color: #B9C2BD; font-size: .95rem; }
+  .chip { font: 700 .65rem var(--f-mono); letter-spacing: .12em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; background: rgba(237, 231, 220, .08); color: var(--mint); }
 
   /* faq */
-  .section-h { margin: 0 0 22px; font: 800 clamp(2rem, 4vw, 3.2rem)/.95 var(--f-display); letter-spacing: -.035em; color: var(--pink); }
-  .dialogs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
-  .dlg { background: var(--night-2); border: 2px solid var(--bone); border-radius: 10px; box-shadow: 6px 6px 0 var(--purple); overflow: hidden; }
-  .dlg:nth-child(2) { box-shadow: 6px 6px 0 var(--pink); }
-  .dlg:nth-child(3) { box-shadow: 6px 6px 0 var(--mint); }
-  .dlg:nth-child(4) { box-shadow: 6px 6px 0 var(--lime); }
-  .dlg summary { list-style: none; cursor: pointer; display: grid; }
-  .dlg summary::-webkit-details-marker { display: none; }
-  .dlg-bar { background: var(--bone); color: var(--night); font-weight: 700; font-size: .75rem; padding: 6px 12px; letter-spacing: .06em; }
-  .dlg-q { display: flex; align-items: center; gap: 14px; padding: 18px 16px 8px; font-weight: 700; }
-  .dlg-icon { flex: none; width: 32px; height: 32px; display: grid; place-items: center; background: var(--lime); color: var(--night); font-weight: 800; clip-path: polygon(50% 0, 100% 100%, 0 100%); padding-top: 8px; }
-  .dlg-btns { display: flex; justify-content: flex-end; gap: 8px; padding: 6px 16px 16px; font-size: .75rem; }
-  .dlg-btns span { border: 1px solid var(--line); border-radius: 6px; padding: 4px 12px; color: var(--muted); }
-  .dlg-btns span:first-child { border-color: var(--bone); color: var(--bone); }
-  .dlg[open] .dlg-btns span:first-child { background: var(--bone); color: var(--night); }
-  .dlg-a { margin: 0; padding: 0 16px 18px 62px; color: var(--mint); }
+  .qa { display: grid; border-top: 1px solid rgba(237, 231, 220, .12); }
+  .qa details { border-bottom: 1px solid rgba(237, 231, 220, .12); }
+  .qa summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 20px; padding: 26px 0; font: 700 clamp(1.15rem, 2vw, 1.5rem) "Satoshi", system-ui, sans-serif; }
+  .qa summary::-webkit-details-marker { display: none; }
+  .qa summary span { color: var(--pink); font-size: 1.6rem; line-height: 1; transition: transform .3s; }
+  .qa details[open] summary span { transform: rotate(45deg); }
+  .qa details p { margin: 0 0 26px; max-width: 64ch; color: #B9C2BD; }
+
+  /* final */
+  .final { text-align: center; display: grid; justify-items: center; gap: 22px; padding-block: clamp(40px, 6vw, 80px); }
+  .final-h { margin: 0; font: 800 clamp(4.5rem, 16vw, 13rem)/.82 var(--f-display); letter-spacing: -.055em; color: var(--pink); }
+  .final p { margin: 0; color: #C7CFCA; font-size: 1.15rem; max-width: 40ch; }
 
   /* responsive */
   @media (max-width: 1000px) {
     .hero { grid-template-columns: 1fr; }
-    .hero-desk { max-width: 560px; }
-    .sticky { left: auto; right: 0; bottom: -40px; }
+    .hero-art { max-width: 560px; width: 100%; justify-self: center; }
+    .roles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .garments { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .session { grid-template-columns: 1fr; }
   }
-  @media (max-width: 900px) {
-    .desk { grid-template-columns: 1fr; }
-    .desk > * { grid-column: 1 / -1 !important; margin-top: 0 !important; }
-    .desk .win { --rot: 0deg !important; }
-    .lab { grid-template-columns: 1fr; }
-    .lab-tile { max-width: 340px; }
-    .dialogs { grid-template-columns: 1fr; }
+  @media (max-width: 760px) {
+    .pillars, .values { grid-template-columns: 1fr; }
+    .pillar { min-height: 380px; }
+    .wall { grid-template-columns: 1fr 1fr; }
+    .hero-meta { grid-template-columns: 1fr 1fr; }
   }
-  @media (max-width: 520px) {
-    .hero-desk { grid-template-columns: 1fr; }
-    .icons { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    .icon-tile { width: 58px; }
-    .sticky { position: relative; left: 0; bottom: 0; justify-self: start; margin-top: 8px; }
-    .ticket { grid-template-columns: 1fr; }
-    .ticket-stub { border-left: 0; border-top: 3px dashed rgba(11, 15, 13, .45); padding: 12px; }
-    .ticket-stub span { writing-mode: horizontal-tb; }
+  @media (max-width: 480px) {
+    .roles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .garments, .wall { grid-template-columns: 1fr; }
+    .wall-tile { aspect-ratio: 2.2; }
+    .facts { grid-template-columns: 1fr; }
+    .stamp { width: 88px; font-size: .66rem; }
   }
-  @media (prefers-reduced-motion: reduce) {
-    .marquee-track { animation: none; }
-    .bar i { width: 100%; }
-    .extracted { opacity: 1; }
-  }
+  @media (prefers-reduced-motion: reduce) { .ticker-track { animation: none; } }
 </style>
-
-<script>
-  import { bugSVG, OPTS, SPECIES, ROLES, SEVERITY } from '../lib/bug/render.js';
-  import { site } from '../config/site';
-
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  // ---------- claim rotator with scramble ----------
-  const rot = document.getElementById('rotator');
-  const GLYPHS = '!<>-_\\/[]{}=+*^?#01';
-  let ci = 0;
-  const scramble = (el: HTMLElement, to: string) => {
-    if (reduce) { el.textContent = to; return; }
-    const start = performance.now();
-    const step = (now: number) => {
-      const p = Math.min(1, (now - start) / 300);
-      const keep = Math.floor(to.length * p);
-      let out = to.slice(0, keep);
-      for (let i = keep; i < to.length; i++) out += to[i] === ' ' ? ' ' : GLYPHS[(Math.random() * GLYPHS.length) | 0];
-      el.textContent = out;
-      if (p < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  };
-  if (rot) setInterval(() => { ci = (ci + 1) % site.rotator.length; scramble(rot, site.rotator[ci]); }, 2500);
-
-  // ---------- bug_lab.exe: a bug that keeps mutating ----------
-  const pick = <T,>(a: readonly T[]) => a[(Math.random() * a.length) | 0];
-  const val = (k: string) => pick(OPTS[k].items)[0];
-  const SHELLS = ['green', 'lime', 'purple', 'mint', 'brown', 'white', 'pink', 'pink'];
-  const TILES: Record<string, string> = { lime: 'var(--lime)', mint: 'var(--mint)', purple: 'var(--purple)', green: 'var(--green)', pink: 'var(--pink)', brown: 'var(--bug-brown)' };
-  const hash = (s: string) => { let x = 2166136261; for (const ch of s) { x ^= ch.charCodeAt(0); x = Math.imul(x, 16777619); } return x >>> 0; };
-
-  const labBug = document.getElementById('lab-bug');
-  const labTile = document.getElementById('lab-tile');
-  const out = (id: string, v: string) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-
-  const mutate = () => {
-    if (!labBug || !labTile) return;
-    const role = pick(ROLES)[0];
-    const shell = pick(SHELLS);
-    const cfg = {
-      role, shell,
-      shape: val('shape'), pose: val('pose'), attitude: val('attitude'), pattern: val('pattern'),
-      eyes: val('eyes'), mouth: val('mouth'), antennae: val('antennae'),
-      hat: Math.random() < 0.55 ? val('hat') : 'none',
-      eyewear: Math.random() < 0.25 ? val('eyewear') : 'none',
-      extra: Math.random() < 0.3 ? val('extra') : 'none',
-    };
-    const species = SPECIES.map((s, i) => [s, i] as const).filter(([s]) => s[2] === role);
-    const sp = species.length ? pick(species)[0] : SPECIES[0];
-    const tiles = Object.keys(TILES).filter((t) => t !== shell);
-    labTile.style.background = TILES[pick(tiles)];
-    labBug.innerHTML = bugSVG(cfg, 320);
-    if (!reduce) { labBug.classList.remove('wig'); void labBug.offsetWidth; labBug.classList.add('wig'); }
-    out('ro-role', ROLES.find((r) => r[0] === role)?.[1] ?? role);
-    out('ro-species', sp[0]);
-    out('ro-sev', SEVERITY[hash(JSON.stringify(cfg)) % SEVERITY.length]);
-  };
-  document.getElementById('mutate')?.addEventListener('click', mutate);
-  let paused = false;
-  labTile?.addEventListener('pointerenter', () => { paused = true; });
-  labTile?.addEventListener('pointerleave', () => { paused = false; });
-  setInterval(() => { if (!paused && !document.hidden) mutate(); }, 1600);
-
-  // ---------- swarm.live ----------
-  const sc = document.getElementById('swarm-count');
-  document.addEventListener('tr:count', (e) => { if (sc) sc.textContent = String((e as CustomEvent<number>).detail); });
-  document.getElementById('release')?.addEventListener('click', () => document.dispatchEvent(new CustomEvent('tr:release', { detail: 50 })));
-</script>

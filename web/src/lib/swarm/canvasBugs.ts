@@ -42,8 +42,10 @@ export class Swarm {
 
   resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    this.W = this.canvas.clientWidth || window.innerWidth;
-    this.H = this.canvas.clientHeight || window.innerHeight;
+    // Both swarm canvases cover the viewport. Measure the window, not the canvas:
+    // before CSS applies, a canvas reports its default 300x150 size.
+    this.W = window.innerWidth;
+    this.H = window.innerHeight;
     this.canvas.width = Math.round(this.W * dpr);
     this.canvas.height = Math.round(this.H * dpr);
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);

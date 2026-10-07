@@ -1,0 +1,136 @@
+---
+// Version 2 shell: "a fancy community of rebels". Editorial nav, ambient bugs, footer.
+import Base from './Base.astro';
+import Ambient from '../components/Ambient.astro';
+import { links } from '../config/links';
+
+interface Props { title?: string; description?: string }
+const { title, description } = Astro.props;
+---
+<Base title={title} description={description}>
+  <link slot="head" rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" />
+  <script slot="head" is:inline>document.documentElement.classList.add('js');</script>
+  <slot name="before" />
+
+  <div class="club">
+    <header class="nav" id="nav">
+      <a class="nav-mark" href="/" aria-label="techRebels home"><span>tech</span><span>Rebels</span></a>
+      <nav aria-label="Main">
+        <a href="/#manifesto">Manifesto</a>
+        <a href="/#session">Sessions</a>
+        <a href="/#lab">Bug Lab</a>
+        <a href="/#drop">The Drop</a>
+      </nav>
+      <div class="nav-right">
+        <span class="nav-count" title="Click anywhere on the page to release a bug"><i aria-hidden="true"></i><b id="bug-count">0</b> bugs online</span>
+        <a class="pill pill-pink" href="/lab">Join the swarm</a>
+      </div>
+    </header>
+
+    <Ambient />
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="foot">
+      <p class="foot-mark" aria-label="techRebels"><span>tech</span><span>Rebels</span></p>
+      <div class="foot-cols">
+        <div>
+          <p class="eyebrow">Community</p>
+          <ul>
+            <li><a href="/#manifesto">Manifesto</a></li>
+            <li><a href="/#session">Rebel Sessions</a></li>
+            <li><a href="/lab">Bug Lab</a></li>
+            <li><a href="/swarm">The Swarm</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="eyebrow">Elsewhere</p>
+          <ul>
+            <li><a href={links.instagram}>Instagram</a></li>
+            <li><a href={links.linkedin}>LinkedIn</a></li>
+            <li><a href={links.lumaCalendar}>Luma calendar</a></li>
+            <li><a href="/privacy">Privacy</a></li>
+          </ul>
+        </div>
+        <div class="foot-meta">
+          <p>Status: won't fix<br />© 2026 techRebels, Prague</p>
+          <button type="button" class="pill pill-ghost" id="replay">Replay intro</button>
+        </div>
+      </div>
+    </footer>
+  </div>
+</Base>
+
+<style is:global>
+  .club { font-family: "Satoshi", "Figtree", system-ui, sans-serif; font-size: 17px; line-height: 1.55; }
+  .club .eyebrow { margin: 0; font: 500 .72rem var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+
+  .pill { display: inline-flex; align-items: center; gap: 10px; border: 0; border-radius: 999px; padding: 14px 24px; font: 700 .95rem "Satoshi", system-ui, sans-serif; text-decoration: none; cursor: pointer; transition: transform .2s ease, background-color .2s ease, box-shadow .2s ease; }
+  .pill:hover { transform: translateY(-2px); }
+  .pill-pink { background: var(--pink); color: var(--night); }
+  .pill-pink:hover { box-shadow: 0 10px 30px rgba(244, 165, 212, .35); }
+  .pill-lime { background: var(--lime); color: var(--night); }
+  .pill-lime:hover { box-shadow: 0 10px 30px rgba(205, 220, 39, .3); }
+  .pill-ghost { background: transparent; color: var(--bone); box-shadow: inset 0 0 0 1.5px rgba(237, 231, 220, .3); }
+  .pill-ghost:hover { box-shadow: inset 0 0 0 1.5px var(--bone); }
+  .pill-dark { background: var(--night); color: var(--bone); }
+
+  /* nav */
+  .nav {
+    position: sticky; top: 0; z-index: 60;
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px;
+    padding: calc(env(safe-area-inset-top, 0px) + 14px) clamp(16px, 4vw, 48px) 14px;
+    background: rgba(11, 15, 13, .78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(237, 231, 220, .08);
+  }
+  .nav-mark { font: 800 1.35rem/.8 var(--f-display); letter-spacing: -.05em; color: var(--pink); text-decoration: none; }
+  .nav-mark span { display: block; }
+  .nav nav { display: flex; justify-content: center; gap: clamp(16px, 2.5vw, 36px); }
+  .nav nav a { color: var(--bone); text-decoration: none; font-weight: 500; font-size: .95rem; opacity: .8; transition: opacity .2s; }
+  .nav nav a:hover { opacity: 1; }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .nav-count { display: inline-flex; align-items: center; gap: 8px; font: 500 .75rem var(--f-mono); color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .nav-count i { width: 8px; height: 8px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 4px rgba(205, 220, 39, .18); animation: live 2s ease-in-out infinite; }
+  .nav-count b { color: var(--bone); }
+  .nav .pill { padding: 11px 20px; font-size: .9rem; }
+  @keyframes live { 50% { box-shadow: 0 0 0 8px rgba(205, 220, 39, 0); } }
+  @media (max-width: 900px) { .nav nav { display: none; } .nav { grid-template-columns: auto 1fr; } .nav-right { justify-content: flex-end; } }
+  @media (max-width: 480px) { .nav-count { display: none; } }
+
+  /* footer */
+  .foot { padding: clamp(56px, 8vw, 96px) clamp(16px, 4vw, 48px) calc(env(safe-area-inset-bottom, 0px) + 40px); border-top: 1px solid rgba(237, 231, 220, .08); display: grid; gap: 48px; }
+  .foot-mark { margin: 0; font: 800 clamp(4.5rem, 17vw, 15rem)/.8 var(--f-display); letter-spacing: -.055em; color: var(--pink); }
+  .foot-mark span { display: block; }
+  .foot-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+  .foot ul { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
+  .foot a { color: var(--bone); text-decoration: none; opacity: .8; }
+  .foot a:hover { opacity: 1; color: var(--lime); }
+  .foot-meta { display: grid; gap: 16px; justify-items: start; align-content: start; }
+  .foot-meta p { margin: 0; font: 500 .8rem/1.7 var(--f-mono); color: var(--muted); }
+  @media (max-width: 720px) { .foot-cols { grid-template-columns: 1fr 1fr; } .foot-meta { grid-column: 1 / -1; } }
+
+  /* scroll reveal (only when JS runs, never hides content without it) */
+  html.js .rv { opacity: 0; transform: translateY(28px); transition: opacity .8s ease, transform .8s cubic-bezier(.2, .7, .2, 1); }
+  html.js .rv.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { html.js .rv { opacity: 1; transform: none; } }
+</style>
+
+<script>
+  const count = document.getElementById('bug-count');
+  document.addEventListener('tr:count', (e) => { if (count) count.textContent = String((e as CustomEvent<number>).detail); });
+
+  document.getElementById('replay')?.addEventListener('click', () => {
+    try { sessionStorage.removeItem('tr-intro-seen'); } catch {}
+    window.scrollTo(0, 0);
+    location.reload();
+  });
+
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }, { rootMargin: '0px 0px -8% 0px' });
+  const watch = () => document.querySelectorAll('.rv:not(.in)').forEach((el) => io.observe(el));
+  if (document.documentElement.classList.contains('entered')) watch();
+  else document.addEventListener('tr:entered', watch, { once: true });
+</script>
