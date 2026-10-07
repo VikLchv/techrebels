@@ -1,0 +1,57 @@
+---
+import Club from '../layouts/Club.astro';
+import { links, session } from '../config/site';
+
+const steps = [
+  ['Bug birth at the door', 'Build your bug when you arrive. It prints as your name badge. No job titles on it.'],
+  ['A real project, bugs and all', 'A guest shows what they built and exactly where it broke. No polished keynote.'],
+  ['You dig in', 'Questions, problems, hot takes. The room decides where the conversation goes.'],
+  ['Pink drinks and a bug swap', 'Swap stickers, collect species, meet people without the networking.'],
+];
+
+
+const faq = [
+  ['Is this only for developers?', 'No. PMs, designers, marketers, data and AI people, founders and the just curious are all welcome. The jokes are for everyone too.'],
+  ['How much does it cost?', 'Joining is free. Some Rebel Sessions may have a small ticket, which covers the venue and the drinks.'],
+  ['What do I get as a member?', 'Your own bug, a vote on Session topics, guest suggestions, early access to events and to every merch drop.'],
+  ['Where does it happen?', 'Prague. Every event is on our Luma calendar.'],
+  ['Who runs techRebels?', 'A small crew of people from tech who wanted a community that is actually fun to be part of.'],
+];
+---
+<Club title="Rebel Sessions · techRebels" description="Rebel Session: one real project, all the bugs. 30 to 50 people in Prague.">
+  <!-- Session -->
+  <section class="block session first" id="session">
+    <div class="session-card rv">
+      <p class="eyebrow">The format</p>
+      <h2 class="session-h">{session.name}</h2>
+      <dl class="facts">
+        <div><dt>Length</dt><dd>{session.length}</dd></div>
+        <div><dt>People</dt><dd>{session.people}</dd></div>
+        <div><dt>Where</dt><dd>{session.city}, {session.venue}</dd></div>
+        <div><dt>When</dt><dd>{session.date}</dd></div>
+      </dl>
+      <a class="pill pill-lime" href={links.lumaSession}>Get on the list <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="session-steps rv">
+      <p class="eyebrow">How a night goes</p>
+      <ol>
+        {steps.map(([t, d]) => <li><h3>{t}</h3><p>{d}</p></li>)}
+      </ol>
+    </div>
+  </section>
+
+
+  <!-- FAQ -->
+  <section class="block faq" id="faq">
+    <div class="head rv"><p class="eyebrow">FAQ</p><h2 class="h2">Known issues.</h2></div>
+    <div class="qa rv">
+      {faq.map(([q, a]) => (
+        <details>
+          <summary>{q}<span aria-hidden="true">+</span></summary>
+          <p>{a}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+
+</Club>

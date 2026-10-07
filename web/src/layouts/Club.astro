@@ -1,6 +1,7 @@
 ---
 // Version 2 shell: "a fancy community of rebels". Editorial nav, ambient bugs, footer.
 import Base from './Base.astro';
+import '../styles/club.css';
 import Ambient from '../components/Ambient.astro';
 import { links } from '../config/links';
 
@@ -16,11 +17,11 @@ const { title, description } = Astro.props;
     <header class="nav" id="nav">
       <a class="nav-mark" href="/" aria-label="techRebels home"><span>tech</span><span>Rebels</span></a>
       <nav aria-label="Main">
-        <a href="/#manifesto">Manifesto</a>
-        <a href="/#session">Sessions</a>
-        <a href="/#lab">Bug Lab</a>
-        <a href="/#drop">The Drop</a>
-        <a href="/#involved">Get involved</a>
+        <a href="/manifesto">Manifesto</a>
+        <a href="/sessions">Sessions</a>
+        <a href="/lab">Bug Lab</a>
+        <a href="/drop">The Drop</a>
+        <a href="/get-involved">Get involved</a>
         <a href="/crew">Crew</a>
       </nav>
       <div class="nav-right">
@@ -41,11 +42,11 @@ const { title, description } = Astro.props;
         <div>
           <p class="eyebrow">Community</p>
           <ul>
-            <li><a href="/#manifesto">Manifesto</a></li>
-            <li><a href="/#session">Rebel Sessions</a></li>
+            <li><a href="/manifesto">Manifesto</a></li>
+            <li><a href="/sessions">Rebel Sessions</a></li>
             <li><a href="/lab">Bug Lab</a></li>
             <li><a href="/swarm">The Swarm</a></li>
-            <li><a href="/#involved">Get involved</a></li>
+            <li><a href="/get-involved">Get involved</a></li>
             <li><a href="/crew">The crew</a></li>
           </ul>
         </div>
@@ -147,10 +148,22 @@ const { title, description } = Astro.props;
     location.reload();
   });
 
-  const io = new IntersectionObserver((entries) => {
-    for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
-  }, { rootMargin: '0px 0px -8% 0px' });
-  const watch = () => document.querySelectorAll('.rv:not(.in)').forEach((el) => io.observe(el));
+  // Scroll reveal. A plain position check on scroll (no IntersectionObserver), so content can never stay hidden.
+  let pending: HTMLElement[] = [];
+  const check = () => {
+    const limit = innerHeight * 0.94;
+    pending = pending.filter((el) => {
+      if (el.getBoundingClientRect().top < limit) { el.classList.add('in'); return false; }
+      return true;
+    });
+  };
+  const watch = () => {
+    pending = [...document.querySelectorAll<HTMLElement>('.rv:not(.in)')];
+    check();
+    addEventListener('scroll', check, { passive: true });
+    addEventListener('resize', check);
+    setTimeout(check, 300);
+  };
   if (document.documentElement.classList.contains('entered')) watch();
   else document.addEventListener('tr:entered', watch, { once: true });
 </script>

@@ -1,33 +1,18 @@
 ---
-// Version 2: a fancy community of rebels. Version 1 (techRebels OS) lives at /v1.
 import Club from '../layouts/Club.astro';
 import Intro from '../components/Intro.astro';
 import Bug from '../components/Bug';
-import Involved from '../components/Involved.astro';
-import { bugSVG, SPECIES } from '../lib/bug/render.js';
-import { site, links, session } from '../config/site';
+import { SPECIES } from '../lib/bug/render.js';
+import { site, session } from '../config/site';
+import { news } from '../config/news';
 
+// Home: hero, Bug Lab teaser, what's happening. Other sections live on their own pages.
 const hero = {
   main: { role: 'dev', shape: 'round', shell: 'green', pattern: 'circuit', eyes: 'visor', mouth: 'grin', antennae: 'plug', hat: 'headphones', pose: 'stomp', attitude: 'rebel', accent: 'mint' },
   left: { role: 'design', shape: 'tall', shell: 'purple', pattern: 'dots', eyes: 'hearts', mouth: 'smirk', antennae: 'cursor', hat: 'beret', pose: 'lean', attitude: 'smug' },
   right: { role: 'marketing', shape: 'wide', shell: 'lime', pattern: 'pixels', eyes: 'googly', eyewear: 'heartshades', mouth: 'tongue', antennae: 'match', hat: 'party', pose: 'wave', attitude: 'excited' },
 };
 
-const pillars = [
-  { name: 'Bugs', what: 'Chaos, glitches, unexpected behavior.', claim: 'Working as unintended.', cls: 'p-bugs',
-    bug: { role: 'ai', shape: 'round', shell: 'mint', pattern: 'pixels', eyes: 'glitch', mouth: 'zigzag', antennae: 'wifi', hat: 'none', pose: 'hype', attitude: 'excited', extra: 'sparkles' } },
-  { name: 'Rebels', what: 'Attitude, rule-breaking, your own path.', claim: 'Normal was never the plan.', cls: 'p-rebels',
-    bug: { role: 'security', shape: 'tall', shell: 'pink', pattern: 'code', eyes: 'visor', mouth: 'fangs', antennae: 'plug', hat: 'bandana', pose: 'stomp', attitude: 'rebel' } },
-  { name: 'Tech Lunapark', what: 'Experiments, play, weirdness, fun.', claim: 'Every demo is a ride.', cls: 'p-luna',
-    bug: { role: 'founder', shape: 'wide', shell: 'purple', pattern: 'stripes', eyes: 'googly', mouth: 'grin', antennae: 'match', hat: 'crown', pose: 'jump', attitude: 'excited' } },
-];
-
-const steps = [
-  ['Bug birth at the door', 'Build your bug when you arrive. It prints as your name badge. No job titles on it.'],
-  ['A real project, bugs and all', 'A guest shows what they built and exactly where it broke. No polished keynote.'],
-  ['You dig in', 'Questions, problems, hot takes. The room decides where the conversation goes.'],
-  ['Pink drinks and a bug swap', 'Swap stickers, collect species, meet people without the networking.'],
-];
 
 const sp = (name: string) => SPECIES.findIndex((s) => s[0] === name);
 const roleBugs = [
@@ -40,37 +25,6 @@ const roleBugs = [
 ] as const;
 
 // Merch: simple garment silhouettes with a real bug print from the renderer
-const inner = (svg: string) => svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
-const print = (cfg: Record<string, string>, x: number, y: number, w: number) =>
-  `<svg x="${x}" y="${y}" width="${w}" height="${(w * 332) / 300}" viewBox="0 -12 300 332">${inner(bugSVG(cfg, 300))}</svg>`;
-const smallBug = { role: 'curious', shape: 'round', shell: 'pink', pattern: 'code', eyes: 'visor', mouth: 'grin', antennae: 'plug', hat: 'none' };
-const garments = [
-  { name: 'The Tee', tag: 'Everyday', note: 'Cream, oversized. Small bug on the chest, STATUS: WON’T FIX at the neck.', bg: 'var(--pink)',
-    svg: `<svg viewBox="0 0 200 200" aria-hidden="true"><path d="M62 30 L86 21 Q100 33 114 21 L138 30 L176 58 L159 82 L143 72 L143 180 L57 180 L57 72 L41 82 L24 58 Z" fill="#F1EBDD" stroke="#2A1416" stroke-width="3" stroke-linejoin="round"/>${print(smallBug, 106, 52, 26)}</svg>` },
-  { name: 'The Hoodie', tag: 'Everyday', note: 'Deep green. Wordmark on the chest, your BUG ID as a sleeve patch.', bg: 'var(--lime)',
-    svg: `<svg viewBox="0 0 200 200" aria-hidden="true"><path d="M70 42 Q100 8 130 42 L152 52 L182 124 L163 131 L147 96 L147 182 L53 182 L53 96 L37 131 L18 124 L48 52 Z" fill="#114F40" stroke="#2A1416" stroke-width="3" stroke-linejoin="round"/><path d="M78 44 Q100 22 122 44 Q100 60 78 44 Z" fill="#0B2E25"/><path d="M93 54 L91 82 M107 54 L109 82" stroke="#EDE7DC" stroke-width="2" stroke-linecap="round"/><path d="M70 140 H130 L136 168 H64 Z" fill="none" stroke="#0B2E25" stroke-width="3"/><text x="100" y="118" text-anchor="middle" font-family="Bricolage Grotesque, Arial Black, sans-serif" font-weight="800" font-size="16" fill="#F4A5D4" letter-spacing="-0.8">techRebels</text></svg>` },
-  { name: 'The Cap', tag: 'Everyday', note: 'Rebel brown, embroidered pink bug. Small details, big attitude.', bg: 'var(--purple)',
-    svg: `<svg viewBox="0 0 200 200" aria-hidden="true"><path d="M44 124 Q42 62 100 58 Q158 62 156 124 Z" fill="#3C241F" stroke="#2A1416" stroke-width="3" stroke-linejoin="round"/><path d="M36 124 Q100 110 182 132 Q156 148 100 140 Q58 138 36 124 Z" fill="#3C241F" stroke="#2A1416" stroke-width="3" stroke-linejoin="round"/><circle cx="100" cy="60" r="5" fill="#3C241F" stroke="#2A1416" stroke-width="2"/>${print({ ...smallBug, shell: 'pink' }, 84, 80, 32)}</svg>` },
-  { name: 'The Tote', tag: 'Event', note: 'Natural canvas, green handles, the big bug that started it all.', bg: 'var(--mint)',
-    svg: `<svg viewBox="0 0 200 200" aria-hidden="true"><path d="M74 72 Q74 30 100 30 Q126 30 126 72" fill="none" stroke="#114F40" stroke-width="7"/><rect x="44" y="68" width="112" height="118" rx="6" fill="#F1EBDD" stroke="#2A1416" stroke-width="3"/>${print({ role: 'dev', shape: 'round', shell: 'pink', pattern: 'code', eyes: 'visor', mouth: 'grin', antennae: 'plug', hat: 'none', pose: 'stomp', attitude: 'rebel' }, 62, 76, 76)}</svg>` },
-];
-
-const wall = [
-  ['ATTITUDE IS A FEATURE.', 'w-pink'],
-  ['REBELS BREAK THINGS NICELY.', 'w-green'],
-  ["REBELS DON'T FOLLOW ROADMAPS.", 'w-lime'],
-  ['RIDES, DEMOS AND BAD IDEAS.', 'w-purple'],
-  ['EXPERIMENTS OVER KEYNOTES.', 'w-night'],
-  ['THE FUTURE IS A FUNFAIR.', 'w-brown'],
-];
-
-const faq = [
-  ['Is this only for developers?', 'No. PMs, designers, marketers, data and AI people, founders and the just curious are all welcome. The jokes are for everyone too.'],
-  ['How much does it cost?', 'Joining is free. Some Rebel Sessions may have a small ticket, which covers the venue and the drinks.'],
-  ['What do I get as a member?', 'Your own bug, a vote on Session topics, guest suggestions, early access to events and to every merch drop.'],
-  ['Where does it happen?', 'Prague. Every event is on our Luma calendar.'],
-  ['Who runs techRebels?', 'A small crew of people from tech who wanted a community that is actually fun to be part of.'],
-];
 ---
 <Club>
   <Intro slot="before" />
@@ -83,7 +37,7 @@ const faq = [
       <p class="hero-lede">techRebels is a club for people who build, break and rethink tech. Devs, PMs, designers, marketers, founders and the just curious. Real projects, real bugs, zero status games.</p>
       <div class="hero-cta">
         <a class="pill pill-pink" href="/lab">Join the swarm <span aria-hidden="true">→</span></a>
-        <a class="pill pill-ghost" href="#session">Next Rebel Session</a>
+        <a class="pill pill-ghost" href="/sessions">Next Rebel Session</a>
       </div>
       <dl class="hero-meta">
         <div><dt>Next session</dt><dd>{session.name} · {session.date}</dd></div>
@@ -110,58 +64,9 @@ const faq = [
     </div>
   </div>
 
-  <!-- Manifesto -->
-  <section class="block manifesto" id="manifesto">
-    <p class="eyebrow rv">Manifesto</p>
-    <p class="statement rv">We're not a conference. We're where tech people show their <span class="hl-pink">bugs</span>, not just their wins. No stage. No titles. No status games. Just curious people, real projects and a serious amount of <span class="hl-lime">play</span>.</p>
-    <div class="values">
-      <div class="rv"><h3>Honest</h3><p>We show the mistakes and dead ends too. A bug is a feature, not a shame.</p></div>
-      <div class="rv"><h3>Community-driven</h3><p>Everyone brings a question, a problem or a speaker tip. The agenda grows bottom-up.</p></div>
-      <div class="rv"><h3>Self-aware</h3><p>We take tech seriously. Ourselves, not so much.</p></div>
-    </div>
-  </section>
-
-  <!-- Pillars -->
-  <section class="block">
-    <div class="head rv">
-      <p class="eyebrow">What we're made of</p>
-      <h2 class="h2">Three ideas. One swarm.</h2>
-    </div>
-    <div class="pillars">
-      {pillars.map((p) => (
-        <article class={`pillar ${p.cls} rv`}>
-          <p class="pillar-name">{p.name}</p>
-          <p class="pillar-what">{p.what}</p>
-          <h3 class="pillar-claim">{p.claim}</h3>
-          <div class="pillar-bug" aria-hidden="true"><Bug config={p.bug} size={200} /></div>
-        </article>
-      ))}
-    </div>
-  </section>
-
-  <!-- Session -->
-  <section class="block session" id="session">
-    <div class="session-card rv">
-      <p class="eyebrow">The format</p>
-      <h2 class="session-h">{session.name}</h2>
-      <dl class="facts">
-        <div><dt>Length</dt><dd>{session.length}</dd></div>
-        <div><dt>People</dt><dd>{session.people}</dd></div>
-        <div><dt>Where</dt><dd>{session.city}, {session.venue}</dd></div>
-        <div><dt>When</dt><dd>{session.date}</dd></div>
-      </dl>
-      <a class="pill pill-lime" href={links.lumaSession}>Get on the list <span aria-hidden="true">→</span></a>
-    </div>
-    <div class="session-steps rv">
-      <p class="eyebrow">How a night goes</p>
-      <ol>
-        {steps.map(([t, d]) => <li><h3>{t}</h3><p>{d}</p></li>)}
-      </ol>
-    </div>
-  </section>
 
   <!-- Bug lab -->
-  <section class="block lab" id="lab">
+  <section class="block roles-teaser" id="lab">
     <div class="head rv">
       <p class="eyebrow">Bug Lab</p>
       <h2 class="h2">Every rebel gets a bug.</h2>
@@ -178,43 +83,21 @@ const faq = [
     <div class="center rv"><a class="pill pill-pink" href="/lab">Build your bug <span aria-hidden="true">→</span></a></div>
   </section>
 
-  <!-- Claims wall -->
-  <section class="wall" aria-label="Claims">
-    {wall.map(([c, cls]) => <p class={`wall-tile ${cls} rv`}>{c}</p>)}
-  </section>
 
-  <!-- Drop -->
-  <section class="block drop" id="drop">
+  <!-- What's happening -->
+  <section class="block news" id="news">
     <div class="head rv">
-      <p class="eyebrow">Merch · Founding Drop 001</p>
-      <h2 class="h2">Limited. Numbered.<br />Never reprinted.</h2>
-      <p class="lede">Pre-order only, so we make exactly what you want. Members get first access and a sleeve patch with their own bug ID.</p>
+      <p class="eyebrow">What's happening</p>
+      <h2 class="h2">Now, next and lately.</h2>
     </div>
-    <div class="garments">
-      {garments.map((g) => (
-        <article class="garment rv">
-          <div class="garment-art" style={`background:${g.bg}`} set:html={g.svg} />
-          <div class="garment-copy">
-            <h3>{g.name}</h3><span class="chip">{g.tag}</span>
-            <p>{g.note}</p>
-          </div>
+    <div class="news-list">
+      {news.map((n) => (
+        <article class={`news-item rv is-${n.when}`}>
+          <div class="news-meta"><span class="news-when">{n.when === 'next' ? 'Coming up' : n.when === 'now' ? 'Live now' : 'Done'}</span><span>{n.date}</span><span class="news-tag">{n.tag}</span></div>
+          <h3>{n.title}</h3>
+          <p>{n.text}</p>
+          {n.href && <a class="news-link" href={n.href}>{n.cta} <span aria-hidden="true">→</span></a>}
         </article>
-      ))}
-    </div>
-    <div class="center rv"><a class="pill pill-lime" href="/lab">Get early access <span aria-hidden="true">→</span></a></div>
-  </section>
-
-  <Involved />
-
-  <!-- FAQ -->
-  <section class="block faq" id="faq">
-    <div class="head rv"><p class="eyebrow">FAQ</p><h2 class="h2">Known issues.</h2></div>
-    <div class="qa rv">
-      {faq.map(([q, a]) => (
-        <details>
-          <summary>{q}<span aria-hidden="true">+</span></summary>
-          <p>{a}</p>
-        </details>
       ))}
     </div>
   </section>
@@ -226,150 +109,3 @@ const faq = [
     <a class="pill pill-pink" href="/lab">Join the swarm <span aria-hidden="true">→</span></a>
   </section>
 </Club>
-
-<style is:global>
-
-  /* hero */
-  .hero { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(32px, 5vw, 72px); align-items: center; padding-top: clamp(40px, 7vw, 96px); }
-  .hero-copy { display: grid; gap: 26px; min-width: 0; }
-  .hero-h { margin: 0; font: 800 clamp(3rem, 7.6vw, 7rem)/.86 var(--f-display); letter-spacing: -.05em; color: var(--bone); }
-  .hero-h em { font-style: normal; color: var(--pink); }
-  .hero-h .nw { white-space: nowrap; }
-  .hero-lede { margin: 0; max-width: 46ch; font-size: clamp(1.05rem, 1.5vw, 1.25rem); color: #C7CFCA; }
-  .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
-  .hero-meta { margin: 8px 0 0; display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 28px; padding-top: 22px; border-top: 1px solid rgba(237, 231, 220, .1); }
-  .hero-meta dt { font: 500 .76rem var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
-  .hero-meta dd { margin: 4px 0 0; font-weight: 700; font-size: .95rem; }
-
-  .hero-art { position: relative; aspect-ratio: 1 / 1.02; max-width: 100%; }
-  .hero-art .card { position: absolute; border-radius: 28px; padding: 14px; box-shadow: 0 30px 70px rgba(0, 0, 0, .45); transition: transform .5s cubic-bezier(.2, .7, .2, 1); }
-  .hero-art .card svg { display: block; width: 100%; height: auto; }
-  .c-main { width: 64%; left: 18%; top: 6%; background: var(--pink); transform: rotate(-3deg); z-index: 2; }
-  .c-left { width: 36%; left: 0; top: 52%; background: var(--lime); transform: rotate(-9deg); z-index: 3; }
-  .c-right { width: 34%; right: 0; top: 0; background: var(--purple); transform: rotate(8deg); z-index: 1; }
-  .hero-art:hover .c-main { transform: rotate(-1deg) translateY(-6px); }
-  .hero-art:hover .c-left { transform: rotate(-12deg) translate(-6px, 4px); }
-  .hero-art:hover .c-right { transform: rotate(11deg) translate(6px, -4px); }
-  .c-main .tag { position: absolute; left: 18px; bottom: 16px; background: var(--night); color: var(--bone); font: 700 .78rem var(--f-mono); padding: 6px 12px; border-radius: 999px; }
-  .stamp { position: absolute; right: 2%; bottom: 6%; z-index: 4; width: 112px; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; text-align: center; background: var(--mint); color: var(--night); font: 700 .78rem/1.25 var(--f-mono); text-transform: uppercase; transform: rotate(12deg); box-shadow: 0 12px 30px rgba(0, 0, 0, .35); }
-
-  /* ticker */
-  .ticker { overflow: hidden; border-block: 1px solid rgba(237, 231, 220, .1); padding-block: 22px; }
-  .ticker-track { display: inline-flex; white-space: nowrap; animation: tick 70s linear infinite; }
-  .ticker-track span { display: inline-flex; align-items: center; }
-  .ticker b { font: 800 clamp(1.6rem, 3vw, 2.6rem) var(--f-display); letter-spacing: -.03em; color: var(--bone); }
-  .ticker b:nth-of-type(3n+1) { color: var(--pink); }
-  .ticker b:nth-of-type(3n+2) { color: var(--lime); }
-  .ticker i { font-style: normal; color: var(--mint); margin-inline: 28px; font-size: 1.2rem; }
-  .ticker:hover .ticker-track { animation-play-state: paused; }
-  @keyframes tick { to { transform: translateX(-50%); } }
-
-  /* manifesto */
-  .manifesto { display: grid; gap: 40px; }
-  .statement { margin: 0; font: 800 clamp(2rem, 4.6vw, 4rem)/1.04 var(--f-display); letter-spacing: -.035em; color: var(--bone); max-width: 22ch; text-wrap: pretty; }
-  .hl-pink { color: var(--pink); }
-  .hl-lime { color: var(--night); background: var(--lime); padding: 0 .12em; border-radius: .12em; }
-  .values { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding-top: 32px; border-top: 1px solid rgba(237, 231, 220, .1); }
-  .values h3 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 700; color: var(--lime); }
-  .values p { margin: 0; color: #B9C2BD; }
-
-  /* pillars */
-  .pillars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
-  .pillar { position: relative; overflow: hidden; border-radius: 28px; padding: clamp(24px, 3vw, 36px); min-height: 460px; display: grid; align-content: start; gap: 12px; transition: transform .4s cubic-bezier(.2, .7, .2, 1); }
-  .pillar:hover { transform: translateY(-6px) rotate(-.6deg); }
-  .pillar-name { margin: 0; font: 500 .8rem var(--f-mono); letter-spacing: .16em; text-transform: uppercase; opacity: .85; }
-  .pillar-what { margin: 0; font-weight: 500; opacity: .9; }
-  .pillar-claim { margin: 8px 0 0; font: 800 clamp(1.9rem, 2.8vw, 2.6rem)/.95 var(--f-display); letter-spacing: -.035em; max-width: 12ch; }
-  .pillar-bug { position: absolute; right: -6%; bottom: -8%; width: 62%; transform: rotate(-8deg); transition: transform .5s; }
-  .pillar:hover .pillar-bug { transform: rotate(-2deg) translateY(-8px); }
-  .pillar-bug svg { display: block; width: 100%; height: auto; }
-  .p-bugs { background: var(--purple); color: var(--mint); }
-  .p-rebels { background: var(--green); color: var(--pink); }
-  .p-luna { background: var(--lime); color: var(--green); }
-
-  /* session */
-  .session { display: grid; grid-template-columns: .9fr 1.1fr; gap: 24px; align-items: stretch; }
-  .session-card { border-radius: 28px; padding: clamp(28px, 4vw, 48px); background: var(--pink); color: var(--night); display: grid; gap: 22px; align-content: start; }
-  .session-card .eyebrow { color: rgba(11, 15, 13, .6); }
-  .session-h { margin: 0; font: 800 clamp(2.6rem, 5vw, 4.4rem)/.9 var(--f-display); letter-spacing: -.045em; }
-  .facts { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; padding-block: 22px; border-block: 1.5px solid rgba(11, 15, 13, .15); }
-  .facts dt { font: 500 .76rem var(--f-mono); letter-spacing: .14em; text-transform: uppercase; opacity: .65; }
-  .facts dd { margin: 4px 0 0; font-weight: 700; font-size: 1.1rem; }
-  .session-card .pill { justify-self: start; }
-  .session-steps { border-radius: 28px; padding: clamp(28px, 4vw, 48px); background: var(--night-2); border: 1px solid rgba(237, 231, 220, .08); display: grid; gap: 22px; align-content: start; }
-  .session-steps ol { list-style: none; counter-reset: step; margin: 0; padding: 0; display: grid; gap: 4px; }
-  .session-steps li { counter-increment: step; display: grid; grid-template-columns: 56px 1fr; column-gap: 12px; padding: 18px 0; border-bottom: 1px solid rgba(237, 231, 220, .08); }
-  .session-steps li:last-child { border-bottom: 0; }
-  .session-steps li::before { content: "0" counter(step); grid-row: span 2; font: 800 1.6rem/1 var(--f-display); color: var(--lime); }
-  .session-steps h3 { margin: 0; font-size: 1.2rem; font-weight: 700; }
-  .session-steps p { margin: 4px 0 0; color: #B9C2BD; }
-
-  /* lab */
-  .roles { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; }
-  .role { margin: 0; display: grid; gap: 12px; }
-  .role-tile { border-radius: 22px; padding: 10px; transition: transform .35s cubic-bezier(.2, .7, .2, 1); }
-  .role:hover .role-tile { transform: translateY(-6px) rotate(-3deg); }
-  .role-tile svg { display: block; width: 100%; height: auto; }
-  .role figcaption { display: grid; gap: 2px; padding-left: 4px; }
-  .role figcaption b { font-size: 1rem; }
-  .role figcaption span { font: 500 .82rem var(--f-mono); color: var(--muted); }
-
-  /* claims wall */
-  .wall { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; }
-  .wall-tile { margin: 0; aspect-ratio: 1.6; display: flex; align-items: flex-end; padding: clamp(20px, 3vw, 40px); font: 800 clamp(1.6rem, 3.4vw, 3.2rem)/.92 var(--f-display); letter-spacing: -.035em; }
-  .w-pink { background: var(--pink); color: var(--rebel-brown); }
-  .w-night { background: var(--night-2); color: var(--lime); }
-  .w-green { background: var(--green); color: var(--pink); }
-  .w-purple { background: var(--purple); color: var(--mint); }
-  .w-lime { background: var(--lime); color: var(--green); }
-  .w-brown { background: var(--rebel-brown); color: var(--pink); }
-
-  /* drop */
-  .garments { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
-  .garment { display: grid; gap: 16px; align-content: start; }
-  .garment-art { border-radius: 24px; padding: 18px; aspect-ratio: 1; display: grid; place-items: center; transition: transform .35s cubic-bezier(.2, .7, .2, 1); }
-  .garment:hover .garment-art { transform: translateY(-6px); }
-  .garment-art svg { width: 100%; height: 100%; display: block; }
-  .garment-copy { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 10px; }
-  .garment-copy h3 { margin: 0; font-size: 1.15rem; font-weight: 700; }
-  .garment-copy p { grid-column: 1 / -1; margin: 0; color: #B9C2BD; font-size: .95rem; }
-  .chip { font: 700 .72rem var(--f-mono); letter-spacing: .12em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; background: rgba(237, 231, 220, .08); color: var(--mint); }
-
-  /* faq */
-  .qa { display: grid; border-top: 1px solid rgba(237, 231, 220, .12); }
-  .qa details { border-bottom: 1px solid rgba(237, 231, 220, .12); }
-  .qa summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; gap: 20px; padding: 26px 0; font: 700 clamp(1.15rem, 2vw, 1.5rem) "Satoshi", system-ui, sans-serif; }
-  .qa summary::-webkit-details-marker { display: none; }
-  .qa summary span { color: var(--pink); font-size: 1.6rem; line-height: 1; transition: transform .3s; }
-  .qa details[open] summary span { transform: rotate(45deg); }
-  .qa details p { margin: 0 0 26px; max-width: 64ch; color: #B9C2BD; }
-
-  /* final */
-  .final { text-align: center; display: grid; justify-items: center; gap: 22px; padding-block: clamp(40px, 6vw, 80px); }
-  .final-h { margin: 0; font: 800 clamp(4.5rem, 16vw, 13rem)/.82 var(--f-display); letter-spacing: -.055em; color: var(--pink); }
-  .final p { margin: 0; color: #C7CFCA; font-size: 1.15rem; max-width: 40ch; }
-
-  /* responsive */
-  @media (max-width: 1000px) {
-    .hero { grid-template-columns: minmax(0, 1fr); }
-    .hero-h { font-size: min(11vw, 6.5rem); }
-    .hero-art { max-width: 560px; width: 100%; justify-self: center; }
-    .roles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .garments { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .session { grid-template-columns: 1fr; }
-  }
-  @media (max-width: 760px) {
-    .pillars, .values { grid-template-columns: 1fr; }
-    .pillar { min-height: 380px; }
-    .wall { grid-template-columns: 1fr; }
-    .hero-meta { grid-template-columns: 1fr 1fr; }
-  }
-  @media (max-width: 480px) {
-    .roles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .garments, .wall { grid-template-columns: 1fr; }
-    .wall-tile { aspect-ratio: 2.2; }
-    .facts { grid-template-columns: 1fr; }
-    .stamp { width: 88px; font-size: .66rem; }
-  }
-  @media (prefers-reduced-motion: reduce) { .ticker-track { animation: none; } }
-</style>

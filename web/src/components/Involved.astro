@@ -2,9 +2,11 @@
 // "Get involved": speaker / crew / partner forms. Preview only: nothing is sent yet.
 import { contactEmail } from '../config/links';
 
+const { first = false } = Astro.props as { first?: boolean };
+
 const helpAreas = ['Events & venue', 'Design', 'Dev & web', 'Marketing & social', 'Photo & video', 'Merch', 'Community care'];
 ---
-<section class="block involved" id="involved">
+<section class:list={["block", "involved", { first }]} id="involved">
   <div class="head rv">
     <p class="eyebrow">Get involved</p>
     <h2 class="h2">Speak. Build. Host.</h2>

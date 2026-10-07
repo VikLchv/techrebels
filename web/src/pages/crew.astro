@@ -16,14 +16,17 @@ import { crew } from '../config/site';
       {crew.map((m) => (
         <article class="member">
           <div class="member-photo" style={`--tile:${m.tile}`}>
-            <img src={m.photo} alt={`${m.name}, ${m.role} of techRebels`} width="512" height="512" loading="lazy" decoding="async" />
-            <div class="member-bug"><Bug config={m.bug} size={200} label={`${m.short}'s bug, ${m.bugName}`} /></div>
+            {m.photo
+              ? <img src={m.photo} alt={`${m.name}, ${m.role} of techRebels`} width="512" height="512" loading="lazy" decoding="async" />
+              : <div class="member-nophoto" style={`background:${m.tile}`}><Bug config={m.bug} size={320} label={`${m.short}'s bug, ${m.bugName}`} /></div>}
+            {m.photo && <div class="member-bug"><Bug config={m.bug} size={200} label={`${m.short}'s bug, ${m.bugName}`} /></div>}
             <span class="member-tag">{m.bugName}</span>
           </div>
           <div class="member-copy">
             <p class="member-role">{m.role}</p>
             <h3>{m.name}</h3>
             <p>{m.line}</p>
+            {m.linkedin && <a class="member-li" href={m.linkedin} rel="noopener" target="_blank" aria-label={`${m.name} on LinkedIn`}>LinkedIn <span aria-hidden="true">↗</span></a>}
           </div>
         </article>
       ))}
@@ -32,7 +35,7 @@ import { crew } from '../config/site';
 
   <section class="block crew-cta rv">
     <p class="lede">Want to be part of it? We're always looking for speakers, crew and hosts.</p>
-    <a class="pill pill-pink" href="/#involved">Get involved <span aria-hidden="true">→</span></a>
+    <a class="pill pill-pink" href="/get-involved">Get involved <span aria-hidden="true">→</span></a>
   </section>
 </Club>
 
@@ -40,7 +43,7 @@ import { crew } from '../config/site';
   .crew-page { padding-top: clamp(40px, 7vw, 96px); }
   .crew-cta { display: grid; justify-items: start; gap: 18px; }
   /* crew: photo on a brand tile, the member's bug stuck on as a sticker */
-  .crew-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(28px, 4vw, 56px); max-width: 980px; }
+  .crew-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(28px, 4vw, 48px); }
   .member { display: grid; gap: 22px; }
   .member-photo { position: relative; aspect-ratio: 1; max-width: 100%; margin: 14px 14px 0 0; }
   .member-photo::before { content: ""; position: absolute; inset: 0; border-radius: 28px; background: var(--tile); transform: translate(14px, 14px) rotate(3deg); transition: transform .45s cubic-bezier(.2, .7, .2, 1); }
@@ -57,6 +60,11 @@ import { crew } from '../config/site';
   .member-copy h3 { margin: 0; font: 800 clamp(1.9rem, 3vw, 2.4rem)/1 var(--f-display); letter-spacing: -.035em; }
   .member-copy p { margin: 0; color: #C3CBC6; }
   .member-role { font: 700 .8rem var(--f-mono) !important; letter-spacing: .14em; text-transform: uppercase; color: var(--pink) !important; }
-  @media (max-width: 640px) { .crew-grid { grid-template-columns: 1fr; } }
+  .member-nophoto { position: relative; width: 100%; height: 100%; border-radius: 28px; display: grid; place-items: center; padding: 8%; transform: rotate(-2deg); }
+  .member-nophoto svg { display: block; width: 100%; height: auto; }
+  .member-li { justify-self: start; margin-top: 6px; display: inline-flex; gap: 6px; align-items: center; font: 700 .9rem "Satoshi", system-ui, sans-serif; color: var(--bone); text-decoration: none; padding: 8px 14px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px rgba(237, 231, 220, .3); }
+  .member-li:hover { box-shadow: inset 0 0 0 1.5px var(--lime); color: var(--lime); }
+  @media (max-width: 960px) { .crew-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .crew-grid { grid-template-columns: 1fr; } }
 
 </style>

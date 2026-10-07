@@ -1,6 +1,387 @@
 ---
-import Placeholder from '../components/Placeholder.astro';
+// Bug Lab: build your bug, save it with your email (magic link) = join techRebels.
+import Club from '../layouts/Club.astro';
+import { OPTS, ROLES, SPECIES, COL } from '../lib/bug/render.js';
+import { links } from '../config/site';
+
+// control groups, in the order they appear
+const groups = ['role', 'shape', 'pose', 'attitude', 'shell', 'pattern', 'accent', 'eyes', 'eyewear', 'mouth', 'antennae', 'hat', 'extra', 'bg', 'bgpattern'];
+const swatch = (key: string, v: string) => {
+  const g = OPTS[key];
+  if (!g.swatch) return null;
+  return (g.colors ?? COL)[v] ?? null;
+};
 ---
-<Placeholder file="bug_lab.exe" title="Bug Lab" heading="Build your bug." tile="var(--lime)"
-  text="Pick a role, a body, a pose and an attitude. Name it, save it, and it becomes your avatar, your name badge and your membership card."
-  bug={{ role: 'design', shape: 'tall', shell: 'purple', pattern: 'dots', eyes: 'hearts', mouth: 'smirk', antennae: 'cursor', hat: 'beret', pose: 'lean', attitude: 'smug' }} />
+<Club title="Bug Lab · techRebels" description="Build your Rebel Bug. Name it, save it, join the swarm.">
+  <section class="block lab-page" id="lab">
+    <div class="head">
+      <p class="eyebrow">Bug Lab</p>
+      <h1 class="h2">Build your bug.</h1>
+      <p class="lede">Pick a role, a body, a pose and an attitude. Name it. Save it. That's your avatar, your name badge and your membership card.</p>
+    </div>
+
+    <div class="lab">
+      <div class="lab-left">
+        <article class="lcard" id="lcard" aria-live="polite">
+          <div class="lcard-art" id="lcard-art">
+            <span class="lpill lid" id="lid">BUG-????</span>
+            <span class="lpill lsev" id="lsev">Cute</span>
+            <div id="lbug" class="lbug"></div>
+          </div>
+          <div class="lcard-body">
+            <p class="lname" id="lname">Name your bug</p>
+            <p class="lline" id="lline">Dev · Heisenbug</p>
+            <p class="lquip" id="lquip"></p>
+            <div class="lfoot"><span>Status: won't fix · Found at techRebels</span><span class="lwm"><span>tech</span><span>Rebels</span></span></div>
+          </div>
+        </article>
+
+        <div class="lactions">
+          <button type="button" class="pill pill-pink" id="save-btn" data-track="save bug">Save my bug &amp; join the swarm <span aria-hidden="true">→</span></button>
+          <div class="lrow">
+            <button type="button" class="pill pill-ghost" id="random-btn">Randomize</button>
+            <button type="button" class="pill pill-ghost" id="png-btn">Save as image</button>
+            <button type="button" class="pill pill-ghost" id="svg-btn">Copy SVG</button>
+          </div>
+          <p class="lstatus" id="lstatus" role="status"></p>
+          <p class="lsigned" id="lsigned" hidden></p>
+        </div>
+
+        <form class="ljoin" id="ljoin" hidden novalidate>
+          <h2>Save it. Join the swarm.</h2>
+          <p>We'll email you a magic link. No passwords, no spam. Click it and your bug is saved with its own number.</p>
+          <label>Email<input type="email" id="join-email" name="email" required autocomplete="email" maxlength="120" /></label>
+          <label class="check"><input type="checkbox" id="join-privacy" required /> I agree to the <a href="/privacy">privacy policy</a>.</label>
+          <label class="check"><input type="checkbox" id="join-news" /> Send me news about Sessions and merch drops.</label>
+          <p class="lerr" id="join-err" role="alert" hidden></p>
+          <button class="pill pill-lime" type="submit" id="join-send" data-track="send magic link">Send magic link <span aria-hidden="true">→</span></button>
+        </form>
+
+        <div class="ldone" id="ldone" hidden>
+          <h2 id="ldone-h">Welcome to the swarm.</h2>
+          <p id="ldone-p"></p>
+          <div class="lrow">
+            <a class="pill pill-pink" id="ldone-swarm" href="/swarm">See yourself in the swarm</a>
+            <a class="pill pill-ghost" href={links.lumaCalendar}>Subscribe on Luma</a>
+          </div>
+        </div>
+
+        <div class="lexport" id="lexport" hidden>
+          <img id="lexport-img" alt="Your bug card as an image" />
+          <p>Right-click the image and choose Save image, or long-press it on a phone. 1080 × 1350, ready for Instagram.</p>
+          <button type="button" class="pill pill-ghost" id="lexport-close">Close</button>
+        </div>
+      </div>
+
+      <form class="lctrl" id="lctrl" autocomplete="off">
+        <div class="f2">
+          <label class="ff">Bug name<input type="text" id="bug-name" maxlength="22" placeholder="Name your bug" /></label>
+          <label class="ff">Species
+            <select id="bug-species">
+              {ROLES.map(([k, label]) => (
+                <optgroup label={label}>
+                  {SPECIES.map(([n, , r], i) => (r === k ? <option value={i}>{n}</option> : null))}
+                </optgroup>
+              ))}
+            </select>
+          </label>
+        </div>
+        {groups.map((key) => (
+          <fieldset>
+            <legend>{OPTS[key].label}</legend>
+            <div class="lchips">
+              {OPTS[key].items.map(([v, l]) => (
+                <label class="lchip">
+                  <input type="radio" name={key} id={`${key}-${v}`} value={v} />
+                  <span>{swatch(key, v) && <i class="sw" style={`background:${swatch(key, v)}`}></i>}{l}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        ))}
+      </form>
+    </div>
+  </section>
+</Club>
+
+<style is:global>
+  .lab-page { padding-top: clamp(40px, 6vw, 80px); }
+  .lab { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); gap: clamp(24px, 4vw, 56px); align-items: start; }
+  .lab-left { position: sticky; top: 88px; display: grid; gap: 18px; }
+
+  .lcard { border-radius: 28px; overflow: hidden; background: var(--night-2); border: 1px solid rgba(237, 231, 220, .08); }
+  .lcard-art { position: relative; padding: 18px 22px 6px; display: grid; transition: background-color .25s; }
+  .lbug svg { display: block; width: 100%; max-width: 420px; height: auto; margin: 0 auto; }
+  .lbug.wig svg { animation: lwig .45s ease-in-out; transform-origin: 50% 70%; }
+  @keyframes lwig { 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
+  .lpill { position: absolute; top: 16px; z-index: 1; font: 700 .8rem var(--f-mono); padding: 5px 12px; border-radius: 999px; }
+  .lid { left: 18px; background: rgba(255, 255, 255, .88); color: var(--ink); }
+  .lsev { right: 18px; background: var(--ink); color: var(--lime); }
+  .lcard-body { padding: 20px 24px 22px; display: grid; gap: 6px; }
+  .lname { margin: 0; font: 800 clamp(2rem, 4vw, 2.8rem)/.95 var(--f-display); letter-spacing: -.035em; overflow-wrap: anywhere; }
+  .lname.placeholder { color: var(--muted); }
+  .lline { margin: 0; font: 700 .85rem var(--f-mono); color: var(--mint); }
+  .lquip { margin: 0; color: #C3CBC6; }
+  .lfoot { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(237, 231, 220, .15); font: 500 .74rem var(--f-mono); color: var(--muted); }
+  .lwm { font: 800 1.05rem/.82 var(--f-display); letter-spacing: -.04em; color: var(--pink); }
+  .lwm span { display: block; }
+
+  .lactions { display: grid; gap: 12px; justify-items: start; }
+  .lrow { display: flex; flex-wrap: wrap; gap: 10px; }
+  .lrow .pill { padding: 11px 18px; font-size: .9rem; }
+  .lstatus { margin: 0; min-height: 1.2em; font: 500 .85rem var(--f-mono); color: var(--mint); }
+  .lsigned { margin: 0; font: 500 .82rem var(--f-mono); color: var(--muted); }
+  .lsigned button { background: none; border: 0; color: var(--pink); font: inherit; text-decoration: underline; cursor: pointer; padding: 0; }
+
+  .ljoin, .ldone, .lexport { border-radius: 24px; background: var(--night-2); border: 1.5px solid rgba(237, 231, 220, .12); padding: 22px; display: grid; gap: 14px; }
+  .ljoin h2, .ldone h2 { margin: 0; font: 800 1.8rem/1 var(--f-display); letter-spacing: -.03em; color: var(--pink); }
+  .ldone { border-color: var(--lime); }
+  .ldone h2 { color: var(--lime); }
+  .ljoin p, .ldone p, .lexport p { margin: 0; color: #C3CBC6; }
+  .ljoin label { display: grid; gap: 7px; font-weight: 700; font-size: .92rem; }
+  .ljoin input[type=email] { font: 500 1rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 14px; padding: 13px 15px; }
+  .ljoin input[type=email]:focus { outline: none; border-color: var(--lime); }
+  .ljoin .check { display: flex; align-items: flex-start; gap: 10px; font-weight: 500; color: #C3CBC6; }
+  .ljoin .check input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--lime); }
+  .ljoin .pill { justify-self: start; }
+  .lerr { margin: 0; color: var(--pink) !important; font-weight: 700; }
+  .lexport img { width: 100%; max-width: 320px; border-radius: 14px; }
+  .lexport .pill { justify-self: start; }
+
+  .lctrl { display: grid; gap: 22px; min-width: 0; }
+  .lctrl .f2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .lctrl .ff { display: grid; gap: 8px; font: 500 .8rem var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .lctrl input[type=text], .lctrl select { font: 500 1.05rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night-2); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 14px; padding: 12px 14px; width: 100%; text-transform: none; letter-spacing: 0; }
+  .lctrl input[type=text]:focus, .lctrl select:focus { outline: none; border-color: var(--lime); }
+  .lctrl fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .lctrl legend { padding: 0; margin-bottom: 10px; font: 500 .8rem var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .lchips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .lchip input { position: absolute; opacity: 0; pointer-events: none; }
+  .lchip span { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: var(--night-2); box-shadow: inset 0 0 0 1.5px rgba(237, 231, 220, .14); font-weight: 500; font-size: .92rem; cursor: pointer; user-select: none; transition: box-shadow .15s, background .15s; }
+  .lchip span:hover { box-shadow: inset 0 0 0 1.5px rgba(237, 231, 220, .45); }
+  .lchip input:checked + span { background: var(--pink); color: var(--night); box-shadow: inset 0 0 0 1.5px var(--pink); }
+  .lchip input:focus-visible + span { outline: 3px solid var(--lime); outline-offset: 2px; }
+  .sw { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .25); flex: none; }
+
+  @media (max-width: 900px) {
+    .lab { grid-template-columns: minmax(0, 1fr); }
+    .lab-left { position: static; }
+  }
+  @media (max-width: 480px) { .lctrl .f2 { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  import { bugSVG, OPTS, ROLES, SPECIES } from '../lib/bug/render.js';
+  import { applyCardBg, renderCardPNG, severityOf } from '../lib/bug/card';
+  import { supabase } from '../lib/supabase';
+  import { track } from '../lib/track';
+
+  type State = Record<string, string | number>;
+  const KEYS = ['role', 'shape', 'pose', 'attitude', 'shell', 'pattern', 'accent', 'eyes', 'eyewear', 'mouth', 'antennae', 'hat', 'extra', 'bg', 'bgpattern'];
+  const DRAFT = 'tr-lab-draft', PENDING = 'tr-lab-pending';
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+
+  const store = {
+    get: (k: string) => { try { return localStorage.getItem(k); } catch { return null; } },
+    set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch {} },
+    del: (k: string) => { try { localStorage.removeItem(k); } catch {} },
+  };
+
+  const fresh = (): State => ({
+    name: '', species: 0, role: 'dev', shape: 'round', pose: 'stand', attitude: 'none', shell: 'pink', pattern: 'code',
+    accent: 'auto', eyes: 'visor', eyewear: 'none', mouth: 'grin', antennae: 'plug', hat: 'none', extra: 'none', bg: 'green', bgpattern: 'plain',
+  });
+
+  let state: State = fresh();
+  try { const d = JSON.parse(store.get(DRAFT) || 'null'); if (d && typeof d === 'object') state = { ...fresh(), ...d }; } catch {}
+
+  let bugNumber: number | null = null;
+  let userId: string | null = null;
+  let hasRow = false;
+  let saving = false;
+
+  const cleanName = (s: string) => s.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 22);
+  const visual = () => { const c: State = {}; for (const k of KEYS) c[k] = state[k]; return c; };
+  const idText = () => (bugNumber ? `BUG-${String(bugNumber).padStart(4, '0')}` : 'BUG-????');
+
+  // ---------- render ----------
+  function syncControls() {
+    ($('bug-name') as HTMLInputElement).value = String(state.name ?? '');
+    ($('bug-species') as HTMLSelectElement).value = String(state.species);
+    for (const k of KEYS) { const el = document.getElementById(`${k}-${state[k]}`) as HTMLInputElement | null; if (el) el.checked = true; }
+  }
+
+  function render(wiggle = false) {
+    const bug = $('lbug');
+    bug.innerHTML = bugSVG(visual(), 420);
+    if (wiggle && !reduce) { bug.classList.remove('wig'); void bug.offsetWidth; bug.classList.add('wig'); }
+    applyCardBg($('lcard-art'), String(state.bg), String(state.bgpattern));
+    const name = cleanName(String(state.name ?? ''));
+    const nameEl = $('lname');
+    nameEl.textContent = name || 'Name your bug';
+    nameEl.classList.toggle('placeholder', !name);
+    const sp = SPECIES[Number(state.species)] ?? SPECIES[0];
+    const role = ROLES.find((r) => r[0] === state.role)?.[1] ?? 'Dev';
+    $('lline').textContent = `${role} · ${sp[0]}`;
+    $('lquip').textContent = sp[1];
+    $('lid').textContent = idText();
+    $('lsev').textContent = severityOf(visual());
+    store.set(DRAFT, JSON.stringify(state));
+  }
+
+  const status = (msg: string) => { $('lstatus').textContent = msg; };
+
+  // ---------- controls ----------
+  const firstSpeciesOf = (role: string) => SPECIES.findIndex((s) => s[2] === role);
+  $('lctrl').addEventListener('input', (e) => {
+    const t = e.target as HTMLInputElement;
+    if (t.id === 'bug-name') state.name = t.value;
+    else if (t.id === 'bug-species') { state.species = Number(t.value); state.role = SPECIES[Number(t.value)][2]; syncControls(); }
+    else if (t.name === 'role') {
+      state.role = t.value;
+      if (SPECIES[Number(state.species)]?.[2] !== t.value) { state.species = firstSpeciesOf(t.value); ($('bug-species') as HTMLSelectElement).value = String(state.species); }
+    } else if (t.name && KEYS.includes(t.name)) state[t.name] = t.value;
+    render(t.type === 'radio');
+  });
+  $('lctrl').addEventListener('submit', (e) => e.preventDefault());
+
+  const pick = <T,>(a: readonly T[]) => a[(Math.random() * a.length) | 0];
+  $('random-btn').addEventListener('click', () => {
+    for (const k of KEYS) state[k] = pick(OPTS[k].items)[0];
+    if (Math.random() < 0.6) state.eyewear = 'none';
+    if (Math.random() < 0.5) state.extra = 'none';
+    if (Math.random() < 0.6) state.accent = 'auto';
+    const ofRole = SPECIES.map((s, i) => [s, i] as const).filter(([s]) => s[2] === state.role);
+    state.species = ofRole.length ? pick(ofRole)[1] : 0;
+    syncControls(); render(true);
+  });
+
+  $('svg-btn').addEventListener('click', () => {
+    const svg = bugSVG(visual(), 600);
+    navigator.clipboard?.writeText(svg).then(() => status('SVG copied. Paste it into Figma or Illustrator.'), () => status('Copy was blocked here. Use Save as image instead.'));
+  });
+
+  $('png-btn').addEventListener('click', async () => {
+    try {
+      const sp = SPECIES[Number(state.species)] ?? SPECIES[0];
+      const role = ROLES.find((r) => r[0] === state.role)?.[1] ?? 'Dev';
+      const url = await renderCardPNG(visual(), {
+        id: idText(), name: cleanName(String(state.name)) || 'Unnamed bug',
+        line: `${role} · ${sp[0]} · ${severityOf(visual()).toLowerCase()}`, quip: sp[1],
+      });
+      ($('lexport-img') as HTMLImageElement).src = url;
+      $('lexport').hidden = false;
+      track('bug_png');
+    } catch { status('Could not render the image here.'); }
+  });
+  $('lexport-close').addEventListener('click', () => { $('lexport').hidden = true; });
+
+  // ---------- saving = joining ----------
+  async function loadMine() {
+    if (!supabase || !userId) return;
+    const { data } = await supabase.from('bugs').select('bug_number, name, role, species, config').eq('user_id', userId).maybeSingle();
+    if (!data) return;
+    hasRow = true;
+    bugNumber = data.bug_number;
+    if (!store.get(PENDING)) {
+      state = { ...fresh(), ...(data.config as State), name: data.name, species: data.species, role: data.role };
+      syncControls();
+    }
+    ($('save-btn') as HTMLButtonElement).innerHTML = 'Update my bug <span aria-hidden="true">→</span>';
+    render();
+  }
+
+  async function saveBug() {
+    if (!supabase || !userId || saving) return;
+    const name = cleanName(String(state.name ?? ''));
+    if (!name) { status('Give your bug a name first.'); ($('bug-name') as HTMLInputElement).focus(); return; }
+    saving = true;
+    status('Saving your bug...');
+    const row = { name, role: String(state.role), species: Number(state.species), config: visual(), is_public: true };
+    const res = hasRow
+      ? await supabase.from('bugs').update(row).eq('user_id', userId).select('bug_number').single()
+      : await supabase.from('bugs').insert(row).select('bug_number').single();
+    saving = false;
+    if (res.error) { status('Saving failed. Try again in a moment.'); console.error(res.error); return; }
+    const first = !hasRow;
+    hasRow = true;
+    bugNumber = res.data.bug_number;
+    store.del(PENDING);
+    render();
+    status(first ? 'Saved.' : 'Updated.');
+    track(first ? 'bug_saved' : 'bug_updated', String(state.role));
+    $('ljoin').hidden = true;
+    $('ldone-h').textContent = first ? `Welcome to the swarm, ${name}.` : `${name} is updated.`;
+    $('ldone-p').textContent = `You are ${idText()}. Your bug is now part of the swarm.`;
+    ($('ldone-swarm') as HTMLAnchorElement).href = `/swarm?highlight=${bugNumber}`;
+    $('ldone').hidden = false;
+    ($('save-btn') as HTMLButtonElement).innerHTML = 'Update my bug <span aria-hidden="true">→</span>';
+  }
+
+  $('save-btn').addEventListener('click', () => {
+    if (!cleanName(String(state.name ?? ''))) { status('Give your bug a name first.'); ($('bug-name') as HTMLInputElement).focus(); return; }
+    if (!supabase) { status('Saving is not connected yet on this site.'); return; }
+    if (userId) { saveBug(); return; }
+    $('ljoin').hidden = false;
+    ($('join-email') as HTMLInputElement).focus();
+  });
+
+  $('ljoin').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = $('join-err');
+    err.hidden = true;
+    const email = ($('join-email') as HTMLInputElement);
+    const privacy = ($('join-privacy') as HTMLInputElement);
+    if (!email.checkValidity() || !email.value) { err.textContent = 'Please enter a valid email.'; err.hidden = false; email.focus(); return; }
+    if (!privacy.checked) { err.textContent = 'Please agree to the privacy policy to join.'; err.hidden = false; privacy.focus(); return; }
+    const btn = $('join-send') as HTMLButtonElement;
+    btn.disabled = true;
+    store.set(PENDING, '1');
+    store.set(DRAFT, JSON.stringify(state));
+    const { error } = await supabase!.auth.signInWithOtp({
+      email: email.value.trim(),
+      options: {
+        emailRedirectTo: `${location.origin}/lab`,
+        data: { privacy_accepted: true, marketing_consent: ($('join-news') as HTMLInputElement).checked },
+      },
+    });
+    btn.disabled = false;
+    if (error) {
+      err.textContent = error.status === 429 ? 'Too many emails right now. Try again in a few minutes.' : 'We could not send the email. Check the address and try again.';
+      err.hidden = false;
+      console.error(error);
+      return;
+    }
+    track('magic_link_sent');
+    $('ljoin').innerHTML = '<h2>Check your inbox.</h2><p>We sent you a magic link. Open it on this device and your bug gets saved. The link works for one hour.</p>';
+  });
+
+  function showSigned(email: string | undefined) {
+    const el = $('lsigned');
+    el.hidden = false;
+    el.textContent = `Signed in as ${email ?? 'member'} · `;
+    const out = document.createElement('button');
+    out.type = 'button';
+    out.textContent = 'Sign out';
+    out.addEventListener('click', async () => { await supabase?.auth.signOut(); location.reload(); });
+    el.appendChild(out);
+  }
+
+  // ---------- start ----------
+  syncControls();
+  render();
+
+  if (supabase) {
+    const onSession = async (uid: string | null, email?: string) => {
+      if (!uid || uid === userId) return;
+      userId = uid;
+      showSigned(email);
+      await loadMine();
+      if (store.get(PENDING)) await saveBug();
+    };
+    supabase.auth.getSession().then(({ data }) => onSession(data.session?.user.id ?? null, data.session?.user.email));
+    // defer: supabase-js warns against calling it from inside this callback
+    supabase.auth.onAuthStateChange((_e, session) => { setTimeout(() => onSession(session?.user.id ?? null, session?.user.email), 0); });
+  }
+</script>

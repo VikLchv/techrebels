@@ -1,0 +1,62 @@
+---
+import Club from '../layouts/Club.astro';
+import Bug from '../components/Bug';
+
+const pillars = [
+  { name: 'Bugs', what: 'Chaos, glitches, unexpected behavior.', claim: 'Working as unintended.', cls: 'p-bugs',
+    bug: { role: 'ai', shape: 'round', shell: 'mint', pattern: 'pixels', eyes: 'glitch', mouth: 'zigzag', antennae: 'wifi', hat: 'none', pose: 'hype', attitude: 'excited', extra: 'sparkles' } },
+  { name: 'Rebels', what: 'Attitude, rule-breaking, your own path.', claim: 'Normal was never the plan.', cls: 'p-rebels',
+    bug: { role: 'security', shape: 'tall', shell: 'pink', pattern: 'code', eyes: 'visor', mouth: 'fangs', antennae: 'plug', hat: 'bandana', pose: 'stomp', attitude: 'rebel' } },
+  { name: 'Tech Lunapark', what: 'Experiments, play, weirdness, fun.', claim: 'Every demo is a ride.', cls: 'p-luna',
+    bug: { role: 'founder', shape: 'wide', shell: 'purple', pattern: 'stripes', eyes: 'googly', mouth: 'grin', antennae: 'match', hat: 'crown', pose: 'jump', attitude: 'excited' } },
+];
+
+
+const wall = [
+  ['ATTITUDE IS A FEATURE.', 'w-pink'],
+  ['REBELS BREAK THINGS NICELY.', 'w-green'],
+  ["REBELS DON'T FOLLOW ROADMAPS.", 'w-lime'],
+  ['RIDES, DEMOS AND BAD IDEAS.', 'w-purple'],
+  ['EXPERIMENTS OVER KEYNOTES.', 'w-night'],
+  ['THE FUTURE IS A FUNFAIR.', 'w-brown'],
+];
+
+---
+<Club title="Manifesto · techRebels" description="What techRebels believes: real projects, real bugs, zero status games.">
+  <!-- Manifesto -->
+  <section class="block manifesto first" id="manifesto">
+    <p class="eyebrow rv">Manifesto</p>
+    <p class="statement rv">We're not a conference. We're where tech people show their <span class="hl-pink">bugs</span>, not just their wins. No stage. No titles. No status games. Just curious people, real projects and a serious amount of <span class="hl-lime">play</span>.</p>
+    <div class="values">
+      <div class="rv"><h3>Honest</h3><p>We show the mistakes and dead ends too. A bug is a feature, not a shame.</p></div>
+      <div class="rv"><h3>Community-driven</h3><p>Everyone brings a question, a problem or a speaker tip. The agenda grows bottom-up.</p></div>
+      <div class="rv"><h3>Self-aware</h3><p>We take tech seriously. Ourselves, not so much.</p></div>
+    </div>
+  </section>
+
+
+  <!-- Pillars -->
+  <section class="block">
+    <div class="head rv">
+      <p class="eyebrow">What we're made of</p>
+      <h2 class="h2">Three ideas. One swarm.</h2>
+    </div>
+    <div class="pillars">
+      {pillars.map((p) => (
+        <article class={`pillar ${p.cls} rv`}>
+          <p class="pillar-name">{p.name}</p>
+          <p class="pillar-what">{p.what}</p>
+          <h3 class="pillar-claim">{p.claim}</h3>
+          <div class="pillar-bug" aria-hidden="true"><Bug config={p.bug} size={200} /></div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+
+  <!-- Claims wall -->
+  <section class="wall" aria-label="Claims">
+    {wall.map(([c, cls]) => <p class={`wall-tile ${cls} rv`}>{c}</p>)}
+  </section>
+
+</Club>
