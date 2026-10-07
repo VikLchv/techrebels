@@ -9,6 +9,19 @@ export const site = {
     bugs: ['WORKING AS UNINTENDED.', 'BE THE BUG.', 'UNEXPECTED BY DESIGN.', 'TOO WEIRD TO PATCH.', "STATUS: WON'T FIX."],
     rebels: ['ATTITUDE IS A FEATURE.', 'WE REBEL AGAINST BORING.', 'NORMAL WAS NEVER THE PLAN.', 'SAME SYSTEM. DIFFERENT ATTITUDE.', 'NOT MADE FOR SAFE MODE.'],
     lunapark: ['LESS CONFERENCE. MORE CARNIVAL.', 'COME FOR THE TECH. STAY FOR THE CHAOS.', 'NO INNOVATION WITHOUT PLAY.', 'SERIOUS EXPERIMENTS. STUPID AMOUNTS OF FUN.'],
+    // "Rebels ..." lines. The first one is the V2 hero headline.
+    rebelLines: [
+      "Rebels don't follow roadmaps.",
+      'Rebels show their bugs.',
+      'Rebels ship weird.',
+      'Rebels break things nicely.',
+      'Rebels debug out loud.',
+      'Rebels skip the small talk.',
+      'Rebels build. Bugs included.',
+      "Rebels don't do safe mode.",
+      'Rebels play with tech.',
+      'Rebels welcome. Bugs too.',
+    ],
   },
 
   // order used by the hero claim rotator
