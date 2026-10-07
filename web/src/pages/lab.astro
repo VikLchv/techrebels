@@ -50,6 +50,7 @@ const swatch = (key: string, v: string) => {
         <form class="ljoin" id="ljoin" hidden novalidate>
           <h2>Save it. Join the swarm.</h2>
           <p>We'll email you a magic link. No passwords, no spam. Click it and your bug is saved with its own number.</p>
+          <label>Your full name<input type="text" id="join-name" name="name" required autocomplete="name" maxlength="80" /></label>
           <label>Email<input type="email" id="join-email" name="email" required autocomplete="email" maxlength="120" /></label>
           <label class="check"><input type="checkbox" id="join-privacy" required /> I agree to the <a href="/privacy">privacy policy</a>.</label>
           <label class="check"><input type="checkbox" id="join-news" /> Send me news about Sessions and merch drops.</label>
@@ -60,9 +61,10 @@ const swatch = (key: string, v: string) => {
         <div class="ldone" id="ldone" hidden>
           <h2 id="ldone-h">Welcome to the swarm.</h2>
           <p id="ldone-p"></p>
+          <p>Tell us what you're into and we'll match you with people worth meeting.</p>
           <div class="lrow">
-            <a class="pill pill-pink" id="ldone-swarm" href="/swarm">See yourself in the swarm</a>
-            <a class="pill pill-ghost" href={links.lumaCalendar}>Subscribe on Luma</a>
+            <a class="pill pill-pink" href="/inside" data-track="complete profile">Complete your profile <span aria-hidden="true">→</span></a>
+            <a class="pill pill-ghost" id="ldone-swarm" href="/swarm">See yourself in the swarm</a>
           </div>
         </div>
 
@@ -139,8 +141,8 @@ const swatch = (key: string, v: string) => {
   .ldone h2 { color: var(--lime); }
   .ljoin p, .ldone p, .lexport p { margin: 0; color: #C3CBC6; }
   .ljoin label { display: grid; gap: 7px; font-weight: 700; font-size: .92rem; }
-  .ljoin input[type=email] { font: 500 1rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 14px; padding: 13px 15px; }
-  .ljoin input[type=email]:focus { outline: none; border-color: var(--lime); }
+  .ljoin input[type=email], .ljoin input[type=text] { font: 500 1rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 14px; padding: 13px 15px; }
+  .ljoin input[type=email]:focus, .ljoin input[type=text]:focus { outline: none; border-color: var(--lime); }
   .ljoin .check { display: flex; align-items: flex-start; gap: 10px; font-weight: 500; color: #C3CBC6; }
   .ljoin .check input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--lime); }
   .ljoin .pill { justify-self: start; }
@@ -332,6 +334,9 @@ const swatch = (key: string, v: string) => {
     const err = $('join-err');
     err.hidden = true;
     const email = ($('join-email') as HTMLInputElement);
+    const fullName = ($('join-name') as HTMLInputElement);
+    const nameVal = fullName.value.replace(/[ -]/g, '').trim().slice(0, 80);
+    if (!nameVal) { err.textContent = 'Please tell us your name.'; err.hidden = false; fullName.focus(); return; }
     const privacy = ($('join-privacy') as HTMLInputElement);
     if (!email.checkValidity() || !email.value) { err.textContent = 'Please enter a valid email.'; err.hidden = false; email.focus(); return; }
     if (!privacy.checked) { err.textContent = 'Please agree to the privacy policy to join.'; err.hidden = false; privacy.focus(); return; }
@@ -343,7 +348,7 @@ const swatch = (key: string, v: string) => {
       email: email.value.trim(),
       options: {
         emailRedirectTo: `${location.origin}/lab`,
-        data: { privacy_accepted: true, marketing_consent: ($('join-news') as HTMLInputElement).checked },
+        data: { full_name: nameVal, privacy_accepted: true, marketing_consent: ($('join-news') as HTMLInputElement).checked },
       },
     });
     btn.disabled = false;

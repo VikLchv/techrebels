@@ -1,6 +1,208 @@
 ---
-import Placeholder from '../components/Placeholder.astro';
+// Members area: your bug, your profile for matching, your account.
+import Club from '../layouts/Club.astro';
+import { ageRanges, topics, activities, ambitions } from '../config/profile';
+import { links } from '../config/site';
+
+const chips = (name: string, items: string[], type: 'checkbox' | 'radio' = 'checkbox') =>
+  items.map((v, i) => ({ id: `${name}-${i}`, name, v, type }));
 ---
-<Placeholder file="inside.sys" title="Inside" heading="Get inside." tile="var(--pink)"
-  text="The members area: vote on Session topics, suggest guests, get early access to merch and find the community Slack."
-  bug={{ role: 'people', shape: 'round', shell: 'green', pattern: 'dots', eyes: 'googly', mouth: 'smile', antennae: 'classic', hat: 'none', pose: 'wave', attitude: 'excited', extra: 'freckles' }} />
+<Club title="Inside · techRebels" description="Your techRebels profile.">
+  <section class="block first inside">
+    <!-- logged out -->
+    <div id="in-out" hidden>
+      <p class="eyebrow">Inside</p>
+      <h1 class="h2">Members only.</h1>
+      <p class="lede">Log in with your email, or build your bug to join.</p>
+      <div class="lrow"><a class="pill pill-pink" href="/login">Log in</a><a class="pill pill-ghost" href="/lab">Build your bug</a></div>
+    </div>
+
+    <!-- logged in -->
+    <div id="in-app" hidden>
+      <div class="in-head">
+        <div class="in-bug" id="in-bug" aria-hidden="true"></div>
+        <div>
+          <p class="eyebrow" id="in-id">Inside</p>
+          <h1 class="h2" id="in-hello">Hey, rebel.</h1>
+          <p class="lede" id="in-sub">This is your corner of techRebels.</p>
+          <div class="lrow"><a class="pill pill-ghost" href="/lab">Edit my bug</a><a class="pill pill-ghost" href={links.slackInvite}>Join the Slack</a></div>
+        </div>
+      </div>
+
+      <form class="pf" id="pf" novalidate>
+        <div class="pf-head">
+          <h2>Your profile</h2>
+          <p>We use this to match you with people worth meeting: a bug buddy and a small squad with shared interests. Only the techRebels crew sees your answers, and titles, job titles and companies are never shown on the site. Fill in as much as you like.</p>
+        </div>
+
+        <div class="pf-grid">
+          <label>Full name<input type="text" id="pf-full_name" maxlength="80" autocomplete="name" /></label>
+          <label>Title <span class="opt">optional</span><input type="text" id="pf-title" maxlength="40" autocomplete="honorific-prefix" placeholder="Ing., PhD, MBA..." /></label>
+          <label>Job title <span class="opt">optional</span><input type="text" id="pf-job_title" maxlength="80" autocomplete="organization-title" /></label>
+          <label>Company <span class="opt">optional</span><input type="text" id="pf-company" maxlength="80" autocomplete="organization" /></label>
+        </div>
+
+        <fieldset><legend>Age range</legend>
+          <div class="lchips">{chips('age_range', ageRanges, 'radio').map((c) => <label class="lchip"><input type={c.type} name={c.name} id={c.id} value={c.v} /><span>{c.v}</span></label>)}</div>
+        </fieldset>
+        <fieldset><legend>Topics you care about</legend>
+          <div class="lchips">{chips('topics', topics).map((c) => <label class="lchip"><input type="checkbox" name={c.name} id={c.id} value={c.v} /><span>{c.v}</span></label>)}</div>
+        </fieldset>
+        <fieldset><legend>Things you like doing</legend>
+          <div class="lchips">{chips('activities', activities).map((c) => <label class="lchip"><input type="checkbox" name={c.name} id={c.id} value={c.v} /><span>{c.v}</span></label>)}</div>
+        </fieldset>
+        <fieldset><legend>Where you're heading</legend>
+          <div class="lchips">{chips('ambitions', ambitions).map((c) => <label class="lchip"><input type="checkbox" name={c.name} id={c.id} value={c.v} /><span>{c.v}</span></label>)}</div>
+        </fieldset>
+        <label class="pf-wide">Your dream project <span class="opt">optional</span><textarea id="pf-dream_project" rows="3" maxlength="500" placeholder="If time and money didn't matter, what would you build?"></textarea></label>
+
+        <div class="pf-consents">
+          <label class="check"><input type="checkbox" id="pf-matching_consent" /> <span><b>Match me with people.</b> techRebels may use my profile to suggest a bug buddy and a squad, and introduce me to them by name and shared interests. I can turn this off any time.</span></label>
+          <label class="check"><input type="checkbox" id="pf-marketing_consent" /> <span>Send me news about Sessions and merch drops.</span></label>
+        </div>
+
+        <p class="lerr" id="pf-err" role="alert" hidden></p>
+        <div class="lrow"><button class="pill pill-pink" type="submit" id="pf-save" data-track="save profile">Save profile <span aria-hidden="true">→</span></button><span class="lstatus" id="pf-status" role="status"></span></div>
+      </form>
+
+      <section class="in-matches">
+        <h2>Your bug buddy and squad</h2>
+        <p>Coming soon. Once matching starts, this is where you'll meet your bug buddy and your squad, with a link to your group on Slack.</p>
+      </section>
+
+      <section class="in-account">
+        <h2>Your account</h2>
+        <p id="in-email"></p>
+        <div class="lrow">
+          <button type="button" class="pill pill-ghost" id="in-signout">Sign out</button>
+          <button type="button" class="pill pill-ghost" id="in-delete">Delete my account</button>
+        </div>
+        <div class="in-confirm" id="in-confirm" hidden>
+          <p><b>Delete everything?</b> Your bug, your profile and your account will be removed for good. This can't be undone.</p>
+          <div class="lrow"><button type="button" class="pill pill-pink" id="in-delete-yes">Yes, delete it all</button><button type="button" class="pill pill-ghost" id="in-delete-no">Keep my account</button></div>
+        </div>
+      </section>
+    </div>
+  </section>
+</Club>
+
+<style is:global>
+  .inside .lrow { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .in-head { display: grid; grid-template-columns: 200px 1fr; gap: clamp(20px, 4vw, 40px); align-items: center; margin-bottom: clamp(32px, 5vw, 56px); }
+  .in-bug { border-radius: 24px; padding: 10px; background: var(--purple); }
+  .in-bug svg { display: block; width: 100%; height: auto; }
+  .in-head .h2 { margin: 6px 0 10px; }
+  .in-head .lede { margin-bottom: 16px; }
+
+  .pf { border-radius: 28px; background: var(--night-2); border: 1px solid rgba(237, 231, 220, .08); padding: clamp(22px, 3.5vw, 44px); display: grid; gap: 24px; }
+  .pf-head h2, .in-matches h2, .in-account h2 { margin: 0 0 8px; font: 800 clamp(1.7rem, 3vw, 2.4rem)/1 var(--f-display); letter-spacing: -.03em; color: var(--pink); }
+  .pf-head p, .in-matches p, .in-account p { margin: 0; max-width: 64ch; color: #C3CBC6; }
+  .pf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .pf label:not(.lchip):not(.check) { display: grid; gap: 7px; font-weight: 700; font-size: .92rem; }
+  .pf .opt { font: 500 .75rem var(--f-mono); color: var(--muted); margin-left: 6px; }
+  .pf input[type=text], .pf textarea { font: 500 1rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 14px; padding: 12px 14px; width: 100%; resize: vertical; }
+  .pf input[type=text]:focus, .pf textarea:focus { outline: none; border-color: var(--lime); }
+  .pf fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .pf legend { padding: 0; margin-bottom: 10px; font: 500 .8rem var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .pf .lchips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pf .lchip input { position: absolute; opacity: 0; pointer-events: none; }
+  .pf .lchip span { display: inline-flex; padding: 8px 14px; border-radius: 999px; background: var(--night); box-shadow: inset 0 0 0 1.5px rgba(237, 231, 220, .14); font-weight: 500; font-size: .92rem; cursor: pointer; }
+  .pf .lchip input:checked + span { background: var(--lime); color: var(--night); box-shadow: inset 0 0 0 1.5px var(--lime); }
+  .pf .lchip input:focus-visible + span { outline: 3px solid var(--lime); outline-offset: 2px; }
+  .pf-consents { display: grid; gap: 12px; padding-top: 18px; border-top: 1px solid rgba(237, 231, 220, .1); }
+  .pf .check { display: flex; align-items: flex-start; gap: 10px; color: #C3CBC6; }
+  .pf .check input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--lime); flex: none; }
+  .pf .check b { color: var(--bone); }
+  .lstatus { font: 500 .85rem var(--f-mono); color: var(--mint); }
+  .lerr { margin: 0; color: var(--pink); font-weight: 700; }
+
+  .in-matches, .in-account { margin-top: clamp(28px, 4vw, 48px); display: grid; gap: 12px; }
+  .in-matches { border-radius: 24px; padding: clamp(22px, 3vw, 32px); border: 1.5px dashed rgba(237, 231, 220, .2); }
+  .in-confirm { border-radius: 18px; border: 1.5px solid var(--pink); padding: 18px; display: grid; gap: 12px; max-width: 640px; }
+  @media (max-width: 760px) { .pf-grid { grid-template-columns: 1fr; } .in-head { grid-template-columns: 1fr; } .in-bug { max-width: 200px; } }
+</style>
+
+<script>
+  import { supabase } from '../lib/supabase';
+  import { bugSVG } from '../lib/bug/render.js';
+  import { track } from '../lib/track';
+
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const TEXT = ['full_name', 'title', 'job_title', 'company', 'dream_project'] as const;
+  const LISTS = ['topics', 'activities', 'ambitions'] as const;
+  const clean = (s: string, n: number) => s.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, n);
+  let uid = '';
+
+  async function start() {
+    if (!supabase) { $('in-out').hidden = false; return; }
+    const { data } = await supabase.auth.getSession();
+    const session = data.session;
+    if (!session) { $('in-out').hidden = false; return; }
+    uid = session.user.id;
+    $('in-app').hidden = false;
+    $('in-email').textContent = `Signed in as ${session.user.email ?? ''}`;
+
+    const [{ data: prof }, { data: bug }] = await Promise.all([
+      supabase.from('profiles').select('full_name, title, job_title, company, age_range, topics, activities, ambitions, dream_project, matching_consent, marketing_consent').eq('id', uid).maybeSingle(),
+      supabase.from('bugs').select('bug_number, name, config').eq('user_id', uid).maybeSingle(),
+    ]);
+
+    if (bug) {
+      $('in-bug').innerHTML = bugSVG(bug.config, 200);
+      $('in-id').textContent = `BUG-${String(bug.bug_number).padStart(4, '0')} · ${bug.name}`;
+    } else {
+      $('in-bug').innerHTML = bugSVG({ role: 'curious', shape: 'round', shell: 'white', pattern: 'plain', eyes: 'sleepy', mouth: 'o', antennae: 'classic', hat: 'none' }, 200);
+      $('in-sub').textContent = "You don't have a bug yet. Build one so the swarm knows you.";
+    }
+    const first = (prof?.full_name ?? '').split(' ')[0];
+    $('in-hello').textContent = first ? `Hey, ${first}.` : 'Hey, rebel.';
+
+    if (prof) {
+      for (const k of TEXT) ($(`pf-${k}`) as HTMLInputElement).value = prof[k] ?? '';
+      if (prof.age_range) { const r = document.querySelector<HTMLInputElement>(`input[name="age_range"][value="${CSS.escape(prof.age_range)}"]`); if (r) r.checked = true; }
+      for (const k of LISTS) for (const v of prof[k] ?? []) { const c = document.querySelector<HTMLInputElement>(`input[name="${k}"][value="${CSS.escape(v)}"]`); if (c) c.checked = true; }
+      ($('pf-matching_consent') as HTMLInputElement).checked = !!prof.matching_consent;
+      ($('pf-marketing_consent') as HTMLInputElement).checked = !!prof.marketing_consent;
+    }
+  }
+
+  $('pf').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!supabase || !uid) return;
+    const err = $('pf-err');
+    err.hidden = true;
+    const val = (k: string, n: number) => clean(($(`pf-${k}`) as HTMLInputElement).value, n) || null;
+    const picked = (k: string) => [...document.querySelectorAll<HTMLInputElement>(`input[name="${k}"]:checked`)].map((i) => i.value);
+    const full_name = val('full_name', 80);
+    if (!full_name) { err.textContent = 'Please add your name.'; err.hidden = false; $('pf-full_name').focus(); return; }
+    const row = {
+      full_name, title: val('title', 40), job_title: val('job_title', 80), company: val('company', 80), dream_project: val('dream_project', 500),
+      age_range: picked('age_range')[0] ?? null,
+      topics: picked('topics').slice(0, 20), activities: picked('activities').slice(0, 15), ambitions: picked('ambitions').slice(0, 10),
+      matching_consent: ($('pf-matching_consent') as HTMLInputElement).checked,
+      marketing_consent: ($('pf-marketing_consent') as HTMLInputElement).checked,
+    };
+    const btn = $('pf-save') as HTMLButtonElement;
+    btn.disabled = true;
+    $('pf-status').textContent = 'Saving...';
+    const { error } = await supabase.from('profiles').update(row).eq('id', uid);
+    btn.disabled = false;
+    if (error) { $('pf-status').textContent = ''; err.textContent = 'Saving failed. Try again in a moment.'; err.hidden = false; console.error(error); return; }
+    $('pf-status').textContent = 'Saved.';
+    $('in-hello').textContent = `Hey, ${full_name.split(' ')[0]}.`;
+    track('profile_saved', row.matching_consent ? 'matching on' : 'matching off', { props: { topics: row.topics.length, activities: row.activities.length, ambitions: row.ambitions.length } });
+  });
+
+  $('in-signout').addEventListener('click', async () => { await supabase?.auth.signOut(); location.href = '/'; });
+  $('in-delete').addEventListener('click', () => { $('in-confirm').hidden = false; ($('in-delete-no') as HTMLButtonElement).focus(); });
+  $('in-delete-no').addEventListener('click', () => { $('in-confirm').hidden = true; });
+  $('in-delete-yes').addEventListener('click', async () => {
+    if (!supabase) return;
+    const { error } = await supabase.rpc('delete_my_account');
+    if (error) { $('pf-err').textContent = 'Deleting failed. Write to us and we will do it by hand.'; $('pf-err').hidden = false; return; }
+    await supabase.auth.signOut();
+    location.href = '/';
+  });
+
+  start();
+</script>

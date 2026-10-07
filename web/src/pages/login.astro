@@ -1,6 +1,56 @@
 ---
-import Placeholder from '../components/Placeholder.astro';
+// Log in for existing members (magic link). New people join through the Bug Lab.
+import Club from '../layouts/Club.astro';
 ---
-<Placeholder file="login.exe" title="Log in" heading="Magic link, no passwords." tile="var(--bug-brown)"
-  text="Log in with a link sent to your email. No passwords, no spam."
-  bug={{ role: 'security', shape: 'tall', shell: 'mint', pattern: 'circuit', eyes: 'pixel', mouth: 'fangs', antennae: 'plug', hat: 'bandana', pose: 'stand', attitude: 'rebel' }} />
+<Club title="Log in · techRebels" description="Get inside techRebels with a magic link.">
+  <section class="block first login">
+    <div class="login-card">
+      <p class="eyebrow">Members</p>
+      <h1 class="h2">Get inside.</h1>
+      <p class="lede">We'll email you a magic link. No passwords, no spam.</p>
+      <form id="login-form" novalidate>
+        <label>Email<input type="email" id="login-email" required autocomplete="email" maxlength="120" /></label>
+        <p class="lerr" id="login-err" role="alert" hidden></p>
+        <button class="pill pill-pink" type="submit" id="login-send">Send magic link <span aria-hidden="true">→</span></button>
+      </form>
+      <p class="login-done" id="login-done" role="status" hidden>If this email belongs to a member, a magic link is on its way. It works for one hour.</p>
+      <p class="login-new">New here? <a href="/lab">Build your bug and join</a>.</p>
+    </div>
+  </section>
+</Club>
+
+<style is:global>
+  .login-card { max-width: 560px; display: grid; gap: 18px; }
+  .login-card form { display: grid; gap: 14px; }
+  .login-card label { display: grid; gap: 7px; font-weight: 700; }
+  .login-card input { font: 500 1rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night-2); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 14px; padding: 13px 15px; }
+  .login-card input:focus { outline: none; border-color: var(--lime); }
+  .login-card .pill { justify-self: start; }
+  .login-done { margin: 0; padding: 16px 18px; border-radius: 16px; border: 1.5px solid var(--lime); color: var(--bone); }
+  .login-new { margin: 0; color: var(--muted); }
+  .lerr { margin: 0; color: var(--pink); font-weight: 700; }
+</style>
+
+<script>
+  import { supabase } from '../lib/supabase';
+
+  if (supabase) supabase.auth.getSession().then(({ data }) => { if (data.session) location.replace('/inside'); });
+
+  const form = document.getElementById('login-form') as HTMLFormElement;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('login-email') as HTMLInputElement;
+    const err = document.getElementById('login-err')!;
+    err.hidden = true;
+    if (!email.value || !email.checkValidity()) { err.textContent = 'Please enter a valid email.'; err.hidden = false; email.focus(); return; }
+    if (!supabase) { err.textContent = 'Log in is not connected on this site yet.'; err.hidden = false; return; }
+    const btn = document.getElementById('login-send') as HTMLButtonElement;
+    btn.disabled = true;
+    // shouldCreateUser: false = only existing members. Same message either way, so emails can't be probed.
+    const { error } = await supabase.auth.signInWithOtp({ email: email.value.trim(), options: { shouldCreateUser: false, emailRedirectTo: `${location.origin}/inside` } });
+    btn.disabled = false;
+    if (error?.status === 429) { err.textContent = 'Too many emails right now. Try again in a few minutes.'; err.hidden = false; return; }
+    form.hidden = true;
+    document.getElementById('login-done')!.hidden = false;
+  });
+</script>
