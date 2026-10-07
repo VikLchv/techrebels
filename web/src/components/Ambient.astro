@@ -13,7 +13,10 @@
 
   const canvas = document.getElementById('ambient') as HTMLCanvasElement | null;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const emit = (n: number) => document.dispatchEvent(new CustomEvent('tr:count', { detail: n }));
+  const emit = (n: number) => {
+    (window as Window & { __trBugs?: number }).__trBugs = n; // for listeners that load later
+    document.dispatchEvent(new CustomEvent('tr:count', { detail: n }));
+  };
 
   if (!canvas || reduce) {
     canvas?.remove();

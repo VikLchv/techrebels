@@ -25,6 +25,8 @@
   setInterval(tick, 15000);
 
   const count = document.getElementById('bug-count');
+  const known = (window as Window & { __trBugs?: number }).__trBugs;
+  if (count && known !== undefined) count.textContent = String(known);
   document.addEventListener('tr:count', (e) => {
     if (count) count.textContent = String((e as CustomEvent<number>).detail);
   });

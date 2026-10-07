@@ -16,19 +16,18 @@ export const session = {
   length: '90 min',
 };
 
-// The crew shown in "Who's behind it". Replace [role] and the one-liners with your own words.
+// The crew shown in "Who's behind it". Photo + the member's own bug as a sticker.
+// Replace [one line ...] with your own words; swap a bug config once it's built in the Bug Lab.
 export const crew = [
   {
-    name: 'Vik', bugName: 'Kernel Vik', role: '[role]', line: '[one line about Vik]', tile: 'var(--purple)',
+    name: 'Viktorie Láchová', short: 'Vik', role: 'Co-founder', photo: '/crew/vik.webp',
+    bugName: 'Kernel Vik', line: '[one line about Vik]', tile: 'var(--purple)',
     bug: { role: 'dev', shape: 'round', shell: 'pink', pattern: 'code', eyes: 'visor', mouth: 'fangs', antennae: 'plug', hat: 'headphones', pose: 'stand', attitude: 'rebel' },
   },
   {
-    name: 'Any', bugName: '[bug name]', role: '[role]', line: '[one line about Any]', tile: 'var(--lime)',
+    name: 'Any Kožuch', short: 'Any', role: 'Co-founder', photo: '/crew/any.webp',
+    bugName: '[bug name]', line: '[one line about Any]', tile: 'var(--lime)',
     bug: { role: 'people', shape: 'tall', shell: 'green', pattern: 'dots', eyes: 'googly', mouth: 'smile', antennae: 'match', hat: 'none', pose: 'wave', attitude: 'excited', extra: 'freckles' },
-  },
-  {
-    name: 'Tom', bugName: '[bug name]', role: '[role]', line: '[one line about Tom]', tile: 'var(--pink)',
-    bug: { role: 'design', shape: 'wide', shell: 'purple', pattern: 'pixels', eyes: 'visor', eyewear: 'glasses', mouth: 'smirk', antennae: 'cursor', hat: 'beret', pose: 'lean', attitude: 'smug' },
   },
 ];
 
