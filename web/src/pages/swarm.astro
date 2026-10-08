@@ -1,6 +1,134 @@
 ---
-import Placeholder from '../components/Placeholder.astro';
+// The Swarm: every saved bug orbiting the brand, live.
+import Club from '../layouts/Club.astro';
+import '../styles/swarm.css';
 ---
-<Placeholder file="swarm.live" title="The Swarm" heading="The Swarm." tile="var(--mint)"
-  text="Every bug made in the Bug Lab joins one loop around the brand. At events it runs on the big screen and everyone hunts for their own."
-  bug={{ role: 'ai', shape: 'round', shell: 'pink', pattern: 'pixels', eyes: 'glitch', mouth: 'o', antennae: 'wifi', hat: 'none', pose: 'hype', attitude: 'excited', extra: 'sparkles' }} />
+<Club title="The Swarm · techRebels" description="Every bug made in the Bug Lab, orbiting techRebels live.">
+  <section class="block first swarm-page">
+    <div class="head">
+      <p class="eyebrow">The Swarm</p>
+      <h1 class="h2">The Swarm.</h1>
+      <p class="lede">Every bug made in the Bug Lab joins one loop around the brand. At events it runs on the big screen and everyone hunts for their own. <b id="sw-count">0</b> bugs and counting.</p>
+    </div>
+
+    <div class="stage" id="stage" aria-label="Animated swarm of member bugs around the techRebels logo">
+      <p class="stage-mark" aria-hidden="true"><span>tech</span><span>Rebels</span></p>
+      <p class="stage-empty" id="sw-empty" hidden>The swarm is warming up. <a href="/lab">Be the first bug.</a></p>
+    </div>
+
+    <div class="sw-controls">
+      <button type="button" class="pill pill-pink" id="sw-find" hidden>Find my bug</button>
+      <button type="button" class="pill pill-ghost" id="sw-pause">Pause</button>
+      <button type="button" class="pill pill-ghost" id="sw-fs">Full screen</button>
+      <a class="pill pill-ghost" href="/swarm/live">Event screen ↗</a>
+      <span class="sw-msg" id="sw-msg" role="status"></span>
+    </div>
+
+    <div class="sw-newest">
+      <h2 class="sw-h">Newest bugs</h2>
+      <div class="sw-grid" id="sw-grid"></div>
+    </div>
+  </section>
+</Club>
+
+<style is:global>
+  .sw-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 20px; }
+  .sw-controls .pill { padding: 11px 18px; font-size: .9rem; }
+  .sw-msg { font: 500 .85rem var(--f-mono); color: var(--mint); }
+  .sw-newest { margin-top: clamp(48px, 7vw, 88px); display: grid; gap: 20px; }
+  .sw-h { margin: 0; font: 800 clamp(1.8rem, 3vw, 2.4rem)/1 var(--f-display); letter-spacing: -.03em; }
+  .sw-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
+  .sw-card { display: grid; gap: 8px; }
+  .sw-card .tile { border-radius: 18px; padding: 8px; }
+  .sw-card svg { display: block; width: 100%; height: auto; }
+  .sw-card b { font-size: .98rem; overflow-wrap: anywhere; }
+  .sw-card small { font: 500 .78rem var(--f-mono); color: var(--muted); }
+  @media (max-width: 900px) { .sw-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 480px) { .sw-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
+
+<script>
+  import { supabase } from '../lib/supabase';
+  import { createOrbit, bugId, type SwarmBug } from '../lib/swarm/orbit';
+  import { bugSVG, ROLES, SPECIES, COL } from '../lib/bug/render.js';
+  import { track } from '../lib/track';
+
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const stage = $('stage');
+  const orbit = createOrbit(stage);
+  let bugs: SwarmBug[] = [];
+  let mine: number | null = null;
+
+  const roleLabel = (r: string) => ROLES.find((x) => x[0] === r)?.[1] ?? r;
+  const TILE: Record<string, string> = { green: COL.green, pink: COL.pink, lime: COL.lime, purple: COL.purple, mint: COL.mint, brown: COL.brown, white: COL.white };
+
+  function renderGrid() {
+    const grid = $('sw-grid');
+    grid.replaceChildren();
+    for (const b of bugs.slice(0, 24)) {
+      const card = document.createElement('a');
+      card.className = 'sw-card';
+      card.href = `/swarm?highlight=${b.bug_number}`;
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+      tile.style.background = TILE[String(b.config.bg)] ?? COL.green;
+      tile.innerHTML = bugSVG(b.config, 180);
+      const name = document.createElement('b');
+      name.textContent = b.name;
+      const meta = document.createElement('small');
+      const sp = SPECIES[Number(b.species ?? 0)]?.[0] ?? '';
+      meta.textContent = `${bugId(b.bug_number)} · ${roleLabel(b.role)}${sp ? ' · ' + sp : ''}`;
+      card.append(tile, name, meta);
+      card.addEventListener('click', (e) => { e.preventDefault(); find(b.bug_number); stage.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+      grid.appendChild(card);
+    }
+    $('sw-count').textContent = String(bugs.length);
+    $('sw-empty').hidden = bugs.length > 0;
+  }
+
+  function find(n: number | null) {
+    const found = orbit.highlight(n, n !== null && n === mine ? 'YOU' : 'HERE');
+    $('sw-find').textContent = n === null ? 'Find my bug' : 'Show everyone';
+    $('sw-msg').textContent = n !== null && !found ? `${bugId(n)} is not in the swarm (yet).` : '';
+  }
+
+  async function start() {
+    if (!supabase) { $('sw-empty').hidden = false; $('sw-empty').textContent = 'The swarm is not connected on this site yet.'; return; }
+    const { data, error } = await supabase.rpc('get_swarm', { max_rows: 1000 });
+    if (error) { $('sw-msg').textContent = 'Could not load the swarm. Try again in a moment.'; return; }
+    bugs = (data ?? []) as SwarmBug[];
+    orbit.set(bugs);
+    renderGrid();
+
+    const hl = new URLSearchParams(location.search).get('highlight');
+    if (hl !== null && /^\d+$/.test(hl)) find(Number(hl));
+
+    const { data: s } = await supabase.auth.getSession();
+    if (s.session) {
+      const { data: me } = await supabase.from('bugs').select('bug_number').eq('user_id', s.session.user.id).maybeSingle();
+      if (me) { mine = me.bug_number; $('sw-find').hidden = false; }
+    }
+
+    supabase.channel('swarm').on('broadcast', { event: 'new_bug' }, ({ payload }) => {
+      const b = payload as SwarmBug;
+      if (!b || typeof b.bug_number !== 'number') return;
+      bugs.unshift(b);
+      orbit.add(b);
+      renderGrid();
+    }).subscribe();
+  }
+
+  $('sw-find').addEventListener('click', () => {
+    const on = $('sw-find').textContent === 'Find my bug';
+    find(on ? mine : null);
+    track('swarm_find', on ? 'on' : 'off');
+  });
+  $('sw-pause').addEventListener('click', () => { $('sw-pause').textContent = orbit.togglePause() ? 'Play' : 'Pause'; });
+  $('sw-fs').addEventListener('click', () => {
+    const r = stage.requestFullscreen?.();
+    if (!r) { $('sw-msg').textContent = 'Full screen is not available here.'; return; }
+    r.catch(() => { $('sw-msg').textContent = 'Full screen is not available here.'; });
+  });
+
+  start();
+</script>

@@ -1,0 +1,29 @@
+/* The Swarm stage: shared by /swarm and /swarm/live */
+.stage {
+  --bw: clamp(46px, 7%, 110px);
+  position: relative; overflow: hidden; border-radius: 28px;
+  aspect-ratio: 16 / 9; max-width: 100%;
+  background: radial-gradient(ellipse at 50% 50%, #1A3A31 0%, #0E1F1A 45%, var(--night) 100%);
+  border: 1px solid rgba(237, 231, 220, .08);
+}
+.stage-mark { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 500; margin: 0; pointer-events: none;
+  font: 800 clamp(2rem, 9cqw, 8rem)/.8 var(--f-display); letter-spacing: -.055em; color: var(--pink); container-type: normal; }
+.stage { container-type: inline-size; }
+.stage-mark span { display: block; }
+.stage-empty { position: absolute; left: 50%; bottom: 10%; transform: translateX(-50%); margin: 0; z-index: 501; font: 500 .9rem var(--f-mono); color: var(--muted); text-align: center; }
+
+.ob { position: absolute; left: 0; top: 0; width: var(--bw); will-change: transform; transition: opacity .3s, filter .3s; }
+.ob svg { display: block; width: 100%; height: auto; }
+.ob-tag { position: absolute; left: 50%; bottom: -6px; transform: translate(-50%, 100%); white-space: nowrap;
+  font: 700 .62rem var(--f-mono); color: var(--bone); background: rgba(11, 15, 13, .75); padding: 2px 7px; border-radius: 999px;
+  opacity: 0; transition: opacity .2s; pointer-events: none; }
+.ob:hover .ob-tag, .ob.me .ob-tag, .ob.is-new .ob-tag { opacity: 1; }
+.ob.is-new::before, .ob.me::before {
+  position: absolute; left: 50%; top: -4px; transform: translate(-50%, -100%); white-space: nowrap;
+  font: 700 .66rem var(--f-mono); padding: 3px 9px; border-radius: 999px; color: var(--night);
+}
+.ob.is-new::before { content: 'NEW'; background: var(--lime); }
+.ob.me::before { content: attr(data-label); background: var(--pink); }
+.stage.finding .ob:not(.me) { opacity: .18; }
+.stage.finding .ob.me { filter: drop-shadow(0 0 16px var(--lime)); z-index: 900 !important; }
+.stage:fullscreen { border-radius: 0; width: 100vw; height: 100vh; aspect-ratio: auto; }

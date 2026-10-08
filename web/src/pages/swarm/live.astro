@@ -1,6 +1,101 @@
 ---
-import Placeholder from '../../components/Placeholder.astro';
+// Event screen: the Swarm full screen on a projector. ?since=2026-11-20T18:00 counts tonight's bugs.
+import Base from '../../layouts/Base.astro';
+import '../../styles/swarm.css';
 ---
-<Placeholder file="swarm_live_screen.exe" title="Event screen" heading="Big screen mode." tile="var(--purple)"
-  text="The full-screen Swarm for events: every new bug flies in live, with a QR code to the Bug Lab and a count of tonight's bugs."
-  bug={{ role: 'ops', shape: 'wide', shell: 'lime', pattern: 'circuit', eyes: 'visor', mouth: 'grin', antennae: 'plug', hat: 'headphones', pose: 'stomp', attitude: 'rebel' }} />
+<Base title="The Swarm, live · techRebels" description="The techRebels Swarm on the big screen.">
+  <link slot="head" rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" />
+  <main class="live">
+    <div class="stage live-stage" id="stage" aria-label="Animated swarm of member bugs around the techRebels logo">
+      <p class="stage-mark" aria-hidden="true"><span>tech</span><span>Rebels</span></p>
+    </div>
+
+    <div class="live-qr">
+      <div class="qr" id="qr" aria-hidden="true"></div>
+      <p><b>Build your bug.</b><br />Join the swarm.</p>
+    </div>
+    <p class="live-count"><b id="live-count">0</b> <span id="live-count-label">bugs in the swarm</span></p>
+
+    <div class="live-toast" id="toast" role="status" hidden>
+      <div class="toast-bug" id="toast-bug"></div>
+      <div><b id="toast-name"></b><span>just joined the swarm</span></div>
+    </div>
+  </main>
+</Base>
+
+<style is:global>
+  html, body { height: 100%; }
+  .live { position: fixed; inset: 0; background: var(--night); font-family: "Satoshi", system-ui, sans-serif; }
+  .live-stage { position: absolute; inset: 0; border-radius: 0; border: 0; aspect-ratio: auto; --bw: clamp(54px, 6.5vw, 130px); }
+  .live-stage .stage-mark { font-size: clamp(3rem, 12vw, 13rem); }
+  .live.hide-cursor, .live.hide-cursor * { cursor: none; }
+
+  .live-qr { position: absolute; left: clamp(16px, 3vw, 40px); bottom: clamp(16px, 3vw, 40px); z-index: 900; display: flex; align-items: center; gap: 16px; background: rgba(11, 15, 13, .82); padding: 14px 20px 14px 14px; border-radius: 22px; }
+  .qr { width: clamp(90px, 9vw, 150px); aspect-ratio: 1; background: #fff; border-radius: 12px; padding: 8px; }
+  .qr svg { display: block; width: 100%; height: 100%; }
+  .live-qr p { margin: 0; color: var(--bone); font-size: clamp(1rem, 1.6vw, 1.5rem); line-height: 1.25; }
+  .live-qr b { color: var(--pink); font: 800 1.15em var(--f-display); letter-spacing: -.02em; }
+  .live-count { position: absolute; right: clamp(16px, 3vw, 40px); bottom: clamp(16px, 3vw, 40px); z-index: 900; margin: 0; color: var(--muted); font: 500 clamp(.9rem, 1.4vw, 1.3rem) var(--f-mono); }
+  .live-count b { font: 800 clamp(2.4rem, 5vw, 5rem)/1 var(--f-display); color: var(--lime); letter-spacing: -.04em; }
+
+  .live-toast { position: absolute; left: 50%; top: clamp(16px, 4vh, 48px); transform: translateX(-50%); z-index: 950; display: flex; align-items: center; gap: 18px; background: var(--bone); color: var(--night); border-radius: 26px; padding: 12px 28px 12px 12px; box-shadow: 0 20px 60px rgba(0, 0, 0, .5); animation: toast-in .5s cubic-bezier(.2, .7, .2, 1); }
+  .live-toast[hidden] { display: none; }
+  .toast-bug { width: clamp(70px, 7vw, 110px); border-radius: 18px; background: var(--lime); padding: 6px; }
+  .toast-bug svg { display: block; width: 100%; height: auto; }
+  .live-toast b { display: block; font: 800 clamp(1.6rem, 3vw, 2.8rem)/1 var(--f-display); letter-spacing: -.03em; }
+  .live-toast span { font: 500 clamp(.9rem, 1.3vw, 1.2rem) var(--f-mono); }
+  @keyframes toast-in { from { opacity: 0; transform: translate(-50%, -20px); } to { opacity: 1; transform: translateX(-50%); } }
+</style>
+
+<script>
+  import QRCode from 'qrcode';
+  import { supabase } from '../../lib/supabase';
+  import { createOrbit, type SwarmBug } from '../../lib/swarm/orbit';
+  import { bugSVG } from '../../lib/bug/render.js';
+
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const orbit = createOrbit($('stage'));
+  const sinceRaw = new URLSearchParams(location.search).get('since');
+  const since = sinceRaw && !Number.isNaN(Date.parse(sinceRaw)) ? new Date(sinceRaw) : null;
+  let count = 0;
+
+  QRCode.toString(`${location.origin}/lab`, { type: 'svg', margin: 0, color: { dark: '#0B0F0D', light: '#FFFFFF' } })
+    .then((svg) => { $('qr').innerHTML = svg; })
+    .catch(() => { $('qr').hidden = true; });
+
+  const setCount = (n: number) => { count = n; $('live-count').textContent = String(n); };
+  if (since) $('live-count-label').textContent = 'bugs tonight';
+
+  let toastTimer = 0;
+  function toast(b: SwarmBug) {
+    $('toast-bug').innerHTML = bugSVG(b.config, 110);
+    $('toast-name').textContent = b.name;
+    $('toast').hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => { $('toast').hidden = true; }, 5000);
+  }
+
+  async function start() {
+    if (!supabase) return;
+    const { data } = await supabase.rpc('get_swarm', { max_rows: 1000 });
+    const bugs = (data ?? []) as SwarmBug[];
+    orbit.set(bugs);
+    setCount(since ? bugs.filter((b) => new Date(b.created_at) >= since).length : bugs.length);
+    supabase.channel('swarm').on('broadcast', { event: 'new_bug' }, ({ payload }) => {
+      const b = payload as SwarmBug;
+      if (!b || typeof b.bug_number !== 'number') return;
+      orbit.add(b);
+      setCount(count + 1);
+      toast(b);
+    }).subscribe();
+  }
+
+  // hide the cursor after 3 s without movement
+  let idle = 0;
+  const live = document.querySelector('.live')!;
+  const wake = () => { live.classList.remove('hide-cursor'); clearTimeout(idle); idle = window.setTimeout(() => live.classList.add('hide-cursor'), 3000); };
+  addEventListener('pointermove', wake);
+  wake();
+
+  start();
+</script>
