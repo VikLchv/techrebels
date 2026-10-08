@@ -42,7 +42,13 @@ import Club from '../layouts/Club.astro';
           <p class="rd-tip-h">Who should we invite? Only the crew sees this.</p>
           <label>Who<input name="who" id="tip-who" required maxlength="120" placeholder="Name, role, company" /></label>
           <label>Why them <span class="opt">optional</span><textarea name="why" id="tip-why" rows="2" maxlength="600"></textarea></label>
-          <label>Link <span class="opt">optional</span><input name="link" id="tip-link" type="url" maxlength="300" placeholder="https://" /></label>
+          <p class="rd-tip-sub">How to reach them (all optional, LinkedIn preferred)</p>
+          <label>LinkedIn <span class="opt">preferred</span><input name="link" id="tip-link" type="url" maxlength="300" placeholder="https://www.linkedin.com/in/..." /></label>
+          <div class="f2">
+            <label>Their email <span class="opt">optional</span><input name="guest_email" id="tip-gemail" type="email" maxlength="120" /></label>
+            <label>Their phone <span class="opt">optional</span><input name="guest_phone" id="tip-gphone" type="tel" maxlength="40" /></label>
+          </div>
+          <p class="rd-tip-sub">Your details</p>
           <div class="f2">
             <label>Your name<input name="name" id="tip-name" required maxlength="80" autocomplete="name" /></label>
             <label>Your email<input name="email" id="tip-email" type="email" required maxlength="120" autocomplete="email" /></label>
@@ -110,6 +116,7 @@ import Club from '../layouts/Club.astro';
   .rd-bug.sel .lbl { background: var(--lime); color: var(--night); }
 
   .rd-card { position: absolute; right: 16px; top: 16px; bottom: 16px; width: min(380px, calc(100% - 32px)); overflow: auto; z-index: 10; background: var(--night-2); border: 1.5px solid rgba(237, 231, 220, .14); border-radius: 22px; padding: 22px; display: grid; gap: 10px; align-content: start; box-shadow: 0 30px 70px rgba(0, 0, 0, .5); }
+  .rd-card { display: flex; flex-direction: column; } .rd-card > * { flex-shrink: 0; }
   .rd-card[hidden] { display: none; }
   .rd-close { position: absolute; right: 12px; top: 10px; background: none; border: 0; color: var(--bone); font-size: 1.6rem; cursor: pointer; line-height: 1; }
   .rd-card-bug { width: 110px; border-radius: 18px; padding: 6px; }
@@ -124,10 +131,13 @@ import Club from '../layouts/Club.astro';
   #rd-vote[aria-pressed="true"] { background: var(--lime); }
   .rd-note { margin: 0; min-height: 1.1em; font: 500 .82rem var(--f-mono); color: var(--mint); }
   .rd-note a { color: var(--pink); }
-  .rd-tip, #rd-suggest-form { display: grid; gap: 10px; }
+  .rd-tip, #rd-suggest-form { display: grid; gap: 12px; }
+  .rd-tip { order: 10; }
+  .rd-tip .rd-tip-sub { margin: 0; font: 500 .78rem var(--f-mono); color: var(--muted); }
   .rd-tip[hidden], #rd-suggest-form[hidden] { display: none; }
   .rd-tip-h { margin: 0; font-weight: 700; }
-  .rd-tip label, #rd-suggest-form label:not(.lchip) { display: grid; gap: 6px; font-weight: 700; font-size: .88rem; }
+  .rd-tip label, #rd-suggest-form label:not(.lchip) { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; font-weight: 700; font-size: .88rem; }
+  .rd-tip label > input:not([type=checkbox]), .rd-tip label > textarea, #rd-suggest-form label > input { flex-basis: 100%; }
   .rd-tip input:not([type=checkbox]), .rd-tip textarea, #rd-suggest-form input:not([type=radio]) { font: 500 .95rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 12px; padding: 10px 12px; width: 100%; }
   .rd-tip input:focus, .rd-tip textarea:focus, #rd-suggest-form input:focus { outline: none; border-color: var(--lime); }
   .rd-tip .f2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -320,7 +330,7 @@ import Club from '../layouts/Club.astro';
     const bug = $('rd-card-bug');
     bug.style.background = TILE[t.pillar];
     bug.innerHTML = bugSVG(bugFor(t), 110);
-    $('rd-meta').textContent = `${t.kind === 'person' ? 'Kind of person' : 'Topic'} · ${PILLAR_NAME[t.pillar]}${t.category && t.category !== 'People' ? ' · ' + t.category : ''}`;
+    $('rd-meta').textContent = `${t.kind === 'person' ? 'Kind of person' : 'Topic'} · ${PILLAR_NAME[t.pillar]}${t.category && t.category !== 'People' && t.category !== PILLAR_NAME[t.pillar] ? ' · ' + t.category : ''}`;
     $('rd-title').textContent = t.title;
     $('rd-desc').textContent = t.description ?? '';
     updateVotes();
@@ -384,7 +394,7 @@ import Club from '../layouts/Club.astro';
     const form = e.currentTarget as HTMLFormElement;
     const get = (id: string) => ($(id) as HTMLInputElement).value.trim();
     const bad = [...form.querySelectorAll<HTMLInputElement>('input:not([name="website"]), textarea')].find((el) => !el.checkValidity());
-    if (bad) { $('rd-note').textContent = 'Please fill in who, your name, a valid email and tick the box.'; bad.focus(); return; }
+    if (bad) { $('rd-note').textContent = 'Please fill in who, your name and email, check the email fields and tick the box.'; bad.focus(); return; }
     if ((form.elements.namedItem('website') as HTMLInputElement).value) { form.hidden = true; $('rd-note').textContent = 'Thanks for the tip.'; return; }
     if (!supabase || !current) return;
     const link = get('tip-link');
@@ -392,7 +402,12 @@ import Club from '../layouts/Club.astro';
       kind: 'guest_tip', consent: true,
       name: get('tip-name').slice(0, 80), email: get('tip-email').slice(0, 120),
       topic: current.title.slice(0, 120),
-      details: `${get('tip-who')}${get('tip-why') ? ' · ' + get('tip-why') : ''}`.slice(0, 800),
+      details: [
+        `Who: ${get('tip-who')}`,
+        get('tip-why') && `Why: ${get('tip-why')}`,
+        get('tip-gemail') && `Email: ${get('tip-gemail')}`,
+        get('tip-gphone') && `Phone: ${get('tip-gphone')}`,
+      ].filter(Boolean).join(' · ').slice(0, 800),
       link: /^https?:\/\//i.test(link) ? link.slice(0, 300) : null,
     });
     if (error) { $('rd-note').textContent = 'Sending failed. Try again in a moment.'; console.error(error); return; }
@@ -411,6 +426,7 @@ import Club from '../layouts/Club.astro';
   // ---- suggest ----
   $('rd-suggest-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const form = e.currentTarget as HTMLFormElement;
     const title = ($('sg-title') as HTMLInputElement).value.replace(/\s+/g, ' ').trim();
     if (title.length < 3) { $('sg-note').textContent = 'Give it a title (at least 3 characters).'; return; }
     if (!supabase || !userId) return;
@@ -418,7 +434,7 @@ import Club from '../layouts/Club.astro';
     const description = ($('sg-desc') as HTMLInputElement).value.trim().slice(0, 300) || null;
     const { error } = await supabase.from('topics').insert({ title: title.slice(0, 80), description, kind, pillar: 'rebels' });
     if (error) { $('sg-note').textContent = 'Sending failed. Try again in a moment.'; console.error(error); return; }
-    (e.currentTarget as HTMLFormElement).reset();
+    form.reset();
     $('sg-note').textContent = 'Thanks. The crew will review it and add it to the radar.';
     track('radar_suggest', kind);
   });
