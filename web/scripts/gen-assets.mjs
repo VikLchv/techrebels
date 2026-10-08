@@ -28,7 +28,7 @@ body{background:#0B0F0D;background-image:linear-gradient(rgba(237,231,220,.05) 1
 </style></head><body>
 <div class="os">TECHREBELS.OS</div>
 <div class="wm"><span>tech</span><span>Rebels</span></div>
-<div class="claim">LESS CONFERENCE. MORE CARNIVAL.</div>
+<div class="claim">SERIOUS TECH. UNSERIOUS PEOPLE.</div>
 <div class="tile">${og}</div>
 </body></html>`);
 console.log('ok');
