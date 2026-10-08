@@ -25,7 +25,7 @@ const { title, description } = Astro.props;
         <a href="/crew">Crew</a>
       </nav>
       <div class="nav-right">
-        <span class="nav-count" title="Click anywhere on the page to release a bug"><i aria-hidden="true"></i><b id="bug-count">0</b> bugs online</span>
+        <a class="nav-count" href="/swarm" title="See every bug in the swarm"><i aria-hidden="true"></i><b id="bug-count">·</b> <span id="bug-count-label">bugs in the swarm</span></a>
         <a class="nav-inside" href="/inside">Inside</a>
         <a class="pill pill-pink" href="/lab">Join the swarm</a>
       </div>
@@ -108,7 +108,7 @@ const { title, description } = Astro.props;
   .nav nav a { color: var(--bone); text-decoration: none; font-weight: 500; font-size: .95rem; opacity: .8; transition: opacity .2s; white-space: nowrap; }
   .nav nav a:hover { opacity: 1; }
   .nav-right { display: flex; align-items: center; gap: 16px; }
-  .nav-count { display: inline-flex; align-items: center; gap: 8px; font: 500 .8rem var(--f-mono); color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .nav-count { text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font: 500 .8rem var(--f-mono); color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .nav-count i { width: 8px; height: 8px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 4px rgba(205, 220, 39, .18); animation: live 2s ease-in-out infinite; }
   .nav-count b { color: var(--bone); }
   .nav .pill { padding: 11px 20px; font-size: .9rem; }
@@ -140,10 +140,21 @@ const { title, description } = Astro.props;
   import { autoTrack } from '../lib/track';
   autoTrack();
 
+  // Nav counter: real bugs in the swarm (saved in the Bug Lab), live.
+  import { supabase } from '../lib/supabase';
+  import { onNewBug } from '../lib/swarm/live';
   const count = document.getElementById('bug-count');
-  const known = (window as Window & { __trBugs?: number }).__trBugs;
-  if (count && known !== undefined) count.textContent = String(known);
-  document.addEventListener('tr:count', (e) => { if (count) count.textContent = String((e as CustomEvent<number>).detail); });
+  const label = document.getElementById('bug-count-label');
+  let swarmTotal = 0;
+  const showCount = (n: number) => {
+    swarmTotal = n;
+    if (count) count.textContent = String(n);
+    if (label) label.textContent = n === 1 ? 'bug in the swarm' : 'bugs in the swarm';
+  };
+  if (supabase) {
+    supabase.rpc('swarm_count').then(({ data }) => { if (typeof data === 'number') showCount(data); });
+    onNewBug(() => showCount(swarmTotal + 1));
+  }
 
   document.getElementById('replay')?.addEventListener('click', () => {
     try { localStorage.removeItem('tr-intro-seen'); sessionStorage.removeItem('tr-intro-seen'); } catch {}

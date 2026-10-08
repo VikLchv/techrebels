@@ -52,6 +52,7 @@ import '../styles/swarm.css';
   import { createOrbit, bugId, type SwarmBug } from '../lib/swarm/orbit';
   import { bugSVG, ROLES, SPECIES, COL } from '../lib/bug/render.js';
   import { track } from '../lib/track';
+  import { onNewBug } from '../lib/swarm/live';
 
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   const stage = $('stage');
@@ -109,13 +110,11 @@ import '../styles/swarm.css';
       if (me) { mine = me.bug_number; $('sw-find').hidden = false; }
     }
 
-    supabase.channel('swarm').on('broadcast', { event: 'new_bug' }, ({ payload }) => {
-      const b = payload as SwarmBug;
-      if (!b || typeof b.bug_number !== 'number') return;
+    onNewBug((b) => {
       bugs.unshift(b);
       orbit.add(b);
       renderGrid();
-    }).subscribe();
+    });
   }
 
   $('sw-find').addEventListener('click', () => {

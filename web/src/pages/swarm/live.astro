@@ -52,6 +52,7 @@ import '../../styles/swarm.css';
   import { supabase } from '../../lib/supabase';
   import { createOrbit, type SwarmBug } from '../../lib/swarm/orbit';
   import { bugSVG } from '../../lib/bug/render.js';
+  import { onNewBug } from '../../lib/swarm/live';
 
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   const orbit = createOrbit($('stage'));
@@ -81,13 +82,11 @@ import '../../styles/swarm.css';
     const bugs = (data ?? []) as SwarmBug[];
     orbit.set(bugs);
     setCount(since ? bugs.filter((b) => new Date(b.created_at) >= since).length : bugs.length);
-    supabase.channel('swarm').on('broadcast', { event: 'new_bug' }, ({ payload }) => {
-      const b = payload as SwarmBug;
-      if (!b || typeof b.bug_number !== 'number') return;
+    onNewBug((b) => {
       orbit.add(b);
       setCount(count + 1);
       toast(b);
-    }).subscribe();
+    });
   }
 
   // hide the cursor after 3 s without movement

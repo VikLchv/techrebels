@@ -39,6 +39,7 @@ const helpAreas = ['Events & venue', 'Design', 'Dev & web', 'Marketing & social'
         <label>Best bug of the story <span class="opt">optional</span><textarea name="bug" id="sp-bug" rows="3" maxlength="500" placeholder="Where did it break, and what did you learn?"></textarea></label>
         <label>Link <span class="opt">optional</span><input name="link" id="sp-link" type="url" maxlength="300" placeholder="https://" /></label>
         <label class="check"><input type="checkbox" name="consent" id="sp-consent" required /> I agree that techRebels may contact me about this.</label>
+        <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off" /></label>
         <button class="pill pill-pink" type="submit" data-track="submit speaker form">Pitch my talk <span aria-hidden="true">→</span></button>
       </form>
     </div>
@@ -66,6 +67,7 @@ const helpAreas = ['Events & venue', 'Design', 'Dev & web', 'Marketing & social'
         </fieldset>
         <label>Anything else <span class="opt">optional</span><textarea name="note" id="cr-note" rows="3" maxlength="500" placeholder="Skills, ideas, how much time you have"></textarea></label>
         <label class="check"><input type="checkbox" name="consent" id="cr-consent" required /> I agree that techRebels may contact me about this.</label>
+        <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off" /></label>
         <button class="pill pill-lime" type="submit" data-track="submit crew form">Count me in <span aria-hidden="true">→</span></button>
       </form>
     </div>
@@ -100,11 +102,12 @@ const helpAreas = ['Events & venue', 'Design', 'Dev & web', 'Marketing & social'
         </label>
         <label>Message <span class="opt">optional</span><textarea name="message" id="pa-message" rows="3" maxlength="800"></textarea></label>
         <label class="check"><input type="checkbox" name="consent" id="pa-consent" required /> I agree that techRebels may contact me about this.</label>
+        <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off" /></label>
         <button class="pill pill-pink" type="submit" data-track="submit partner form">Let's talk <span aria-hidden="true">→</span></button>
       </form>
     </div>
 
-    <p class="inv-note">Preview: these forms don't send anything yet. Nothing you type leaves this page.</p>
+    <p class="inv-note">We read every message. Your details are only used to get back to you about this.</p>
   </div>
 </section>
 
@@ -149,6 +152,7 @@ const helpAreas = ['Events & venue', 'Design', 'Dev & web', 'Marketing & social'
   .inv-done { border-radius: 20px; background: var(--night); border: 1.5px solid var(--lime); padding: 24px; display: grid; gap: 10px; }
   .inv-done h4 { margin: 0; font: 800 1.6rem/1 var(--f-display); color: var(--lime); letter-spacing: -.03em; }
   .inv-done p { margin: 0; color: #C3CBC6; }
+  .hp { position: absolute !important; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   .inv-note { margin: 0; font: 500 .8rem var(--f-mono); color: var(--muted); }
   @media (max-width: 860px) { .inv-panel { grid-template-columns: 1fr; } }
   @media (max-width: 520px) { .inv-form .f2 { grid-template-columns: 1fr; } }
@@ -156,6 +160,7 @@ const helpAreas = ['Events & venue', 'Design', 'Dev & web', 'Marketing & social'
 
 <script>
   import { track } from '../lib/track';
+  import { supabase } from '../lib/supabase';
 
   // tabs
   const tabs = [...document.querySelectorAll<HTMLButtonElement>('.inv-tabs [role="tab"]')];
@@ -183,36 +188,59 @@ const helpAreas = ['Events & venue', 'Design', 'Dev & web', 'Marketing & social'
   document.querySelectorAll<HTMLFormElement>('.inv-form').forEach((form) => {
     let started = false;
     form.addEventListener('input', () => { if (!started) { started = true; track('form_start', form.dataset.form); } });
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       form.querySelector('.inv-error')?.remove();
+      const fail = (text: string, focus?: HTMLElement | null) => {
+        const msg = document.createElement('p');
+        msg.className = 'inv-error';
+        msg.setAttribute('role', 'alert');
+        msg.textContent = text;
+        form.querySelector('button[type="submit"]')?.before(msg);
+        focus?.focus();
+      };
       let firstBad: HTMLElement | null = null;
-      form.querySelectorAll<HTMLInputElement>('input, textarea, select').forEach((el) => {
+      form.querySelectorAll<HTMLInputElement>('input:not([name="website"]), textarea, select').forEach((el) => {
         const bad = !el.checkValidity();
         if (el.type !== 'checkbox') el.setAttribute('aria-invalid', String(bad));
         if (bad && !firstBad) firstBad = el;
       });
-      if (firstBad) {
-        const msg = document.createElement('p');
-        msg.className = 'inv-error';
-        msg.setAttribute('role', 'alert');
-        msg.textContent = 'Please fill in your name, a valid email and tick the consent box.';
-        form.querySelector('.pill')?.before(msg);
-        (firstBad as HTMLElement).focus();
-        track('form_invalid', form.dataset.form);
-        return;
-      }
-      const name = (form.elements.namedItem('name') as HTMLInputElement | null)?.value.trim() || 'rebel';
-      track('form_submit', form.dataset.form);
-      const done = document.createElement('div');
-      done.className = 'inv-done';
-      done.setAttribute('role', 'status');
-      const h = document.createElement('h4');
-      h.textContent = `Thanks, ${name}.`;
-      const p = document.createElement('p');
-      p.textContent = "This is a preview, so nothing was sent yet. Once the form is live, we'll get back to you.";
-      done.append(h, p);
-      form.replaceWith(done);
+      if (firstBad) { fail('Please fill in the required fields, a valid email and tick the consent box.', firstBad); track('form_invalid', form.dataset.form); return; }
+
+      const f = (n: string) => ((form.elements.namedItem(n) as HTMLInputElement | null)?.value ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim();
+      const name = f('name').slice(0, 80);
+      const done = () => {
+        const box = document.createElement('div');
+        box.className = 'inv-done';
+        box.setAttribute('role', 'status');
+        const h = document.createElement('h4');
+        h.textContent = `Thanks, ${name || 'rebel'}.`;
+        const p = document.createElement('p');
+        p.textContent = "Got it. We'll get back to you soon.";
+        box.append(h, p);
+        form.replaceWith(box);
+      };
+      if (f('website')) { done(); return; } // honeypot: bots fill hidden fields
+
+      const kind = form.dataset.form as 'speaker' | 'crew' | 'partner';
+      const link = f('link');
+      const row = {
+        kind, name, email: f('email').slice(0, 120), consent: true,
+        company: kind === 'partner' ? f('company').slice(0, 120) || null : null,
+        topic: kind === 'speaker' ? f('topic').slice(0, 120) || null : null,
+        details: (kind === 'speaker' ? f('bug') : kind === 'crew' ? f('note') : f('message')).slice(0, 800) || null,
+        areas: kind === 'crew' ? [...form.querySelectorAll<HTMLInputElement>('input[name="areas"]:checked')].map((i) => i.value).slice(0, 12) : [],
+        link: kind === 'speaker' && /^https?:\/\//i.test(link) ? link.slice(0, 300) : null,
+        kind_detail: kind === 'partner' ? f('kind').slice(0, 80) || null : null,
+      };
+      if (!supabase) { fail('Sending is not connected on this site yet.'); return; }
+      const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      if (btn) btn.disabled = true;
+      const { error } = await supabase.from('submissions').insert(row);
+      if (btn) btn.disabled = false;
+      if (error) { fail('Sending failed. Try again in a moment.'); console.error(error); track('form_error', kind); return; }
+      track('form_submit', kind);
+      done();
     });
   });
 </script>
