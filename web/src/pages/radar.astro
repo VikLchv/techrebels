@@ -86,7 +86,7 @@ import Club from '../layouts/Club.astro';
   .rd-sep { width: 1px; height: 24px; background: rgba(237, 231, 220, .2); margin-inline: 4px; }
 
   .rd-wrap { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); }
-  .rd-stage { position: relative; overflow: hidden; border-radius: 28px; aspect-ratio: 16 / 9; min-height: 420px; max-width: 100%;
+  .rd-stage { position: relative; overflow: hidden; border-radius: 28px; aspect-ratio: 16 / 10; min-height: 520px; max-width: 100%;
     background:
       radial-gradient(circle at 50% 50%, rgba(205, 220, 39, .08) 0 12%, transparent 12.2%),
       repeating-radial-gradient(circle at 50% 50%, transparent 0 9%, rgba(237, 231, 220, .06) 9% 9.25%),
@@ -102,7 +102,9 @@ import Club from '../layouts/Club.astro';
   .rd-bug { position: absolute; left: 0; top: 0; display: grid; justify-items: center; gap: 4px; cursor: pointer; border: 0; padding: 0; background: none; color: inherit; will-change: transform; transition: opacity .3s; z-index: 2; }
   .rd-bug svg { display: block; width: var(--w, 70px); height: auto; transition: transform .2s; }
   .rd-bug:hover svg, .rd-bug:focus-visible svg { transform: scale(1.12) rotate(-6deg); }
-  .rd-bug .lbl { max-width: 160px; text-align: center; font: 700 .72rem/1.15 "Satoshi", system-ui, sans-serif; color: var(--bone); background: rgba(11, 15, 13, .78); padding: 4px 9px; border-radius: 10px; }
+  .rd-bug .lbl { position: absolute; left: 50%; top: 100%; transform: translate(-50%, 4px); width: max-content; max-width: 180px; text-align: center; font: 700 .74rem/1.15 "Satoshi", system-ui, sans-serif; color: var(--bone); background: rgba(11, 15, 13, .88); padding: 5px 10px; border-radius: 10px; opacity: 0; transition: opacity .15s; pointer-events: none; z-index: 5; }
+  .rd-bug:hover .lbl, .rd-bug:focus-visible .lbl, .rd-bug.sel .lbl, .rd-bug.top .lbl { opacity: 1; }
+  .rd-bug:hover, .rd-bug:focus-visible, .rd-bug.sel { z-index: 6; }
   .rd-bug.person .lbl { border: 1.5px solid var(--pink); }
   .rd-bug.dim { opacity: .12; pointer-events: none; }
   .rd-bug.sel .lbl { background: var(--lime); color: var(--night); }
@@ -156,7 +158,7 @@ import Club from '../layouts/Club.astro';
   @media (max-width: 760px) {
     .rd-stage { aspect-ratio: 3 / 4; min-height: 0; }
     .rd-card { position: static; width: 100%; margin-top: 14px; box-shadow: none; }
-    .rd-bug .lbl { max-width: 110px; font-size: .64rem; }
+    .rd-bug .lbl { max-width: 130px; font-size: .66rem; }
   }
   @media (prefers-reduced-motion: reduce) { .rd-stage::after { animation: none; } }
 </style>
@@ -196,8 +198,8 @@ import Club from '../layouts/Club.astro';
   }
 
   const width = (t: Topic) => {
-    const base = innerWidth < 760 ? 46 : 64;
-    return Math.min(base + t.votes * 8, base * 2.2);
+    const base = innerWidth < 760 ? 38 : 52;
+    return Math.min(base + t.votes * 7, base * 2.2);
   };
 
   function build() {
@@ -222,6 +224,7 @@ import Club from '../layouts/Club.astro';
       return { t, el, w, hidden: false, x: W / 2 + Math.cos(a) * W * r, y: H / 2 + Math.sin(a) * H * r, vx: (Math.random() - 0.5) * 0.6, vy: (Math.random() - 0.5) * 0.6 };
     });
     $('rd-loading').hidden = true;
+    markTop();
     applyFilter();
     place();
   }
@@ -251,13 +254,13 @@ import Club from '../layouts/Club.astro';
       // popular bugs drift toward the center, but never onto the logo
       const pull = 0.00006 + (f.t.votes / maxVotes) * 0.00025;
       const dx = cx - f.x, dy = cy - f.y, d = Math.hypot(dx, dy) || 1;
-      const keep = Math.min(W, H) * 0.16;
+      const keep = Math.min(W, H) * 0.22;
       const toward = d > keep ? pull : -0.0012;
       f.vx += dx * toward * dt; f.vy += dy * toward * dt;
       // keep some distance from each other
       for (const o of flyers) {
         if (o === f || o.hidden) continue;
-        const ex = f.x - o.x, ey = f.y - o.y, e2 = ex * ex + ey * ey, min = (f.w + o.w) * 0.75;
+        const ex = f.x - o.x, ey = f.y - o.y, e2 = ex * ex + ey * ey, min = (f.w + o.w) * 0.85;
         if (e2 < min * min && e2 > 0.01) { const e = Math.sqrt(e2); f.vx += (ex / e) * 0.05 * dt; f.vy += (ey / e) * 0.05 * dt; }
       }
       // walls
@@ -270,6 +273,11 @@ import Club from '../layouts/Club.astro';
       f.x += f.vx * dt; f.y += f.vy * dt;
     }
     place();
+  }
+
+  function markTop() {
+    const top = new Set([...topics].filter((t) => t.votes > 0).sort((a, b) => b.votes - a.votes).slice(0, 6));
+    for (const f of flyers) f.el.classList.toggle('top', top.has(f.t));
   }
 
   function applyFilter() {
@@ -345,13 +353,13 @@ import Club from '../layouts/Club.astro';
     }
     const was = t.voted;
     t.voted = !was; t.votes += was ? -1 : 1;
-    updateVotes(); renderList(); resize(t);
+    updateVotes(); renderList(); resize(t); markTop();
     const res = was
       ? await supabase.from('topic_votes').delete().eq('topic_id', t.id).eq('user_id', userId)
       : await supabase.from('topic_votes').insert({ topic_id: t.id });
     if (res.error) {
       t.voted = was; t.votes += was ? 1 : -1;
-      updateVotes(); renderList(); resize(t);
+      updateVotes(); renderList(); resize(t); markTop();
       $('rd-note').textContent = 'That did not work. Try again.';
       return;
     }
