@@ -19,7 +19,15 @@
   .ck-btns { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; }
   .ck-btns .pill { padding: 8px 14px; font-size: .85rem; }
   @keyframes ck-in { from { transform: translateY(30px) rotate(3deg); opacity: 0; } }
-  @media (max-width: 560px) { .ck { bottom: 70px; } }
+  @media (max-width: 560px) {
+    .ck { right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); width: calc(100vw - 24px); padding: 14px; border-radius: 16px; }
+    .ck p { font-size: .8rem; line-height: 1.45; }
+    .ck p b { font-size: .92rem; }
+    .ck-btns { display: grid; grid-template-columns: 1fr; }
+    .ck-btns [data-ck="also"] { display: none; }
+    .ck-btns .pill { width: 100%; justify-content: center; }
+    body:has(.ck:not([hidden])) .rm-btn { opacity: 0; pointer-events: none; }
+  }
 </style>
 
 <script>
