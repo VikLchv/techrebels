@@ -1,5 +1,5 @@
 ---
-// Rebel Radar: topics and types of people we want at Rebel Sessions, as flying bugs.
+// Rebel Radar: topics and types of people we want at Rebel Sessions, as flying IT objects.
 import Club from '../layouts/Club.astro';
 ---
 <Club title="Rebel Radar · techRebels" description="Topics and people we want at Rebel Sessions. Vote, tip a guest, suggest a topic.">
@@ -7,7 +7,7 @@ import Club from '../layouts/Club.astro';
     <div class="head">
       <p class="eyebrow">Rebel Radar</p>
       <h1 class="h2">What should we talk about?</h1>
-      <p class="lede">Every bug carries a topic or a kind of person we want at Rebel Sessions. Catch one to vote or tip a guest. The more votes, the bigger the bug and the closer it flies to the center.</p>
+      <p class="lede">Every object on the radar carries a topic or a kind of person we want at Rebel Sessions. Catch one to vote or tip a guest. The more votes, the bigger it gets and the closer it flies to the center.</p>
     </div>
 
     <div class="rd-filters" role="group" aria-label="Filter the radar">
@@ -23,7 +23,7 @@ import Club from '../layouts/Club.astro';
     <div class="rd-wrap">
       <div class="rd-stage" id="rd-stage" aria-hidden="true">
         <p class="rd-center"><span>tech</span><span>Rebels</span></p>
-        <p class="rd-loading" id="rd-loading">Scanning for bugs...</p>
+        <p class="rd-loading" id="rd-loading">Scanning for signals...</p>
       </div>
 
       <aside class="rd-card" id="rd-card" hidden aria-live="polite">
@@ -106,7 +106,7 @@ import Club from '../layouts/Club.astro';
   .rd-loading { position: absolute; left: 50%; bottom: 8%; transform: translateX(-50%); margin: 0; font: 500 .85rem var(--f-mono); color: var(--muted); }
 
   .rd-bug { position: absolute; left: 0; top: 0; display: grid; justify-items: center; gap: 4px; cursor: pointer; border: 0; padding: 0; background: none; color: inherit; will-change: transform; transition: opacity .3s; z-index: 2; }
-  .rd-bug svg { display: block; width: var(--w, 70px); height: auto; transition: transform .2s; }
+  .rd-bug svg { display: block; width: var(--w, 70px); height: auto; transform: rotate(var(--tilt, 0deg)); transition: transform .2s; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .45)); }
   .rd-bug:hover svg, .rd-bug:focus-visible svg { transform: scale(1.12) rotate(-6deg); }
   .rd-bug .lbl { position: absolute; left: 50%; top: 100%; transform: translate(-50%, 4px); width: max-content; max-width: 180px; text-align: center; font: 700 .74rem/1.15 "Satoshi", system-ui, sans-serif; color: var(--bone); background: rgba(11, 15, 13, .88); padding: 5px 10px; border-radius: 10px; opacity: 0; transition: opacity .15s; pointer-events: none; z-index: 5; }
   .rd-bug:hover .lbl, .rd-bug:focus-visible .lbl, .rd-bug.sel .lbl, .rd-bug.top .lbl { opacity: 1; }
@@ -175,7 +175,7 @@ import Club from '../layouts/Club.astro';
 
 <script>
   import { supabase } from '../lib/supabase';
-  import { bugSVG, OPTS } from '../lib/bug/render.js';
+  import { radarObjectSVG } from '../lib/radar/objects';
   import { hash } from '../lib/bug/card';
   import { track } from '../lib/track';
 
@@ -185,7 +185,6 @@ import Club from '../layouts/Club.astro';
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   const stage = $('rd-stage');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const SHELL = { bugs: 'purple', rebels: 'green', lunapark: 'lime' } as const;
   const PILLAR_COLOR = { bugs: 'var(--purple)', rebels: 'var(--green)', lunapark: 'var(--lime)' } as const;
   const PILLAR_NAME = { bugs: 'Bugs', rebels: 'Rebels', lunapark: 'Lunapark' } as const;
   const TILE = { bugs: 'var(--mint)', rebels: 'var(--pink)', lunapark: 'var(--purple)' } as const;
@@ -196,19 +195,11 @@ import Club from '../layouts/Club.astro';
   let current: Topic | null = null;
   let filter = 'all';
 
-  // a stable, unique-looking bug per topic
-  function bugFor(t: Topic) {
-    const h = hash(t.id);
-    const pick = (k: string, salt: number) => { const items = OPTS[k].items; return items[(h >>> salt) % items.length][0]; };
-    return {
-      role: 'curious', shape: pick('shape', 1), pose: pick('pose', 3), attitude: pick('attitude', 5), pattern: pick('pattern', 7),
-      eyes: pick('eyes', 9), mouth: pick('mouth', 11), antennae: pick('antennae', 13), hat: (h >>> 15) % 3 === 0 ? pick('hat', 17) : 'none',
-      shell: t.kind === 'person' ? 'pink' : SHELL[t.pillar], accent: 'auto',
-    };
-  }
+  // a stable IT object per topic, showing its votes
+  const objectFor = (t: Topic) => radarObjectSVG(t, hash(t.id));
 
   const width = (t: Topic) => {
-    const base = innerWidth < 760 ? 38 : 52;
+    const base = innerWidth < 760 ? 46 : 66;
     return Math.min(base + t.votes * 7, base * 2.2);
   };
 
@@ -219,7 +210,8 @@ import Club from '../layouts/Club.astro';
       const el = document.createElement('button');
       el.type = 'button';
       el.className = `rd-bug ${t.kind}`;
-      el.innerHTML = bugSVG(bugFor(t), 120);
+      el.innerHTML = objectFor(t);
+      el.style.setProperty('--tilt', `${(hash(t.id) % 15) - 7}deg`);
       const lbl = document.createElement('span');
       lbl.className = 'lbl';
       lbl.textContent = t.title; // text only
@@ -329,7 +321,7 @@ import Club from '../layouts/Club.astro';
     flyers.forEach((f) => f.el.classList.toggle('sel', f.t === t));
     const bug = $('rd-card-bug');
     bug.style.background = TILE[t.pillar];
-    bug.innerHTML = bugSVG(bugFor(t), 110);
+    bug.innerHTML = objectFor(t);
     $('rd-meta').textContent = `${t.kind === 'person' ? 'Kind of person' : 'Topic'} · ${PILLAR_NAME[t.pillar]}${t.category && t.category !== 'People' && t.category !== PILLAR_NAME[t.pillar] ? ' · ' + t.category : ''}`;
     $('rd-title').textContent = t.title;
     $('rd-desc').textContent = t.description ?? '';
@@ -382,6 +374,9 @@ import Club from '../layouts/Club.astro';
     f.w = width(t);
     f.el.style.setProperty('--w', `${f.w}px`);
     f.el.setAttribute('aria-label', `${t.title}. ${t.votes} votes`);
+    f.el.querySelector('svg')?.remove();
+    f.el.insertAdjacentHTML('afterbegin', objectFor(t));
+    if (current === t) $('rd-card-bug').innerHTML = objectFor(t);
   }
 
   // ---- card actions ----
