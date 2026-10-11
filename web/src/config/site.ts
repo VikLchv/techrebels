@@ -2,7 +2,7 @@ export { links, session, plausibleDomain, crew, contactEmail } from './links';
 
 export const site = {
   name: 'techRebels',
-  title: "techRebels · Rebels don't do safe mode.",
+  title: 'tech rebels',
   description: 'A tech lunapark in Prague for curious people in tech. Real projects, real bugs, zero status games.',
 
   claims: {
