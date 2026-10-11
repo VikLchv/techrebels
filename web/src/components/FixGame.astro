@@ -1,0 +1,344 @@
+---
+// Fix or Won't Fix: 12 tickets, 3 seconds each. Swipe, click or use the arrow keys.
+// Points for agreeing with the swarm (plus speed), a bonus for bold fast minority calls.
+---
+<div class="fx-modal" id="fx-modal" hidden role="dialog" aria-modal="true" aria-labelledby="fx-title">
+  <div class="fx-shell">
+    <button class="game-close" id="fx-close" type="button" aria-label="Close Fix or Won't Fix">×</button>
+    <div class="fx-marquee"><span>NOW PLAYING</span><h2 id="fx-title">FIX OR WON'T FIX</h2><p>There is no right answer. There is only the swarm.</p></div>
+
+    <div class="fx-hud" aria-live="polite">
+      <div><span>Ticket</span><b id="fx-count">0/12</b></div>
+      <div><span>Score</span><b id="fx-score">0</b></div>
+      <div><span>Lives</span><b id="fx-lives">♥ ♥ ♥</b></div>
+    </div>
+
+    <div class="fx-stage" id="fx-stage">
+      <div class="fx-intro" id="fx-intro">
+        <p class="eyebrow">Triage time</p>
+        <h3>12 tickets. 3 seconds each.</h3>
+        <p><b class="fx-k">←</b> or swipe left: <b class="fx-no-t">WON'T FIX</b>. <b class="fx-k">→</b> or swipe right: <b class="fx-yes-t">FIX</b>.<br />Agree with the swarm to score. Too slow and the ticket escalates to management.</p>
+        <button class="pill pill-pink" id="fx-start" type="button">Open the backlog →</button>
+      </div>
+
+      <div class="fx-play" id="fx-play" hidden>
+        <div class="fx-timer"><i id="fx-timer"></i></div>
+        <article class="fx-ticket" id="fx-ticket">
+          <p class="fx-id" id="fx-id">TICKET TR-0000</p>
+          <p class="fx-body" id="fx-body"></p>
+          <p class="fx-rep">Reported by: <span id="fx-rep"></span></p>
+          <span class="fx-stamp" id="fx-stamp" aria-hidden="true"></span>
+        </article>
+        <p class="fx-flash" id="fx-flash" role="status"></p>
+        <div class="fx-btns">
+          <button type="button" class="fx-btn no" id="fx-no">← WON'T FIX</button>
+          <button type="button" class="fx-btn yes" id="fx-yes">FIX →</button>
+        </div>
+      </div>
+
+      <div class="fx-end" id="fx-end" hidden>
+        <div class="fx-card">
+          <div class="fx-bug" id="fx-bug"></div>
+          <div>
+            <p class="eyebrow">Your triage profile</p>
+            <h3 id="fx-profile">Product Person</h3>
+            <p class="fx-quip" id="fx-quip"></p>
+            <p class="fx-points"><b id="fx-final">0</b> points</p>
+            <p class="fx-stats" id="fx-stats"></p>
+          </div>
+        </div>
+        <p class="fx-save" id="fx-save" role="status"></p>
+        <div class="fx-actions">
+          <button class="pill pill-pink" id="fx-again" type="button">Another backlog →</button>
+          <button class="pill pill-ghost" id="fx-suggest-open" type="button">Submit a ticket</button>
+        </div>
+        <form class="fx-suggest" id="fx-suggest" hidden novalidate>
+          <label>The ticket<input id="fx-s-body" maxlength="160" placeholder="The CEO discovered emojis. All of them." /></label>
+          <label>Reported by<input id="fx-s-rep" maxlength="60" placeholder="Your aunt, via Facebook" /></label>
+          <button class="pill pill-lime" type="submit">File it</button>
+        </form>
+        <div class="fx-top"><p class="eyebrow">Top fixers this week</p><ol id="fx-top"></ol></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .fx-modal { position: fixed; inset: 0; z-index: 460; display: grid; place-items: center; padding: clamp(8px, 2vw, 24px); background: rgba(5, 3, 10, .9); backdrop-filter: blur(14px); }
+  .fx-modal[hidden] { display: none; }
+  .fx-shell { position: relative; width: min(760px, 97vw); max-height: 96dvh; overflow: auto; border-radius: 26px; background: #17101F; border: 2px solid rgba(61, 219, 154, .35); box-shadow: 8px 8px 0 var(--mint); color: var(--bone); }
+  .fx-marquee { padding: 18px 60px 14px; text-align: center; background: var(--mint); color: var(--night); border-bottom: 5px solid #2A1416; }
+  .fx-marquee span { font: 700 .72rem var(--f-mono); letter-spacing: .16em; }
+  .fx-marquee h2 { margin: 2px 0 0; font: 900 clamp(1.6rem, 4vw, 2.4rem)/1 var(--f-display); letter-spacing: -.02em; }
+  .fx-marquee p { margin: 6px 0 0; font-weight: 700; font-size: .9rem; }
+  .fx-hud { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(237, 231, 220, .08); }
+  .fx-hud div { display: grid; justify-items: center; padding: 10px; background: #17101F; }
+  .fx-hud span { font: 500 .66rem var(--f-mono); text-transform: uppercase; letter-spacing: .12em; color: #A99FB2; }
+  .fx-hud b { font: 800 1.25rem var(--f-mono); color: var(--lime); }
+  #fx-lives { color: var(--pink); }
+  .fx-stage { padding: clamp(18px, 4vw, 34px); min-height: 380px; display: grid; overflow-x: hidden; }
+  .fx-intro, .fx-end { display: grid; gap: 14px; align-content: center; justify-items: center; text-align: center; }
+  .fx-intro[hidden], .fx-play[hidden], .fx-end[hidden], .fx-suggest[hidden] { display: none; }
+  .fx-intro h3 { margin: 0; font: 850 clamp(1.6rem, 4vw, 2.3rem)/1 var(--f-display); color: var(--bone); }
+  .fx-intro p { margin: 0; max-width: 46ch; color: #C9BFCE; line-height: 1.6; }
+  .fx-k { display: inline-block; padding: 0 7px; border-radius: 6px; background: rgba(237, 231, 220, .12); font-family: var(--f-mono); }
+  .fx-yes-t { color: var(--mint); } .fx-no-t { color: var(--pink); }
+
+  .fx-play { display: grid; gap: 14px; align-content: start; }
+  .fx-timer { height: 8px; border-radius: 999px; background: rgba(237, 231, 220, .1); overflow: hidden; }
+  .fx-timer i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--pink), var(--lime)); transform-origin: left; }
+  .fx-ticket { position: relative; display: grid; gap: 10px; min-height: 190px; align-content: center; padding: 24px 22px; border-radius: 18px; background: var(--bone); color: var(--night); box-shadow: 0 18px 40px rgba(0, 0, 0, .4); touch-action: pan-y; user-select: none; cursor: grab; transition: transform .25s cubic-bezier(.3, 1.4, .5, 1), opacity .25s; }
+  .fx-ticket.dragging { transition: none; cursor: grabbing; }
+  .fx-ticket.out-left { transform: translateX(-120%) rotate(-14deg); opacity: 0; }
+  .fx-ticket.out-right { transform: translateX(120%) rotate(14deg); opacity: 0; }
+  .fx-ticket.in { animation: fx-in .3s cubic-bezier(.3, 1.4, .5, 1); }
+  @keyframes fx-in { from { transform: translateY(18px) scale(.96); opacity: 0; } }
+  .fx-id { margin: 0; font: 700 .72rem var(--f-mono); letter-spacing: .1em; color: #6B5A72; }
+  .fx-body { margin: 0; font: 800 clamp(1.15rem, 3vw, 1.55rem)/1.25 var(--f-display); letter-spacing: -.01em; }
+  .fx-rep { margin: 0; font: 500 .82rem var(--f-mono); color: #5A4E62; }
+  .fx-rep span { font-weight: 700; color: #7A304F; }
+  .fx-stamp { position: absolute; right: 18px; top: 16px; padding: 6px 12px; border: 3px solid currentColor; border-radius: 8px; font: 900 1.1rem var(--f-mono); letter-spacing: .06em; transform: rotate(-10deg) scale(.6); opacity: 0; transition: transform .2s, opacity .2s; }
+  .fx-stamp.on { opacity: 1; transform: rotate(-10deg) scale(1); }
+  .fx-stamp.fix { color: #0B7A52; } .fx-stamp.nope { color: #C23F8E; }
+  .fx-flash { margin: 0; min-height: 1.4em; text-align: center; font: 700 .9rem var(--f-mono); color: var(--lime); }
+  .fx-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .fx-btn { padding: 16px 10px; border-radius: 14px; border: 0; font: 900 1rem var(--f-mono); letter-spacing: .06em; cursor: pointer; color: var(--night); transition: transform .12s; }
+  .fx-btn:active { transform: scale(.96); }
+  .fx-btn.no { background: var(--pink); } .fx-btn.yes { background: var(--mint); }
+  .fx-btn:focus-visible { outline: 3px solid var(--lime); outline-offset: 3px; }
+
+  .fx-card { display: grid; grid-template-columns: 150px 1fr; gap: 20px; align-items: center; width: 100%; padding: 20px; border-radius: 20px; background: var(--purple); text-align: left; box-shadow: 6px 6px 0 var(--lime); }
+  .fx-bug svg { display: block; width: 100%; height: auto; }
+  .fx-card h3 { margin: 4px 0 6px; font: 900 clamp(1.5rem, 4vw, 2.2rem)/1 var(--f-display); color: var(--lime); }
+  .fx-quip { margin: 0; color: var(--bone); }
+  .fx-points { margin: 10px 0 0; color: #C9BFCE; } .fx-points b { font: 900 1.6rem var(--f-display); color: var(--pink); }
+  .fx-stats { margin: 4px 0 0; font: 500 .74rem var(--f-mono); color: #C9BFCE; }
+  .fx-save { margin: 0; min-height: 1.1em; font: 500 .8rem var(--f-mono); color: var(--mint); }
+  .fx-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .fx-suggest { display: grid; gap: 10px; width: 100%; text-align: left; }
+  .fx-suggest label { display: grid; gap: 5px; font-weight: 700; font-size: .85rem; }
+  .fx-suggest input { font: 500 .95rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night); border: 1.5px solid rgba(237, 231, 220, .2); border-radius: 12px; padding: 10px 12px; }
+  .fx-suggest .pill { justify-self: start; }
+  .fx-top { width: 100%; text-align: left; }
+  .fx-top ol { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+  .fx-top li { display: grid; grid-template-columns: 26px 34px 1fr auto; gap: 10px; align-items: center; padding: 6px 10px; border-radius: 10px; background: rgba(237, 231, 220, .05); font-size: .85rem; }
+  .fx-top li.me { outline: 1.5px solid var(--lime); }
+  .fx-top li svg { width: 34px; height: auto; display: block; }
+  .fx-top small { font: 500 .7rem var(--f-mono); color: #A99FB2; }
+  @media (max-width: 560px) { .fx-card { grid-template-columns: 1fr; justify-items: center; text-align: center; } .fx-card .fx-bug { width: 130px; } }
+  @media (prefers-reduced-motion: reduce) { .fx-ticket, .fx-ticket.in { transition: none; animation: none; } }
+</style>
+
+<script>
+  import { supabase } from '../lib/supabase';
+  import { bugSVG } from '../lib/bug/render.js';
+  import { track } from '../lib/track';
+
+  type Ticket = { id: string; body: string; reporter: string; fixes: number; votes: number };
+  type Answer = { fix: boolean | null; ms: number; agreed: boolean | null };
+  const ROUND = 12, LIMIT_MS = 3000;
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+
+  let deck: Ticket[] = [], idx = 0, score = 0, lives = 3, answers: Answer[] = [];
+  let shownAt = 0, raf = 0, locked = false, myBug: Record<string, unknown> | null = null;
+
+  const ticketNo = (id: string) => { let h = 0; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0; return `TR-${String(1000 + (h % 9000))}`; };
+
+  const profiles = (a: Answer[]) => {
+    const answered = a.filter((x) => x.fix !== null);
+    const timeouts = a.length - answered.length;
+    const fixRate = answered.length ? answered.filter((x) => x.fix).length / answered.length : 0;
+    const avg = answered.length ? answered.reduce((s, x) => s + x.ms, 0) / answered.length : LIMIT_MS;
+    const judged = answered.filter((x) => x.agreed !== null);
+    const agree = judged.length ? judged.filter((x) => x.agreed).length / judged.length : null;
+    if (timeouts >= 3) return ['Out of Office', 'Escalated more tickets than you touched. Middle management is calling.'];
+    if (avg < 1100) return ['Chaos Agent', 'Decided before finishing the sentence. Respect. Also, concern.'];
+    if (fixRate >= 0.8) return ['Firefighter', 'You would fix the coffee machine during a prod outage. Then the outage. Then the coffee machine again.'];
+    if (fixRate <= 0.2) return ["Professional Won't-Fixer", 'Closing tickets as "works on my machine" since 1998.'];
+    if (agree !== null && judged.length >= 4 && agree >= 0.75) return ['Hive Mind', 'You and the swarm share one brain cell. Luckily it is a good one.'];
+    if (agree !== null && judged.length >= 4 && agree <= 0.35) return ['Certified Contrarian', 'The swarm went left. You went to a different building.'];
+    return ['Product Person', 'It depends. It always depends.'];
+  };
+
+  function hud() {
+    $('fx-count').textContent = `${Math.min(idx + 1, deck.length)}/${deck.length}`;
+    $('fx-score').textContent = String(score);
+    $('fx-lives').textContent = `${'♥ '.repeat(lives)}${'♡ '.repeat(3 - lives)}`.trim();
+  }
+
+  function show() {
+    const t = deck[idx];
+    const card = $('fx-ticket');
+    card.className = 'fx-ticket in';
+    card.style.transform = '';
+    $('fx-stamp').className = 'fx-stamp';
+    $('fx-id').textContent = `TICKET ${ticketNo(t.id)} · PRIORITY: ${['WHATEVER', 'LOW', 'HIGH', 'CEO SAW IT', 'ON FIRE'][idx % 5]}`;
+    $('fx-body').textContent = t.body;
+    $('fx-rep').textContent = t.reporter;
+    hud();
+    locked = false;
+    shownAt = performance.now();
+    cancelAnimationFrame(raf);
+    const tick = () => {
+      const left = 1 - (performance.now() - shownAt) / LIMIT_MS;
+      $('fx-timer').style.transform = `scaleX(${Math.max(0, left)})`;
+      if (left <= 0) { decide(null); return; }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+  }
+
+  function decide(fix: boolean | null) {
+    if (locked) return;
+    locked = true;
+    cancelAnimationFrame(raf);
+    const t = deck[idx];
+    const ms = Math.round(performance.now() - shownAt);
+    let gained = 0, msg = '', agreed: boolean | null = null;
+    if (fix === null) {
+      lives--;
+      msg = 'Too slow. Ticket escalated to management. -1 ♥';
+    } else {
+      const speed = Math.round(50 * Math.max(0, 1 - ms / LIMIT_MS));
+      const total = t.votes, share = total ? t.fixes / total : 0.5;
+      const mine = fix ? share : 1 - share;
+      if (total < 5) { gained = 60 + speed; msg = `Fresh ticket, the swarm has no opinion yet. +${gained}`; }
+      else if (mine >= 0.5) { agreed = true; gained = 100 + speed; msg = `${Math.round(mine * 100)} % of rebels agree. +${gained}`; }
+      else if (mine < 0.2 && ms < 1500) { agreed = false; gained = 150; msg = `Only ${Math.round(mine * 100)} % agree. Bold. Rebel move +150`; }
+      else { agreed = false; msg = `Only ${Math.round(mine * 100)} % agree. The swarm disagrees. +0`; }
+      score += gained;
+      const stamp = $('fx-stamp');
+      stamp.textContent = fix ? 'FIXED' : "WON'T FIX";
+      stamp.className = `fx-stamp on ${fix ? 'fix' : 'nope'}`;
+      $('fx-ticket').classList.add(fix ? 'out-right' : 'out-left');
+      if (supabase) supabase.rpc('fix_vote', { p_ticket: t.id, p_fix: fix, p_ms: ms });
+    }
+    answers.push({ fix, ms, agreed });
+    $('fx-flash').textContent = msg;
+    hud();
+    setTimeout(() => {
+      idx++;
+      if (lives <= 0 || idx >= deck.length) end(); else show();
+    }, fix === null ? 1100 : 650);
+  }
+
+  async function loadTop() {
+    if (!supabase) return;
+    const { data } = await supabase.rpc('fix_leaderboard', { p_limit: 8 });
+    const rows = (data ?? []) as { rank: number; score: number; profile: string | null; bug_number: number; bug_name: string; bug_config: Record<string, unknown>; is_me: boolean }[];
+    const list = $('fx-top');
+    if (!rows.length) { list.innerHTML = '<li><span></span><span></span><span>Nobody yet. Be the first fixer.</span><span></span></li>'; return; }
+    list.replaceChildren(...rows.map((r) => {
+      const li = document.createElement('li'); if (r.is_me) li.className = 'me';
+      const rank = document.createElement('b'); rank.textContent = `#${r.rank}`;
+      const av = document.createElement('span'); av.innerHTML = bugSVG(r.bug_config as never, 60);
+      const who = document.createElement('span'); who.textContent = `${r.bug_name}`;
+      const sm = document.createElement('small'); sm.textContent = ` ${r.profile ?? ''}`; who.append(sm);
+      const pts = document.createElement('b'); pts.textContent = String(r.score);
+      li.append(rank, av, who, pts);
+      return li;
+    }));
+  }
+
+  async function end() {
+    $('fx-play').hidden = true;
+    $('fx-end').hidden = false;
+    const [title, quip] = profiles(answers);
+    const answered = answers.filter((a) => a.fix !== null);
+    const fixed = answered.filter((a) => a.fix).length;
+    const avg = answered.length ? answered.reduce((s, a) => s + a.ms, 0) / answered.length / 1000 : 0;
+    const judged = answered.filter((a) => a.agreed !== null);
+    $('fx-profile').textContent = title;
+    $('fx-quip').textContent = quip;
+    $('fx-final').textContent = String(score);
+    $('fx-stats').textContent = `Fixed ${fixed} · Won't-fixed ${answered.length - fixed} · Escalated ${answers.length - answered.length} · ${avg.toFixed(1)} s per ticket${judged.length ? ` · agreed with the swarm ${Math.round(judged.filter((a) => a.agreed).length / judged.length * 100)} %` : ''}`;
+    $('fx-bug').innerHTML = myBug ? bugSVG(myBug as never, 220) : '';
+    track('fix_or_wont_end', title);
+    if (supabase) {
+      $('fx-save').textContent = 'Filing your damage report…';
+      const { error } = await supabase.rpc('submit_fix_run', { p_score: score, p_profile: title });
+      $('fx-save').textContent = error ? (error.message.includes('bug') ? 'Build a bug to get on the board.' : 'Score stayed local. Is the latest migration installed?') : 'Saved to Top Fixers ✓';
+    }
+    loadTop();
+  }
+
+  async function start() {
+    if (!supabase) return;
+    $('fx-intro').hidden = true; $('fx-end').hidden = true; $('fx-play').hidden = false; $('fx-suggest').hidden = true;
+    $('fx-flash').textContent = 'Shuffling the backlog…';
+    $('fx-body').textContent = '';
+    // local preview without the database: /inside/lunapark?fxdemo
+    const demo = import.meta.env.DEV && new URLSearchParams(location.search).has('fxdemo')
+      ? [['Prod is down. It is Friday, 16:58.', 'Monitoring, screaming'], ['Dad wants the WiFi password back to password123.', 'Your dad'], ['The intern says the dashboard gives off beige vibes.', 'Gen Z intern, no cap']]
+          .map(([body, reporter], i) => ({ id: `demo-${i}`, body, reporter, fixes: [7, 2, 5][i], votes: [9, 10, 3][i] }))
+      : null;
+    const { data, error } = demo ? { data: demo, error: null } : await supabase.rpc('fix_round', { p_limit: ROUND });
+    if (error || !data?.length) { $('fx-flash').textContent = 'The backlog is empty. Install the Fix or Won\'t Fix migration.'; return; }
+    deck = (data as Ticket[]).map((t) => ({ ...t, fixes: Number(t.fixes), votes: Number(t.votes) }));
+    idx = 0; score = 0; lives = 3; answers = [];
+    $('fx-flash').textContent = '';
+    track('fix_or_wont_start');
+    show();
+  }
+
+  function close() {
+    cancelAnimationFrame(raf);
+    $('fx-modal').hidden = true;
+    document.body.classList.remove('game-open');
+  }
+
+  async function open() {
+    $('fx-modal').hidden = false;
+    document.body.classList.add('game-open');
+    $('fx-intro').hidden = false; $('fx-play').hidden = true; $('fx-end').hidden = true;
+    requestAnimationFrame(() => $<HTMLButtonElement>('fx-start').focus());
+    if (supabase && !myBug) {
+      const { data } = await supabase.auth.getUser();
+      if (data.user) { const { data: bug } = await supabase.from('bugs').select('config').eq('user_id', data.user.id).maybeSingle(); myBug = bug?.config ?? null; }
+    }
+  }
+
+  // swipe the ticket left or right
+  function setupSwipe() {
+    const card = $('fx-ticket');
+    let x0 = 0, dragging = false;
+    card.addEventListener('pointerdown', (e) => { if (locked) return; dragging = true; x0 = e.clientX; card.classList.add('dragging'); card.setPointerCapture(e.pointerId); });
+    card.addEventListener('pointermove', (e) => { if (!dragging) return; const dx = e.clientX - x0; card.style.transform = `translateX(${dx}px) rotate(${dx / 18}deg)`; });
+    const up = (e: PointerEvent) => {
+      if (!dragging) return; dragging = false; card.classList.remove('dragging');
+      const dx = e.clientX - x0;
+      if (Math.abs(dx) > 80) { card.style.transform = ''; decide(dx > 0); } else card.style.transform = '';
+    };
+    card.addEventListener('pointerup', up); card.addEventListener('pointercancel', up);
+  }
+
+  function setupFixGame() {
+    if (!document.getElementById('fx-modal')) return;
+    document.getElementById('open-fix')?.addEventListener('click', open);
+    $('fx-close').addEventListener('click', close);
+    $('fx-start').addEventListener('click', start);
+    $('fx-again').addEventListener('click', start);
+    $('fx-yes').addEventListener('click', () => decide(true));
+    $('fx-no').addEventListener('click', () => decide(false));
+    $('fx-suggest-open').addEventListener('click', () => { $('fx-suggest').hidden = false; $<HTMLInputElement>('fx-s-body').focus(); });
+    $('fx-suggest').addEventListener('submit', async (e) => {
+      e.preventDefault(); if (!supabase) return;
+      const body = $<HTMLInputElement>('fx-s-body').value.trim();
+      if (body.length < 8) { $('fx-save').textContent = 'A ticket needs a bit more drama.'; return; }
+      const { error } = await supabase.rpc('submit_fix_ticket', { p_body: body, p_reporter: $<HTMLInputElement>('fx-s-rep').value.trim() });
+      $('fx-save').textContent = error ? (error.message.includes('members') ? 'Tickets are for approved members.' : error.message.includes('five') ? 'Five tickets a day. The backlog thanks you.' : 'The ticket bounced. Try again.') : 'Filed. The crew triages it, then it joins the backlog.';
+      if (!error) { ($('fx-suggest') as HTMLFormElement).reset(); track('fix_ticket_submitted'); }
+    });
+    setupSwipe();
+  }
+
+  document.addEventListener('keydown', (e) => {
+    const modal = document.getElementById('fx-modal');
+    if (!modal || modal.hidden) return;
+    if (e.key === 'Escape') { close(); return; }
+    if ($('fx-play').hidden || locked) return;
+    if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') { e.preventDefault(); decide(true); }
+    if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') { e.preventDefault(); decide(false); }
+  });
+  document.addEventListener('astro:page-load', setupFixGame);
+</script>
