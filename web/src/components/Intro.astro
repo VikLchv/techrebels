@@ -14,11 +14,44 @@
 <div id="intro" role="dialog" aria-modal="true" aria-labelledby="bk-title">
   <div class="bk-noise" aria-hidden="true"></div>
 
+  <!-- fake boot that freezes at 99% and crashes -->
+  <div class="bk-boot" id="bk-boot" aria-hidden="true">
+    <p class="bk-boot-mark"><span>tech</span><span>Rebels</span></p>
+    <div class="bk-boot-bar"><i id="bk-boot-fill"></i></div>
+    <p class="bk-boot-txt" id="bk-boot-txt">loading techRebels... 0%</p>
+  </div>
+
+  <!-- the stream of errors behind everything -->
+  <div class="bk-stream" id="bk-stream" aria-hidden="true"><div class="bk-stream-in" id="bk-stream-in"></div></div>
+
+  <!-- unstyled HTML, as if the stylesheet failed -->
+  <div class="bk-raw" aria-hidden="true">
+    <div class="bk-raw-in">
+      <h1>techRebels</h1>
+      <p>Loading stylesheet <a href="#">/styles/club.css</a> ... <b>failed (404)</b></p>
+      <ul><li><a href="#">Manifesto</a></li><li><a href="#">Sessions</a></li><li><a href="#">Bug Lab</a></li><li><a href="#">The Drop</a></li></ul>
+      <button type="button" tabindex="-1">Join the swarm</button>
+    </div>
+  </div>
+
+  <!-- broken images -->
+  <div class="bk-img i1" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M3 3h18v18H3z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 16l5-5 4 4 3-3 6 6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M14 3l-3 7 4 2-3 9" fill="none" stroke="#F4A5D4" stroke-width="2"/></svg><span>hero-bug.png</span></div>
+  <div class="bk-img i2" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M3 3h18v18H3z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 16l5-5 4 4 3-3 6 6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M14 3l-3 7 4 2-3 9" fill="none" stroke="#F4A5D4" stroke-width="2"/></svg><span>founders.webp</span></div>
+
+  <!-- the nav fell off -->
+  <div class="bk-fallen" aria-hidden="true">
+    <span style="--r:-8deg;--x:0px">Manifesto</span><span style="--r:12deg;--x:6px">Sessions</span><span style="--r:-3deg;--x:-4px">Radar</span><span style="--r:24deg;--x:10px">Bug Lab</span><span style="--r:-15deg;--x:2px">Crew</span>
+  </div>
+
+  <!-- corruption: tearing bands and dead pixels -->
+  <div class="bk-tears" id="bk-tears" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="bk-pixels" id="bk-pixels" aria-hidden="true"></div>
+
   <!-- the "broken" homepage underneath -->
   <div class="bk-page" aria-hidden="true">
     <p class="bk-eyebrow">A COMMUNITY FOR CURIOUS PEOPLE IN TECH · PRAGUE</p>
     <p class="bk-word" data-text="tech">tech</p>
-    <p class="bk-word bk-word2" data-text="Rebels">Rebels</p>
+    <p class="bk-word bk-word2" data-text="Rebels" id="bk-word2">Rebels</p>
     <p class="bk-claim">Rebels don't do <span>s̷a̴f̶e̵ ̷m̸o̵d̷e̶</span>.</p>
   </div>
 
@@ -180,7 +213,57 @@
   #intro.tear.go .slices i:nth-child(odd) { transform: translateX(-105%); }
   #intro.tear.go .slices i:nth-child(even) { transform: translateX(105%); }
 
+  /* boot */
+  .bk-boot { position: absolute; inset: 0; z-index: 40; background: var(--night); display: grid; place-content: center; justify-items: center; gap: 18px; }
+  .bk-boot[hidden] { display: none; }
+  .bk-boot-mark { margin: 0; font: 800 clamp(2.4rem, 7vw, 4.5rem)/.8 var(--f-display); letter-spacing: -.05em; color: var(--pink); }
+  .bk-boot-mark span { display: block; }
+  .bk-boot-bar { width: min(320px, 70vw); height: 6px; border-radius: 999px; background: rgba(237, 231, 220, .12); overflow: hidden; }
+  .bk-boot-bar i { display: block; height: 100%; width: 0; background: var(--lime); transition: width .2s linear; }
+  .bk-boot-txt { margin: 0; font-size: .82rem; color: var(--muted); }
+  .bk-boot.crash { animation: bk-crash .5s steps(5) both; }
+  @keyframes bk-crash { 0% { filter: none; } 20% { filter: invert(1) hue-rotate(90deg); transform: translateX(-12px) skewX(-6deg); } 40% { filter: none; transform: translateX(14px); } 60% { filter: invert(1); transform: translateY(-8px); } 100% { opacity: 0; transform: scaleY(.02); } }
+
+  /* error stream */
+  .bk-stream { position: absolute; left: 0; top: 0; bottom: 0; width: min(420px, 45vw); overflow: hidden; opacity: .55; pointer-events: none;
+    -webkit-mask: linear-gradient(90deg, #000 40%, transparent); mask: linear-gradient(90deg, #000 40%, transparent); }
+  .bk-stream-in { padding: 16px; font-size: .7rem; line-height: 1.6; color: #FF8F8F; white-space: nowrap; animation: bk-scroll 14s linear infinite; }
+  .bk-stream-in p { margin: 0; }
+  .bk-stream-in .w { color: var(--lime); }
+  @keyframes bk-scroll { to { transform: translateY(-50%); } }
+
+  /* unstyled html */
+  .bk-raw { position: absolute; left: 3%; top: 54%; width: 300px; transform: rotate(-3deg); z-index: 3; clip-path: polygon(0 0, 100% 0, 100% 72%, 86% 78%, 92% 100%, 0 100%); }
+  .bk-raw-in { all: revert; display: block; background: #fff; color: #000; font-family: "Times New Roman", Times, serif; font-size: 16px; padding: 10px 14px 18px; }
+  .bk-raw-in * { all: revert; }
+  .bk-raw-in h1 { margin: .2em 0 .3em; font-size: 2em; }
+  .bk-raw-in a { color: #0000EE; text-decoration: underline; }
+  .bk-raw-in b { color: #C00; }
+
+  /* broken images */
+  .bk-img { position: absolute; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px dashed rgba(237, 231, 220, .35); color: var(--muted); font-size: .74rem; background: rgba(19, 26, 23, .7); }
+  .bk-img.i1 { right: 6%; top: 52%; width: 200px; height: 130px; align-items: flex-start; transform: rotate(4deg); }
+  .bk-img.i2 { left: 38%; bottom: 9%; width: 170px; height: 90px; align-items: flex-start; transform: rotate(-6deg); }
+
+  /* fallen nav */
+  .bk-fallen { position: absolute; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 30px); transform: translateX(-50%); display: flex; gap: 6px; align-items: flex-end; pointer-events: none; z-index: 2; }
+  .bk-fallen span { display: inline-block; font: 600 .95rem "Satoshi", system-ui, sans-serif; color: var(--bone); opacity: .7; transform: translateX(var(--x)) rotate(var(--r)); transform-origin: bottom center; }
+
+  /* corruption */
+  .bk-tears i { position: absolute; left: 0; right: 0; height: 0; z-index: 25; pointer-events: none; backdrop-filter: invert(1) hue-rotate(140deg); -webkit-backdrop-filter: invert(1) hue-rotate(140deg); }
+  .bk-pixels i { position: absolute; z-index: 24; pointer-events: none; }
+  #intro.burst { animation: bk-burst .18s steps(3) both; }
+  @keyframes bk-burst { 0% { transform: translate(0); filter: none; } 33% { transform: translate(-10px, 2px); filter: hue-rotate(80deg) saturate(2); } 66% { transform: translate(8px, -3px); filter: invert(1); } 100% { transform: none; filter: none; } }
+  #intro.fixed .bk-stream, #intro.fixed .bk-tears, #intro.fixed .bk-pixels { opacity: 0; transition: opacity .4s; }
+  #intro.fixed .bk-raw, #intro.fixed .bk-img, #intro.fixed .bk-fallen { opacity: 0; transform: scale(.9); transition: opacity .4s, transform .4s; }
+  #intro.fixed .bk-word2 span { transform: none !important; }
+  .bk-word2 span { display: inline-block; transition: transform .5s cubic-bezier(.2, .7, .2, 1); }
+
   @media (max-width: 760px) {
+    .bk-raw { left: auto; right: -40px; top: 12%; width: 220px; transform: rotate(6deg); }
+    .bk-raw-in { font-size: 13px; }
+    .bk-img, .bk-fallen { display: none; }
+    .bk-stream { width: 70vw; opacity: .35; }
     .w1 { display: none; }
     .w2 { display: none; }
     .w3 { display: none; }
@@ -310,6 +393,7 @@
       try { localStorage.setItem('tr-intro-seen', '1'); } catch {}
       document.dispatchEvent(new CustomEvent('tr:intro', { detail: `solved-${how}` }));
       intro.classList.add('fixed');
+      clearTimeout(burstTimer);
       say('> disabling safe mode... done', 'ok');
       await sleep(350);
       say('> patching 404 bugs... won\'t fix, they\'re family', 'ok');
@@ -327,6 +411,56 @@
       setTimeout(() => { intro.remove(); entered(); }, reduce ? 0 : 1000);
     }
 
-    setTimeout(() => input.focus({ preventScroll: true }), 300);
+    // scrambled letters in "Rebels"
+    const w2 = $('bk-word2');
+    w2.innerHTML = [...'Rebels'].map((ch, i) => {
+      const r = (Math.random() - 0.5) * 22, y = (Math.random() - 0.5) * 0.18, x = (Math.random() - 0.5) * 0.08;
+      return `<span style="transform: translate(${x}em, ${y}em) rotate(${r}deg)">${ch}</span>`;
+    }).join('');
+
+    // error stream (two copies for a seamless loop)
+    const ERRS = [
+      'TypeError: rebel is not a function', 'Warning: safe_mode is ON', 'ReferenceError: fun is not defined',
+      'Uncaught (in promise) BugException: 404 bugs', 'GET /styles/club.css 404 (Not Found)', 'Warning: too much attitude detected',
+      'Error: conference_mode.dll not found', 'RangeError: Maximum call stack size exceeded (vibes)', 'Warning: status games disabled',
+      'SyntaxError: Unexpected token "normal"', 'GET /hero-bug.png net::ERR_BUG_OVERFLOW', 'Error: roadmap.json is not followed',
+    ];
+    const lines = Array.from({ length: 34 }, (_, i) => {
+      const t = ERRS[(i * 7) % ERRS.length];
+      const warn = t.startsWith('Warning');
+      return `<p class="${warn ? 'w' : ''}">[${String(10 + i).padStart(2, '0')}:${String((i * 17) % 60).padStart(2, '0')}] ${t}</p>`;
+    }).join('');
+    $('bk-stream-in').innerHTML = lines + lines;
+
+    // random corruption bursts
+    const tears = [...document.querySelectorAll<HTMLElement>('#bk-tears i')];
+    const pixels = $('bk-pixels');
+    const COLORS = ['#F4A5D4', '#CDDC27', '#3DDB9A', '#EDE7DC'];
+    let burstTimer = 0;
+    const burst = () => {
+      if (solved) return;
+      intro.classList.remove('burst'); void intro.offsetWidth; intro.classList.add('burst');
+      for (const t of tears) { t.style.top = `${Math.random() * 95}%`; t.style.height = `${4 + Math.random() * 40}px`; }
+      pixels.innerHTML = Array.from({ length: 10 }, () => `<i style="left:${Math.random() * 100}%;top:${Math.random() * 100}%;width:${2 + Math.random() * 14}px;height:${2 + Math.random() * 6}px;background:${COLORS[(Math.random() * 4) | 0]}"></i>`).join('');
+      setTimeout(() => { for (const t of tears) t.style.height = '0'; pixels.innerHTML = ''; }, 140 + Math.random() * 120);
+      burstTimer = window.setTimeout(burst, 1800 + Math.random() * 2600);
+    };
+
+    // boot: load to 99%, freeze, crash, then the broken page
+    const boot = $('bk-boot');
+    const fill = $('bk-boot-fill');
+    const txt = $('bk-boot-txt');
+    const start = () => {
+      if (!reduce) burstTimer = window.setTimeout(burst, 900);
+      setTimeout(() => input.focus({ preventScroll: true }), 200);
+    };
+    if (reduce) { boot.hidden = true; start(); }
+    else {
+      const steps = [12, 34, 58, 77, 91, 99];
+      steps.forEach((v, i) => setTimeout(() => { fill.style.width = `${v}%`; txt.textContent = `loading techRebels... ${v}%`; }, 180 * (i + 1)));
+      setTimeout(() => { txt.textContent = 'loading techRebels... 99% (still loading)'; }, 1500);
+      setTimeout(() => { txt.textContent = 'FATAL: too many bugs'; boot.classList.add('crash'); }, 2100);
+      setTimeout(() => { boot.hidden = true; start(); }, 2600);
+    }
   }
 </script>
