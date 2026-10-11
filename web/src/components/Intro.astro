@@ -12,7 +12,7 @@
 </script>
 
 <!-- psst. the recovery console hides more than it shows. real rebels list everything: ls -a -->
-<div id="intro" role="dialog" aria-modal="true" aria-labelledby="bk-title">
+<div id="intro" role="dialog" aria-modal="true" aria-label="techRebels is stuck in safe mode. Turn it off to enter.">
   <div class="bk-noise" aria-hidden="true"></div>
 
   <!-- fake boot that freezes at 99% and crashes -->
@@ -80,6 +80,7 @@
       <button type="button" role="switch" aria-checked="true" aria-labelledby="bk-safe-label" id="bk-switch" class="bk-switch"><span class="knob"></span><span class="txt">ON</span></button>
     </p>
     <p class="mono" aria-hidden="true">boring = true</p>
+    <p class="bk-mobile-action"><strong>Kill safe mode.</strong><span>Flip the switch to enter the rebellion.</span></p>
   </div>
 
   <!-- recovery console -->
@@ -161,6 +162,7 @@
   .w3 { width: 260px; right: 4%; bottom: 10%; transform: rotate(-2deg); box-shadow: 6px 6px 0 var(--lime), 0 20px 50px rgba(0, 0, 0, .5); }
   .w4 { width: 230px; left: 44%; top: 9%; transform: rotate(2.5deg); box-shadow: 6px 6px 0 var(--mint), 0 20px 50px rgba(0, 0, 0, .5); }
   .bk-safe-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 700; }
+  .bk-mobile-action { display: none; }
   .bk-switch { position: relative; width: 74px; height: 32px; border-radius: 999px; border: 2px solid var(--bone); background: var(--pink); cursor: pointer; padding: 0; font: 700 .72rem var(--f-mono); color: var(--night); }
   .bk-switch .knob { position: absolute; top: 3px; right: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--night); transition: right .25s; }
   .bk-switch .txt { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); }
@@ -268,17 +270,32 @@
   .bk-word2 span { display: inline-block; transition: transform .5s cubic-bezier(.2, .7, .2, 1); }
 
   @media (max-width: 760px) {
-    .bk-raw { left: auto; right: -40px; top: 12%; width: 220px; transform: rotate(6deg); }
-    .bk-raw-in { font-size: 13px; }
-    .bk-img, .bk-fallen { display: none; }
-    .bk-stream { width: 70vw; opacity: .35; }
-    .w1 { display: none; }
-    .w2 { display: none; }
-    .w3 { left: 4%; right: auto; top: calc(env(safe-area-inset-top, 0px) + 70px); bottom: auto; width: 190px; }
-    .w3 p:nth-of-type(2) { display: none; }
-    .w4 { left: auto; right: 4%; top: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 44px); width: 210px; }
-    .bk-term { top: 56%; }
-    .bk-word { font-size: clamp(3.4rem, 22vw, 6rem); }
+    #intro { width: 100vw; height: 100dvh; min-height: 100svh; overflow: hidden; overscroll-behavior: none; background: var(--night); }
+    #intro::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 52%, rgba(52,36,80,.8), transparent 48%); pointer-events: none; }
+    .bk-raw, .bk-img, .bk-fallen, .bk-tears, .bk-pixels, .w1, .w2, .w3, .bk-term, .bk-hint { display: none !important; }
+    .bk-stream { width: 100%; opacity: .2; -webkit-mask: linear-gradient(#000, transparent 92%); mask: linear-gradient(#000, transparent 92%); }
+    .bk-stream-in { padding: calc(env(safe-area-inset-top, 0px) + 12px) 14px; font-size: .62rem; line-height: 1.7; }
+    .bk-page { z-index: 4; left: 22px; right: 22px; top: calc(env(safe-area-inset-top, 0px) + 44px); text-align: center; }
+    .bk-eyebrow { max-width: 28ch; margin: 0 auto 16px; font-size: .62rem; line-height: 1.5; }
+    .bk-word { font-size: clamp(3rem, 18vw, 4.4rem); line-height: .74; }
+    .bk-word2 { margin-left: 0; }
+    .bk-claim { margin-top: 18px; font-size: 1rem; }
+    .w4 { z-index: 12; left: 20px; right: 20px; top: 48%; bottom: auto; width: auto; transform: translateY(-8%) rotate(-1deg); border-radius: 18px; box-shadow: 8px 9px 0 var(--mint), 0 24px 60px rgba(0,0,0,.65); }
+    .w4 .bk-bar { padding: 10px 12px; }
+    .w4 .bk-bar span { font-size: .72rem; }
+    .w4 .bk-safe-row { padding: 24px 20px 8px; flex-direction: column; gap: 16px; font: 800 1.18rem var(--f-mono) !important; letter-spacing: .08em; }
+    .w4 > .mono { display: none; }
+    .w4 .bk-switch { width: 136px; height: 58px; border-width: 3px; font-size: 1rem; touch-action: manipulation; }
+    .w4 .bk-switch .knob { top: 4px; right: 5px; width: 44px; height: 44px; }
+    .w4 .bk-switch .txt { left: 20px; }
+    .w4 .bk-switch[aria-checked="false"] .knob { right: 81px; }
+    .w4 .bk-switch[aria-checked="false"] .txt { left: auto; right: 18px; }
+    .bk-mobile-action { display: grid; gap: 3px; padding: 10px 20px 22px !important; text-align: center; }
+    .bk-mobile-action strong { color: var(--lime); font: 800 1.08rem var(--f-display); }
+    .bk-mobile-action span { color: var(--bone); font-size: .78rem; }
+    .bk-status { z-index: 14; left: 12px; right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); text-align: center; white-space: nowrap; font-size: .58rem; letter-spacing: .05em; }
+    .bk-bug { width: 46px; opacity: .85; }
+    .bk-bug:nth-child(n+4) { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
     #intro *, #intro *::before, #intro *::after { animation: none !important; }
@@ -312,6 +329,7 @@
     const input = $('bk-input') as HTMLInputElement;
     const sw = $('bk-switch') as HTMLButtonElement;
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mobile = matchMedia('(max-width: 760px)').matches;
     let solved = false, wrong = 0, hintLevel = 0;
 
     // ---------- door sign: community opening hours ----------
@@ -479,7 +497,7 @@
     const txt = $('bk-boot-txt');
     const start = () => {
       if (!reduce) burstTimer = window.setTimeout(burst, 900);
-      setTimeout(() => input.focus({ preventScroll: true }), 200);
+      if (!mobile) setTimeout(() => input.focus({ preventScroll: true }), 200);
     };
     if (reduce) { boot.hidden = true; start(); }
     else {
