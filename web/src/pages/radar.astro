@@ -114,6 +114,12 @@ import Club from '../layouts/Club.astro';
   .rd-bug.person .lbl { border: 1.5px solid var(--pink); }
   .rd-bug.dim { opacity: .12; pointer-events: none; }
   .rd-bug.sel .lbl { background: var(--lime); color: var(--night); }
+  .rd-stage.has-mine .rd-bug:not(.mine):not(.sel):not(:hover):not(:focus-visible) svg { opacity: .32; filter: saturate(.35); }
+  .rd-bug svg { transition: transform .2s, opacity .3s, filter .3s; }
+  .rd-bug.mine svg { filter: drop-shadow(0 0 10px rgba(205, 220, 39, .75)) drop-shadow(0 6px 10px rgba(0, 0, 0, .45)); }
+  .rd-bug.mine .lbl { opacity: 1; border: 1.5px solid var(--lime); }
+  .rd-bug.mine .lbl::before { content: "✓ "; color: var(--lime); }
+  .rd-bug.mine { z-index: 4; }
 
   .rd-card { position: absolute; right: 16px; top: 16px; bottom: 16px; width: min(380px, calc(100% - 32px)); overflow: auto; z-index: 10; background: var(--night-2); border: 1.5px solid rgba(237, 231, 220, .14); border-radius: 22px; padding: 22px; display: grid; gap: 10px; align-content: start; box-shadow: 0 30px 70px rgba(0, 0, 0, .5); }
   .rd-card { display: flex; flex-direction: column; } .rd-card > * { flex-shrink: 0; }
@@ -279,7 +285,9 @@ import Club from '../layouts/Club.astro';
 
   function markTop() {
     const top = new Set([...topics].filter((t) => t.votes > 0).sort((a, b) => b.votes - a.votes).slice(0, 6));
-    for (const f of flyers) f.el.classList.toggle('top', top.has(f.t));
+    for (const f of flyers) { f.el.classList.toggle('top', top.has(f.t)); f.el.classList.toggle('mine', f.t.voted); }
+    // once you have votes, everything else steps back so your picks stand out
+    stage.classList.toggle('has-mine', topics.some((t) => t.voted));
   }
 
   function applyFilter() {
