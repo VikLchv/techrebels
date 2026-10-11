@@ -163,3 +163,30 @@
 .news-link:hover { color: var(--lime); }
 .is-now { border-color: rgba(205, 220, 39, .45); }
 @media (max-width: 760px) { .news-list { grid-template-columns: 1fr; } }
+
+/* Tech Lunapark teaser on the home page */
+.lunapark { position: relative; overflow: hidden; border-radius: 32px; background: var(--lime); color: var(--green); padding: clamp(28px, 5vw, 72px); display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, .6fr); gap: clamp(24px, 4vw, 56px); align-items: center; }
+.lunapark::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background: repeating-conic-gradient(from 0deg at 92% 110%, rgba(17, 79, 64, .10) 0deg 8deg, transparent 8deg 16deg); }
+.lp-inner { position: relative; display: grid; gap: 16px; }
+.lp-label { margin: 0; font: 700 .82rem var(--f-mono); letter-spacing: .16em; }
+.lp-title { margin: 0; font: 800 clamp(2.8rem, 7vw, 6.4rem)/.86 var(--f-display); letter-spacing: -.05em; color: var(--night); text-wrap: balance; }
+.lp-sub { margin: 0; font: 800 clamp(1.2rem, 2.4vw, 1.8rem)/1 var(--f-display); letter-spacing: -.02em; color: var(--green); }
+.lp-text { margin: 0; max-width: 54ch; font-size: 1.1rem; color: #1E3A2E; }
+.lp-rides { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.lp-rides li { font: 700 .85rem var(--f-mono); padding: 7px 12px; border-radius: 999px; background: rgba(11, 15, 13, .1); color: var(--night); }
+.lp-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin-top: 6px; }
+.lunapark .pill-dark { background: var(--night); color: var(--lime); }
+.lunapark .pill-dark:hover { box-shadow: 0 10px 30px rgba(11, 15, 13, .3); }
+.lp-link { color: var(--night); font-weight: 700; text-decoration: none; border-bottom: 2px solid var(--night); }
+.lp-ticket { position: relative; justify-self: center; width: min(240px, 100%); aspect-ratio: 3 / 4; background: var(--pink); color: var(--night); border-radius: 18px; display: grid; align-content: space-between; padding: 22px 20px; transform: rotate(6deg); box-shadow: 10px 10px 0 var(--night);
+  -webkit-mask: radial-gradient(circle 14px at 50% 0, #0000 98%, #000) top / 100% 51% no-repeat, radial-gradient(circle 14px at 50% 100%, #0000 98%, #000) bottom / 100% 51% no-repeat;
+  mask: radial-gradient(circle 14px at 50% 0, #0000 98%, #000) top / 100% 51% no-repeat, radial-gradient(circle 14px at 50% 100%, #0000 98%, #000) bottom / 100% 51% no-repeat; }
+.lunapark:hover .lp-ticket { transform: rotate(2deg) translateY(-6px); transition: transform .4s cubic-bezier(.2, .7, .2, 1); }
+.lp-admit { font: 700 .72rem var(--f-mono); letter-spacing: .24em; }
+.lp-big { font: 800 clamp(2.6rem, 5vw, 3.8rem)/.82 var(--f-display); letter-spacing: -.05em; }
+.lp-no { font: 700 .8rem var(--f-mono); letter-spacing: .14em; border-top: 2px dashed rgba(11, 15, 13, .4); padding-top: 12px; }
+@media (max-width: 760px) {
+  .lunapark { grid-template-columns: 1fr; }
+  .lp-ticket { width: 180px; justify-self: start; }
+}
