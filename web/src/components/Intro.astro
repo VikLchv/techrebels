@@ -269,7 +269,7 @@
   #intro.fixed .bk-word2 span { transform: none !important; }
   .bk-word2 span { display: inline-block; transition: transform .5s cubic-bezier(.2, .7, .2, 1); }
 
-  @media (max-width: 760px) {
+  @media (max-width: 760px), (hover: none) and (pointer: coarse) {
     #intro { width: 100vw; height: 100dvh; min-height: 100svh; overflow: hidden; overscroll-behavior: none; background: var(--night); }
     #intro::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 52%, rgba(52,36,80,.8), transparent 48%); pointer-events: none; }
     .bk-raw, .bk-img, .bk-fallen, .bk-tears, .bk-pixels, .w1, .w2, .w3, .bk-term, .bk-hint { display: none !important; }
@@ -329,7 +329,7 @@
     const input = $('bk-input') as HTMLInputElement;
     const sw = $('bk-switch') as HTMLButtonElement;
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const mobile = matchMedia('(max-width: 760px)').matches;
+    const mobile = matchMedia('(max-width: 760px), (hover: none) and (pointer: coarse)').matches;
     let solved = false, wrong = 0, hintLevel = 0;
 
     // ---------- door sign: community opening hours ----------
