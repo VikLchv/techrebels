@@ -1,0 +1,138 @@
+---
+// Time capsule: members seal predictions about tech. Opened and judged in public at the big event, autumn 2027.
+import Club from '../layouts/Club.astro';
+---
+<Club title="Time capsule · techRebels" description="Seal your predictions about tech. We open the capsule at Tech Lunapark in autumn 2027 and find out who was right.">
+  <section class="block first capsule">
+    <div class="cp-hero">
+      <div class="head">
+        <p class="eyebrow">Time capsule · opens autumn 2027</p>
+        <h1 class="h2">Predict the future. Get roasted in 2027.</h1>
+        <p class="lede">Members seal up to five predictions about tech. Nobody can read them, not even the crew, until we crack the capsule open live at Tech Lunapark and score who was right.</p>
+      </div>
+      <div class="cp-box" aria-hidden="true">
+        <div class="cp-lid"></div>
+        <div class="cp-body"><span id="cp-count">·</span><small>sealed predictions</small></div>
+      </div>
+    </div>
+
+    <div class="cp-clock" aria-label="Time until the capsule opens">
+      <div><b id="cp-d">·</b><span>days</span></div><div><b id="cp-h">·</b><span>hours</span></div><div><b id="cp-m">·</b><span>minutes</span></div>
+      <p id="cp-rebels"></p>
+    </div>
+
+    <div class="cp-write">
+      <form id="cp-form" hidden novalidate>
+        <label for="cp-body">By autumn 2027…</label>
+        <textarea id="cp-body" rows="2" maxlength="280" placeholder="nobody will say 'Web3' at a meetup with a straight face"></textarea>
+        <button class="pill pill-lime" type="submit">Seal it <span aria-hidden="true">→</span></button>
+      </form>
+      <p class="cp-locked" id="cp-locked" hidden>Sealing predictions is for members. <a href="/lab">Build your bug</a> or <a href="/login?next=%2Fcapsule">log in</a>.</p>
+      <p class="cp-note" id="cp-note" role="status"></p>
+      <ol class="cp-mine" id="cp-mine" aria-label="Your sealed predictions"></ol>
+    </div>
+
+    <ol class="cp-open" id="cp-open" hidden></ol>
+  </section>
+</Club>
+
+<style is:global>
+  .cp-hero { display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: center; }
+  .cp-box { position: relative; width: 220px; aspect-ratio: 1 / 1.1; }
+  .cp-lid { position: absolute; left: -6%; right: -6%; top: 0; height: 22%; border-radius: 14px; background: var(--pink); box-shadow: 0 6px 0 #C97FAE; transform: rotate(-4deg); animation: cp-rattle 3s ease-in-out infinite; transform-origin: 20% 100%; }
+  .cp-body { position: absolute; left: 0; right: 0; top: 18%; bottom: 0; border-radius: 10px 10px 22px 22px; background: var(--purple); border: 3px solid var(--night); display: grid; place-content: center; text-align: center; background-image: repeating-linear-gradient(90deg, transparent 0 28px, rgba(237, 231, 220, .07) 28px 30px); }
+  .cp-body span { font: 800 3.4rem/1 var(--f-display); color: var(--lime); }
+  .cp-body small { font: 500 .72rem var(--f-mono); color: var(--bone); text-transform: uppercase; letter-spacing: .1em; }
+  @keyframes cp-rattle { 0%, 80%, 100% { transform: rotate(-4deg); } 85% { transform: rotate(-9deg) translateY(-4px); } 90% { transform: rotate(-2deg); } }
+  .cp-clock { margin-top: 30px; display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
+  .cp-clock div { min-width: 96px; padding: 14px 16px; border-radius: 14px; background: var(--night-2); border: 1px solid rgba(237, 231, 220, .08); display: grid; }
+  .cp-clock b { font: 800 2.2rem/1 var(--f-display); color: var(--bone); }
+  .cp-clock span { font: 500 .72rem var(--f-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+  .cp-clock p { margin: 0 0 6px 8px; color: var(--muted); }
+  .cp-write { margin-top: clamp(30px, 5vw, 56px); max-width: 640px; display: grid; gap: 12px; }
+  #cp-form { display: grid; gap: 10px; }
+  #cp-form[hidden], .cp-locked[hidden], .cp-open[hidden] { display: none; }
+  #cp-form label { font: 800 1.3rem var(--f-display); }
+  #cp-form textarea { font: 500 1rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night-2); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 12px; padding: 12px 14px; }
+  #cp-form textarea:focus { outline: none; border-color: var(--lime); }
+  #cp-form .pill { justify-self: start; }
+  .cp-locked a { color: var(--pink); }
+  .cp-note { margin: 0; min-height: 1.1em; font: 500 .82rem var(--f-mono); color: var(--mint); }
+  .cp-mine { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .cp-mine li { padding: 12px 14px; border-radius: 12px; background: var(--night-2); border: 1px dashed rgba(205, 220, 39, .4); color: #C3CBC6; }
+  .cp-mine li::before { content: "🔒 "; }
+  .cp-open { list-style: none; margin: 30px 0 0; padding: 0; display: grid; gap: 10px; }
+  .cp-open li { padding: 14px 16px; border-radius: 14px; background: var(--night-2); }
+  .cp-open small { display: block; margin-top: 6px; font: 500 .74rem var(--f-mono); color: var(--muted); }
+  @media (max-width: 700px) { .cp-hero { grid-template-columns: 1fr; } .cp-box { width: 170px; } }
+  @media (prefers-reduced-motion: reduce) { .cp-lid { animation: none; } }
+</style>
+
+<script>
+  import { supabase } from '../lib/supabase';
+  import { track } from '../lib/track';
+
+  const $ = (id: string) => document.getElementById(id)!;
+  let opensAt = new Date('2027-10-01T17:00:00+02:00');
+
+  const clock = () => {
+    const left = Math.max(0, opensAt.getTime() - Date.now());
+    $('cp-d').textContent = String(Math.floor(left / 864e5));
+    $('cp-h').textContent = String(Math.floor(left / 36e5) % 24);
+    $('cp-m').textContent = String(Math.floor(left / 6e4) % 60);
+  };
+
+  async function loadMine() {
+    const { data } = await supabase!.rpc('my_predictions');
+    const rows = (data ?? []) as { body: string }[];
+    $('cp-mine').replaceChildren(...rows.map((r) => { const li = document.createElement('li'); li.textContent = r.body; return li; }));
+    ($('cp-form') as HTMLFormElement).hidden = rows.length >= 5;
+    if (rows.length >= 5) $('cp-note').textContent = 'Five predictions sealed. That is the limit. Now wait.';
+  }
+
+  async function stats() {
+    const { data } = await supabase!.rpc('capsule_stats');
+    if (!data) return;
+    opensAt = new Date(data.opens_at);
+    $('cp-count').textContent = String(data.predictions);
+    $('cp-rebels').textContent = `${data.rebels} ${data.rebels === 1 ? 'rebel has' : 'rebels have'} put their reputation on the line.`;
+    clock();
+    if (data.open) {
+      const { data: all } = await supabase!.rpc('capsule_open');
+      const list = $('cp-open');
+      list.hidden = false;
+      list.replaceChildren(...((all ?? []) as { body: string; bug_number: number | null; bug_name: string | null }[]).map((r) => {
+        const li = document.createElement('li'); li.textContent = r.body;
+        const s = document.createElement('small'); s.textContent = r.bug_name ? `BUG-${String(r.bug_number).padStart(4, '0')} · ${r.bug_name}` : 'an anonymous rebel';
+        li.append(s); return li;
+      }));
+    }
+  }
+
+  $('cp-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const box = $('cp-body') as HTMLTextAreaElement;
+    const body = box.value.trim();
+    if (body.length < 10) { $('cp-note').textContent = 'A prediction needs at least 10 characters.'; return; }
+    const { error } = await supabase!.rpc('seal_prediction', { p_body: body });
+    if (error) { $('cp-note').textContent = error.message.includes('members') ? 'Sealing is for approved members.' : error.message.includes('five') ? 'Five predictions per rebel.' : 'The capsule would not close. Try again.'; return; }
+    box.value = '';
+    $('cp-note').textContent = 'Sealed. See you in 2027.';
+    track('capsule_sealed');
+    loadMine(); stats();
+  });
+
+  async function start() {
+    clock();
+    setInterval(clock, 30000);
+    if (!supabase) return;
+    stats();
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) { $('cp-locked').hidden = false; return; }
+    const { data: member } = await supabase.rpc('is_member');
+    if (!member) { $('cp-locked').hidden = false; return; }
+    $('cp-form').hidden = false;
+    loadMine();
+  }
+  start();
+</script>

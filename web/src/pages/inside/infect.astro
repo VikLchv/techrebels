@@ -1,0 +1,122 @@
+---
+// Infections: every member bug carries 3 invites. Share a link, watch the outbreak grow.
+import Club from '../../layouts/Club.astro';
+import InsideNav from '../../components/InsideNav.astro';
+import '../../styles/inside-pages.css';
+---
+<Club title="Infect · Inside · techRebels" description="Your bug carries three infections. Share them with people who belong here.">
+  <section class="block first inside-page infect-page">
+    <div class="page-loading" id="page-loading"><p class="eyebrow">Inside · Infect</p><h1 class="h2">Culturing bugs…</h1></div>
+    <div class="page-out" id="page-out" hidden><p class="eyebrow">Inside · Infect</p><h1 class="h2">Member access required.</h1><a class="pill pill-pink" href="/login?next=%2Finside%2Finfect">Log in</a></div>
+    <div id="page-app" hidden>
+      <header class="page-head">
+        <div>
+          <p class="eyebrow">Inside · Infect</p>
+          <h1 class="h2">Your bug is contagious.</h1>
+          <p class="lede">Every member bug carries <b id="inf-allowed">3</b> infections. Send one to someone who belongs here. Their application jumps the queue, and the outbreak shows up in the swarm.</p>
+        </div>
+        <a class="pill pill-ghost" href="/swarm#outbreak">See the outbreak</a>
+      </header>
+      <InsideNav active="infect" />
+      <section class="page-panel">
+        <div class="inf-vials" id="inf-vials"></div>
+        <p class="inf-note" id="inf-note" role="status"></p>
+        <p class="section-copy">Infections are personal. Only send them to people you would happily sit next to at a Rebel Session. The crew still says the final yes.</p>
+      </section>
+    </div>
+  </section>
+</Club>
+
+<style is:global>
+  .inf-vials { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .inf-vial { position: relative; display: grid; gap: 10px; align-content: start; min-height: 190px; padding: 18px; border-radius: 20px; background: var(--night); border: 1.5px dashed rgba(237, 231, 220, .18); }
+  .inf-vial.live { border: 1.5px solid var(--lime); box-shadow: inset 0 -60px 80px -60px rgba(205, 220, 39, .35); }
+  .inf-vial.used { border: 1.5px solid var(--pink); box-shadow: inset 0 -60px 80px -60px rgba(244, 165, 212, .35); }
+  .inf-vial h3 { margin: 0; font: 800 1.1rem var(--f-display); color: var(--bone); }
+  .inf-vial p { margin: 0; color: var(--muted); font-size: .85rem; }
+  .inf-code { font: 800 1.4rem var(--f-mono); letter-spacing: .12em; color: var(--lime); }
+  .inf-vial .pill { justify-self: start; padding: 9px 15px; font-size: .84rem; }
+  .inf-tag { position: absolute; right: 14px; top: 14px; font: 700 .68rem var(--f-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .inf-vial.live .inf-tag { color: var(--lime); }
+  .inf-vial.used .inf-tag { color: var(--pink); }
+  .inf-note { min-height: 1.2em; margin: 12px 0; font: 500 .82rem var(--f-mono); color: var(--mint); }
+  @media (max-width: 760px) { .inf-vials { grid-template-columns: 1fr; } .inf-vial { min-height: 0; } }
+</style>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+  import { track } from '../../lib/track';
+
+  type Code = { code: string; created_at: string; claimed: boolean; claimed_at: string | null; joined: boolean; bug_number: number | null; bug_name: string | null };
+  const $ = (id: string) => document.getElementById(id)!;
+  const linkFor = (code: string) => `${location.origin}/lab?infect=${code}`;
+
+  function vial(c: Code | null, i: number, canCreate: boolean) {
+    const el = document.createElement('article');
+    el.className = `inf-vial ${c ? (c.claimed ? 'used' : 'live') : ''}`;
+    const tag = document.createElement('span'); tag.className = 'inf-tag';
+    const h = document.createElement('h3');
+    const p = document.createElement('p');
+    if (!c) {
+      tag.textContent = `vial ${i + 1}`;
+      h.textContent = 'Sealed infection';
+      p.textContent = 'Open it when you know who deserves it. The code works once.';
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'pill pill-lime'; b.textContent = 'Open the vial';
+      b.disabled = !canCreate;
+      b.addEventListener('click', create);
+      el.append(tag, h, p, b);
+      return el;
+    }
+    const code = document.createElement('p'); code.className = 'inf-code'; code.textContent = c.code;
+    if (c.claimed) {
+      tag.textContent = c.joined ? 'joined' : 'infected';
+      h.textContent = c.bug_name ? `BUG-${String(c.bug_number).padStart(4, '0')} · ${c.bug_name}` : 'Someone caught it';
+      p.textContent = c.joined ? 'They made it inside. Welcome to the outbreak.' : 'They applied. The crew is looking at it.';
+      el.append(tag, code, h, p);
+    } else {
+      tag.textContent = 'live';
+      h.textContent = 'Ready to spread';
+      p.textContent = 'Send the link. They build a bug, apply and skip the queue.';
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'pill pill-pink'; b.textContent = 'Copy infection link';
+      b.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(linkFor(c.code)); $('inf-note').textContent = 'Link copied. Handle with care.'; }
+        catch { $('inf-note').textContent = linkFor(c.code); }
+        track('infection_copied');
+      });
+      el.append(tag, code, h, p, b);
+    }
+    return el;
+  }
+
+  async function load() {
+    const { data, error } = await supabase!.rpc('my_infections');
+    if (error) { $('inf-note').textContent = 'Could not load your infections. Is the latest database migration installed?'; return; }
+    const allowed = Number(data?.allowed ?? 3);
+    const codes = (data?.codes ?? []) as Code[];
+    $('inf-allowed').textContent = String(allowed);
+    const vials = Array.from({ length: allowed }, (_, i) => vial(codes[i] ?? null, i, codes.length < allowed));
+    $('inf-vials').replaceChildren(...vials);
+  }
+
+  async function create() {
+    $('inf-note').textContent = 'Opening…';
+    const { error } = await supabase!.rpc('create_infection');
+    if (error) { $('inf-note').textContent = error.message.includes('no infections') ? 'All vials are open. Ask the crew if you need more.' : 'The vial is stuck. Try again.'; return; }
+    $('inf-note').textContent = 'Vial open. Copy the link and send it.';
+    track('infection_created');
+    load();
+  }
+
+  async function setupInfectPage() {
+    if (!document.querySelector('.infect-page')) return;
+    if (!supabase) { $('page-loading').hidden = true; $('page-out').hidden = false; return; }
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) { $('page-loading').hidden = true; $('page-out').hidden = false; return; }
+    const { data: member } = await supabase.rpc('is_member');
+    $('page-loading').hidden = true;
+    if (!member) { location.replace('/inside'); return; }
+    $('page-app').hidden = false;
+    load();
+  }
+  document.addEventListener('astro:page-load', setupInfectPage);
+</script>

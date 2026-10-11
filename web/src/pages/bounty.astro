@@ -1,0 +1,128 @@
+---
+// Industry bug bounty: members report bugs in the tech world, the community votes,
+// the winner gets dissected at the next Rebel Session.
+import Club from '../layouts/Club.astro';
+---
+<Club title="Industry bug bounty · techRebels" description="Report bugs in the tech industry. The community votes, the winner gets dissected at the next Rebel Session.">
+  <section class="block first bounty">
+    <div class="head">
+      <p class="eyebrow">Industry bug bounty</p>
+      <h1 class="h2">The tech world is buggy. Report it.</h1>
+      <p class="lede">Pointless processes, toxic culture, hype that will not die. Members file the reports, everyone votes, and the top bug gets dissected live at the next Rebel Session.</p>
+    </div>
+
+    <ol class="bb-list" id="bb-list"><li class="bb-empty">Loading the bug tracker…</li></ol>
+
+    <div class="bb-file">
+      <h2 class="bb-h">File a bug report</h2>
+      <form id="bb-form" hidden novalidate>
+        <label>Title<input id="bb-title" required minlength="3" maxlength="80" placeholder="Stand-ups that last 45 minutes" /></label>
+        <label>Steps to reproduce <span class="opt">optional</span><textarea id="bb-desc" rows="2" maxlength="300" placeholder="1. Join any company. 2. Wait."></textarea></label>
+        <button class="pill pill-pink" type="submit">Submit report <span aria-hidden="true">→</span></button>
+      </form>
+      <a class="pill pill-ghost" id="bb-login" href="/login?next=%2Fbounty">Log in to file a bug</a>
+      <p class="bb-note" id="bb-note" role="status"></p>
+    </div>
+  </section>
+</Club>
+
+<style is:global>
+  .bb-list { list-style: none; margin: 28px 0 0; padding: 0; display: grid; gap: 10px; }
+  .bb-empty { color: var(--muted); }
+  .bb-row { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 16px 18px; border-radius: 16px; background: var(--night-2); border: 1px solid rgba(237, 231, 220, .08); }
+  .bb-row.top { border-color: var(--lime); box-shadow: 4px 4px 0 var(--lime); }
+  .bb-row.done { opacity: .55; }
+  .bb-id { font: 700 .76rem var(--f-mono); color: var(--muted); }
+  .bb-id b { display: block; margin-top: 4px; width: fit-content; padding: 2px 8px; border-radius: 6px; font-size: .68rem; text-transform: uppercase; color: var(--night); background: var(--pink); }
+  .bb-row.top .bb-id b { background: var(--lime); }
+  .bb-row.done .bb-id b { background: var(--mint); }
+  .bb-row h3 { margin: 0; font: 800 1.2rem/1.15 var(--f-display); letter-spacing: -.02em; }
+  .bb-row p { margin: 4px 0 0; color: var(--muted); font-size: .9rem; }
+  .bb-row button { font: 700 .85rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: transparent; border: 1.5px solid rgba(237, 231, 220, .2); border-radius: 999px; padding: 8px 14px; cursor: pointer; white-space: nowrap; }
+  .bb-row button[aria-pressed="true"] { background: var(--lime); color: var(--night); border-color: var(--lime); }
+  .bb-file { margin-top: clamp(36px, 6vw, 64px); display: grid; gap: 12px; max-width: 600px; }
+  .bb-h { margin: 0; font: 800 clamp(1.6rem, 3vw, 2.2rem)/1 var(--f-display); letter-spacing: -.03em; }
+  #bb-form { display: grid; gap: 12px; }
+  #bb-form[hidden], #bb-login[hidden] { display: none; }
+  #bb-form label { display: grid; gap: 6px; font-weight: 700; font-size: .9rem; }
+  #bb-form input, #bb-form textarea { font: 500 .95rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night-2); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 12px; padding: 11px 13px; }
+  #bb-form input:focus, #bb-form textarea:focus { outline: none; border-color: var(--lime); }
+  #bb-form .pill, #bb-login { justify-self: start; }
+  .bb-note { margin: 0; min-height: 1.1em; font: 500 .82rem var(--f-mono); color: var(--mint); }
+  @media (max-width: 600px) { .bb-row { grid-template-columns: 1fr; gap: 8px; } .bb-row button { justify-self: start; } }
+</style>
+
+<script>
+  import { supabase } from '../lib/supabase';
+  import { track } from '../lib/track';
+
+  type Bounty = { id: string; title: string; description: string | null; votes: number; voted: boolean; status: string; created_at: string };
+  const $ = (id: string) => document.getElementById(id)!;
+  let userId: string | null = null;
+  let items: Bounty[] = [];
+
+  function render() {
+    const list = $('bb-list');
+    if (!items.length) { list.innerHTML = '<li class="bb-empty">No bugs reported yet. The industry is perfect, apparently. File the first one.</li>'; return; }
+    const topId = items.find((b) => b.status !== 'done' && b.votes > 0)?.id;
+    list.replaceChildren(...items.map((b, i) => {
+      const li = document.createElement('li');
+      li.className = `bb-row ${b.id === topId ? 'top' : ''} ${b.status === 'done' ? 'done' : ''}`;
+      const id = document.createElement('div'); id.className = 'bb-id';
+      id.textContent = `IND-${String(i + 1).padStart(3, '0')}`;
+      const tag = document.createElement('b'); tag.textContent = b.status === 'done' ? 'dissected' : b.id === topId ? 'next session' : 'open';
+      id.append(tag);
+      const txt = document.createElement('div');
+      const h = document.createElement('h3'); h.textContent = b.title;
+      txt.append(h);
+      if (b.description) { const p = document.createElement('p'); p.textContent = b.description; txt.append(p); }
+      const btn = document.createElement('button'); btn.type = 'button';
+      btn.textContent = `${b.voted ? 'Confirmed ✓' : 'I see it too'} · ${b.votes}`;
+      btn.setAttribute('aria-pressed', String(b.voted));
+      btn.disabled = b.status === 'done';
+      btn.addEventListener('click', () => vote(b));
+      li.append(id, txt, btn);
+      return li;
+    }));
+  }
+
+  async function vote(b: Bounty) {
+    if (!userId) { $('bb-note').textContent = 'Log in as a member to confirm bugs.'; return; }
+    const was = b.voted;
+    b.voted = !was; b.votes += was ? -1 : 1; render();
+    const res = was
+      ? await supabase!.from('topic_votes').delete().eq('topic_id', b.id).eq('user_id', userId)
+      : await supabase!.from('topic_votes').insert({ topic_id: b.id });
+    if (res.error) { b.voted = was; b.votes += was ? 1 : -1; render(); $('bb-note').textContent = 'Votes are for members. Waiting on your approval?'; return; }
+    track(was ? 'bounty_unvote' : 'bounty_vote', b.title);
+  }
+
+  async function load() {
+    const { data, error } = await supabase!.rpc('bounty_board');
+    if (error) { $('bb-list').innerHTML = '<li class="bb-empty">The bug tracker is down. Ironic.</li>'; return; }
+    items = ((data ?? []) as Bounty[]).map((b) => ({ ...b, votes: Number(b.votes) }));
+    render();
+  }
+
+  $('bb-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = ($('bb-title') as HTMLInputElement).value.replace(/\s+/g, ' ').trim();
+    if (title.length < 3) { $('bb-note').textContent = 'Give the bug a title.'; return; }
+    const description = ($('bb-desc') as HTMLTextAreaElement).value.trim().slice(0, 300) || null;
+    const { error } = await supabase!.from('topics').insert({ title: title.slice(0, 80), description, kind: 'bounty', pillar: 'rebels' });
+    if (error) { $('bb-note').textContent = 'Only members can file reports. If you are one, try again.'; return; }
+    ($('bb-form') as HTMLFormElement).reset();
+    $('bb-note').textContent = 'Report filed. The crew triages it, then it goes live for votes.';
+    track('bounty_filed');
+  });
+
+  async function start() {
+    if (!supabase) { $('bb-list').innerHTML = '<li class="bb-empty">Not connected yet.</li>'; return; }
+    const { data } = await supabase.auth.getSession();
+    userId = data.session?.user.id ?? null;
+    $('bb-form').hidden = !userId;
+    $('bb-login').hidden = !!userId;
+    load();
+  }
+  start();
+</script>

@@ -46,18 +46,28 @@ import '../../styles/inside-pages.css';
           <div class="always-on"><i aria-hidden="true"></i><span><b>Always on:</b> account security, password resets and application decisions go to your login email.</span></div>
           <p class="error" id="notification-error" hidden></p><div class="form-actions"><button class="pill pill-pink" id="notification-save" type="submit">Save preferences</button><span class="status" id="notification-status" role="status"></span></div>
         </form>
-        <section class="page-panel danger-card"><p class="eyebrow">Danger zone</p><h2 class="section-title" id="danger-title">Delete my account</h2><p class="section-copy" id="danger-copy">This permanently removes your profile, bug, application, votes, matching data and merch signals. It cannot be undone.</p><button class="pill pill-ghost danger" id="delete-start" type="button">Delete my account</button><div class="delete-confirm" id="delete-confirm" hidden><p>Type <strong id="confirm-email"></strong> to confirm.</p><input type="email" id="delete-email" autocomplete="off" /><p class="error" id="delete-error" hidden></p><div class="form-actions"><button class="pill pill-pink" id="delete-yes" type="button">Delete forever</button><button class="pill pill-ghost" id="delete-no" type="button">Cancel</button></div></div></section>
+        <section class="page-panel danger-card"><p class="eyebrow">Danger zone</p><h2 class="section-title" id="danger-title">Ragequit</h2><p class="section-copy" id="danger-copy">Leaving? Do it with style. This permanently removes your profile, bug, application, votes, matching data and merch signals. It cannot be undone. Your bug can leave a ghost and a last message on the Ragequit wall, without your name.</p><button class="pill pill-ghost danger" id="delete-start" type="button">Ragequit (delete my account)</button><div class="delete-confirm" id="delete-confirm" hidden><p>Type <strong id="confirm-email"></strong> to confirm.</p><input type="email" id="delete-email" autocomplete="off" /><label class="rq-field">Last words <span>(optional, max 140, shown without your name)</span><input type="text" id="rq-msg" maxlength="140" placeholder="I came for the bugs, I left because of the bugs." /></label><label class="rq-check"><input type="checkbox" id="rq-ghost" checked /> Leave my bug's ghost on the Ragequit wall</label><p class="error" id="delete-error" hidden></p><div class="form-actions"><button class="pill pill-pink" id="delete-yes" type="button">Delete forever</button><button class="pill pill-ghost" id="delete-no" type="button">Cancel</button></div></div></section>
       </div>
     </div>
   </section>
 </Club>
 
 <style is:global>
+  .rq-field{display:grid;gap:6px;margin-top:12px;font-weight:700;font-size:.88rem}.rq-field span{font:500 .72rem var(--f-mono);color:var(--muted)}.rq-check{display:flex;align-items:center;gap:8px;margin-top:10px;color:#C3CBC6;font-size:.9rem}.rq-check input{width:16px;height:16px;accent-color:var(--pink)}
+  .rq-stage{position:fixed;inset:0;z-index:3000;display:grid;place-items:center;align-content:center;gap:16px;background:rgba(11,15,13,.96);overflow:hidden}
+  .rq-sign{margin:0;font:800 clamp(3rem,12vw,8rem)/.9 var(--f-display);color:var(--pink);letter-spacing:-.04em;animation:rq-shake .5s steps(2) 3}
+  .rq-bug{width:220px;animation:rq-walk 2.6s cubic-bezier(.5,0,.8,.4) .5s forwards}.rq-bug svg{width:100%;height:auto;display:block}
+  .rq-say{margin:0;max-width:30ch;padding:12px 16px;border-radius:14px 14px 14px 4px;background:var(--bone);color:var(--night);font-weight:700;text-align:center;animation:rq-fade 2.6s ease .6s forwards}
+  @keyframes rq-walk{30%{transform:translateX(-30px) rotate(-8deg)}100%{transform:translateX(120vw) rotate(25deg) scale(.6)}}
+  @keyframes rq-fade{70%{opacity:1}100%{opacity:.25;transform:translateY(-10px)}}
+  @keyframes rq-shake{50%{transform:translate(-6px,3px) rotate(-2deg)}}
+  @media (prefers-reduced-motion: reduce){.rq-bug,.rq-say,.rq-sign{animation:none}}
   .account-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.account-grid .contact-card,.account-grid .notification-card,.account-grid .danger-card{grid-column:1/-1}.account-grid .danger-card{border-color:rgba(244,165,212,.35)}.account-email{margin:10px 0 14px;color:var(--bone);font:800 clamp(1.25rem,2.6vw,2rem)/1.1 var(--f-display);overflow-wrap:anywhere}.account-roles{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}.account-roles span{padding:5px 9px;border-radius:999px;background:rgba(61,219,154,.12);color:var(--mint);font:700 .68rem var(--f-mono);text-transform:uppercase}.identity-card .form-actions,.privacy-card .form-actions,.danger-card>button{margin-top:22px}.contact-card{display:grid;gap:24px}.email-slots{display:grid;grid-template-columns:1fr 1fr;gap:14px}.email-slot{display:grid;gap:12px;padding:18px;border:1px solid rgba(237,231,220,.1);border-radius:18px;background:var(--night)}.slot-head{display:flex;justify-content:space-between;align-items:start;gap:12px}.slot-head>div{display:grid;gap:3px}.slot-head strong{color:var(--bone)}.slot-head span:not(.verified){color:var(--muted);font:.8rem var(--f-mono);overflow-wrap:anywhere}.verified{color:var(--mint);font:700 .72rem var(--f-mono);white-space:nowrap}.email-entry,.code-entry{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}.account-page input[type=email],.account-page input[type=text]{width:100%;min-width:0;border:1.5px solid rgba(237,231,220,.16);border-radius:14px;padding:12px 14px;background:var(--night-2);color:var(--bone);font:500 1rem "Satoshi",system-ui,sans-serif}.email-slot .pill{padding:11px 16px}.text-action{justify-self:start;padding:0;border:0;background:transparent;color:var(--pink);font:700 .78rem var(--f-mono);cursor:pointer}.slot-status{min-height:1.2em;margin:0;color:var(--mint);font:.78rem var(--f-mono)}.notification-card{display:grid;gap:22px}.preferred{max-width:560px}.notification-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}.notification-list .check{padding:16px;border:1px solid rgba(237,231,220,.1);border-radius:16px;background:var(--night)}.notification-list .check span{display:grid;gap:3px}.notification-list small{color:var(--muted);font-weight:500}.always-on{display:flex;align-items:flex-start;gap:10px;padding:14px;border-radius:14px;background:rgba(205,220,39,.08);color:#C3CBC6}.always-on i{flex:none;width:8px;height:8px;margin-top:7px;border-radius:50%;background:var(--lime)}.danger{color:var(--pink)}.delete-confirm{display:grid;gap:12px;margin-top:18px;padding:18px;border-radius:18px;border:1.5px solid var(--pink)}.delete-confirm p{margin:0;color:#C3CBC6}.delete-confirm input{max-width:420px}
   @media(max-width:760px){.account-grid,.email-slots,.notification-list{grid-template-columns:1fr}.account-grid .contact-card,.account-grid .notification-card,.account-grid .danger-card{grid-column:auto}.email-entry,.code-entry{grid-template-columns:1fr}.email-slot .pill{justify-content:center}}
 </style>
 
 <script>
+  import { bugSVG } from '../../lib/bug/render.js';
   import { supabase } from '../../lib/supabase';
   const $=<T extends HTMLElement>(id:string)=>document.getElementById(id) as T;type ContactKind='personal'|'company';let email='';let profile:any=null;
   function renderContact(kind:ContactKind){const value=profile?.[`${kind}_email`]??'';$(`${kind}-current`).textContent=value||'Not added';$(`${kind}-verified`).hidden=!value;$(`${kind}-entry`).hidden=!!value;$(`${kind}-remove`).hidden=!value;const option=$<HTMLOptionElement>(`preferred-${kind}`);option.disabled=!value;option.textContent=value?`${kind==='personal'?'Personal':'Company'} — ${value}`:`${kind==='personal'?'Personal':'Company'} email — add & verify first`;}
@@ -72,6 +82,29 @@ import '../../styles/inside-pages.css';
     document.querySelectorAll<HTMLButtonElement>('[data-remove]').forEach(button=>button.addEventListener('click',async()=>{if(!supabase)return;const kind=button.dataset.remove as ContactKind;if(!confirm(`Remove your ${kind} email?`))return;button.disabled=true;const {error}=await supabase.rpc('remove_contact_email',{p_kind:kind});button.disabled=false;if(error){$(`${kind}-status`).textContent='Removing failed. Try again.';return;}profile[`${kind}_email`]=null;if(profile.preferred_contact_email===kind)profile.preferred_contact_email='account';renderPreferences();$(`${kind}-status`).textContent='Email removed.';}));
     $('notification-form').addEventListener('submit',async(event)=>{event.preventDefault();if(!supabase)return;const button=$<HTMLButtonElement>('notification-save');const errorBox=$('notification-error');errorBox.hidden=true;button.disabled=true;$('notification-status').textContent='Saving…';const {error}=await supabase.rpc('update_notification_preferences',{p_preferred:$<HTMLSelectElement>('preferred-email').value,p_events:$<HTMLInputElement>('notify-events').checked,p_matching:$<HTMLInputElement>('notify-matching').checked,p_drop:$<HTMLInputElement>('notify-drop').checked,p_news:$<HTMLInputElement>('notify-news').checked});button.disabled=false;if(error){$('notification-status').textContent='';errorBox.textContent='Saving failed. Try again.';errorBox.hidden=false;return;}$('notification-status').textContent='Saved ✓';});
     $('delete-start').addEventListener('click',()=>{$('delete-confirm').hidden=false;$<HTMLInputElement>('delete-email').focus();});$('delete-no').addEventListener('click',()=>{$('delete-confirm').hidden=true;});
-    $('delete-yes').addEventListener('click',async()=>{if(!supabase)return;const input=$<HTMLInputElement>('delete-email');const error=$('delete-error');error.hidden=true;if(input.value.trim().toLowerCase()!==email.toLowerCase()){error.textContent='The email does not match.';error.hidden=false;return;}const button=$<HTMLButtonElement>('delete-yes');button.disabled=true;const {error:deleteError}=await supabase.rpc('delete_my_account');if(deleteError){button.disabled=false;error.textContent='Deleting failed. Contact the crew and we will remove it manually.';error.hidden=false;return;}await supabase.auth.signOut();location.href='/';});start();}
+    $('delete-yes').addEventListener('click',async()=>{
+      if(!supabase)return;
+      const input=$<HTMLInputElement>('delete-email');const error=$('delete-error');error.hidden=true;
+      if(input.value.trim().toLowerCase()!==email.toLowerCase()){error.textContent='The email does not match.';error.hidden=false;return;}
+      const button=$<HTMLButtonElement>('delete-yes');button.disabled=true;
+      const message=$<HTMLInputElement>('rq-msg').value.trim().slice(0,140);
+      const ghost=$<HTMLInputElement>('rq-ghost').checked;
+      const {data:who}=await supabase.auth.getUser();const {data:mine}=await supabase.from('bugs').select('config').eq('user_id',who.user?.id??'').maybeSingle();
+      const {error:deleteError}=await supabase.rpc('ragequit',{p_message:message||null,p_keep_ghost:ghost});
+      if(deleteError){button.disabled=false;error.textContent='Even ragequitting failed. Contact the crew and we will remove it manually.';error.hidden=false;return;}
+      await supabase.auth.signOut();
+      await farewell(mine?.config??null,message);
+      location.href=ghost?'/swarm#ghosts':'/';
+    });
+    // the bug walks off screen, leaving its last words behind
+    function farewell(config:Record<string,unknown>|null,message:string){return new Promise<void>((done)=>{
+      const stage=document.createElement('div');stage.className='rq-stage';
+      const bug=document.createElement('div');bug.className='rq-bug';if(config)bug.innerHTML=bugSVG(config as never,220);
+      const say=document.createElement('p');say.className='rq-say';say.textContent=message||'Bye. Do not miss me.';
+      const sign=document.createElement('p');sign.className='rq-sign';sign.textContent='RAGEQUIT';
+      stage.append(sign,bug,say);document.body.append(stage);
+      setTimeout(done,matchMedia('(prefers-reduced-motion: reduce)').matches?900:3200);
+    });}
+    start();}
   document.addEventListener('astro:page-load',setupAccountPage);
 </script>

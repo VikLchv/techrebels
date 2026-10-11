@@ -6,6 +6,7 @@ import Ambient from '../components/Ambient.astro';
 import RebelMode from '../components/RebelMode.astro';
 import CookieBugs from '../components/CookieBugs.astro';
 import ClosedDoor from '../components/ClosedDoor.astro';
+import Decay from '../components/Decay.astro';
 import { links } from '../config/links';
 
 interface Props { title?: string; description?: string }
@@ -45,6 +46,8 @@ const gated = ['/inside', '/inside/lunapark', '/inside/matches', '/inside/drop']
 
     <div transition:persist="club-ambient"><Ambient /></div>
 
+    <Decay />
+
     <main id="main">
       <slot />
     </main>
@@ -66,6 +69,16 @@ const gated = ['/inside', '/inside/lunapark', '/inside/matches', '/inside/drop']
             <li><a href="/get-involved">Get involved</a></li>
             <li><a href="/crew">The crew</a></li>
             <li><a href="/inside/lunapark">Lunapark</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="eyebrow">Rebel stuff</p>
+          <ul>
+            <li><a href="/sins">Tech sins</a></li>
+            <li><a href="/bounty">Industry bug bounty</a></li>
+            <li><a href="/anti-cfp">Anti-CFP</a></li>
+            <li><a href="/capsule">Time capsule</a></li>
+            <li><a href="/swarm#outbreak">The outbreak</a></li>
             <li><a href="/changelog">Changelog</a></li>
           </ul>
         </div>
@@ -154,7 +167,7 @@ const gated = ['/inside', '/inside/lunapark', '/inside/matches', '/inside/drop']
   .foot { padding: clamp(56px, 8vw, 96px) clamp(16px, 4vw, 48px) calc(env(safe-area-inset-bottom, 0px) + 40px); border-top: 1px solid rgba(237, 231, 220, .08); display: grid; gap: 48px; }
   .foot-mark { margin: 0; font: 800 clamp(4.5rem, 17vw, 15rem)/.8 var(--f-display); letter-spacing: -.055em; color: var(--pink); }
   .foot-mark span { display: block; }
-  .foot-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+  .foot-cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px; }
   .foot ul { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
   .foot a { color: var(--bone); text-decoration: none; opacity: .8; }
   .foot a:hover { opacity: 1; color: var(--lime); }

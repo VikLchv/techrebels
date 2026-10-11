@@ -11,6 +11,7 @@
   })();
 </script>
 
+<!-- psst. the recovery console hides more than it shows. real rebels list everything: ls -a -->
 <div id="intro" role="dialog" aria-modal="true" aria-labelledby="bk-title">
   <div class="bk-noise" aria-hidden="true"></div>
 
@@ -287,6 +288,7 @@
 <script>
   import { bugSVG } from '../lib/bug/render.js';
   import { isOpen, untilChange } from '../lib/hours';
+  import { rememberExploit } from '../lib/entry';
 
   const root = document.documentElement;
   const intro = document.getElementById('intro');
@@ -386,6 +388,14 @@
       if (cmd === 'help') { say('commands: help, hint, ls, whoami, cat <file>, clear'); return; }
       if (cmd === 'hint') { showHint(); say('> a hint appeared in the corner.'); return; }
       if (cmd === 'ls') { say('manifesto.txt   bugs/   safe_mode.lock   fun.exe'); return; }
+      if (cmd === 'ls -a' || cmd === 'ls -la' || cmd === 'ls -al') { say('.   ..   .rebel.key   manifesto.txt   bugs/   safe_mode.lock   fun.exe'); return; }
+      if (cmd.startsWith('cat .rebel')) {
+        rememberExploit('R00T-REBEL');
+        say('.rebel.key: R00T-REBEL', 'ok');
+        say('> exploit found. saved in this browser. when you apply, it puts you first in the queue.');
+        document.dispatchEvent(new CustomEvent('tr:intro', { detail: 'exploit' }));
+        return;
+      }
       if (cmd === 'whoami') { say('a rebel, apparently. rebels do not do safe mode.'); return; }
       if (cmd === 'clear') { log.replaceChildren(); return; }
       if (cmd.startsWith('cat safe_mode')) { say('safe_mode.lock: "Rebels don\'t do safe mode. Turn it off."'); return; }

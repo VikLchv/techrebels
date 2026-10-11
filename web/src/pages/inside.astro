@@ -212,6 +212,7 @@ const nextSessionDate = nextSession?.date.startsWith('[') ? 'Date TBA' : nextSes
 </Club>
 
 <style is:global>
+  .applicant-ticket { margin: 0; justify-self: start; padding: 8px 14px; border-radius: 999px; background: var(--lime); color: var(--night); font: 700 .82rem var(--f-mono); }
   .inside .lrow { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
   .inside-detail-legacy { display: none !important; }
   .in-head { display: grid; grid-template-columns: 200px 1fr; gap: clamp(20px, 4vw, 40px); align-items: center; margin-bottom: clamp(32px, 5vw, 56px); }
@@ -337,6 +338,7 @@ const nextSessionDate = nextSession?.date.startsWith('[') ? 'Date TBA' : nextSes
   import { supabase } from '../lib/supabase';
   import { bugSVG } from '../lib/bug/render.js';
   import { track } from '../lib/track';
+  import { redeemTicket } from '../lib/entry';
 
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   const TEXT = ['full_name', 'title', 'job_title', 'company', 'dream_project'] as const;
@@ -505,7 +507,7 @@ const nextSessionDate = nextSession?.date.startsWith('[') ? 'Date TBA' : nextSes
     if (!session) { $('in-out').hidden = false; return; }
     uid = session.user.id;
     const [{ data: prof }, { data: bug }, { data: admin }, { data: partner }] = await Promise.all([
-      supabase.from('profiles').select('full_name, title, job_title, company, age_range, topics, activities, ambitions, dream_project, matching_consent, marketing_consent, membership_status, city, application_reason, application_contribution, application_submitted_at').eq('id', uid).maybeSingle(),
+      supabase.from('profiles').select('full_name, title, job_title, company, age_range, topics, activities, ambitions, dream_project, matching_consent, marketing_consent, membership_status, city, application_reason, application_contribution, application_submitted_at, entry_route').eq('id', uid).maybeSingle(),
       supabase.from('bugs').select('bug_number, name, config').eq('user_id', uid).maybeSingle(),
       supabase.rpc('is_admin'),
       supabase.rpc('has_role', { requested_role: 'partner' }),
@@ -518,6 +520,15 @@ const nextSessionDate = nextSession?.date.startsWith('[') ? 'Date TBA' : nextSes
 
     if (prof?.membership_status !== 'approved' && !admin) {
       renderApplicant(prof as ApplicantProfile | null, bug, session.user.email ?? '');
+      // an infection code or the intro exploit puts the application first in the queue
+      const route = (await redeemTicket(supabase)) ?? (prof as { entry_route?: 'invite' | 'exploit' } | null)?.entry_route ?? null;
+      if (route) {
+        const note = document.createElement('p');
+        note.className = 'applicant-ticket';
+        note.textContent = route === 'invite' ? 'Infected by a member. Your application jumps the queue.' : 'Exploit accepted. Your application jumps the queue.';
+        $('applicant-copy').after(note);
+        track('entry_ticket', route);
+      }
       return;
     }
 

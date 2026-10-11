@@ -1,10 +1,11 @@
 ---
-interface Props { active: 'overview' | 'profile' | 'matches' | 'lunapark' | 'drop' | 'account' }
+interface Props { active: 'overview' | 'profile' | 'matches' | 'infect' | 'lunapark' | 'drop' | 'account' }
 const { active } = Astro.props;
 const items = [
   ['overview', '/inside', 'Overview'],
   ['profile', '/inside/profile', 'Profile'],
   ['matches', '/inside/matches', 'Matches'],
+  ['infect', '/inside/infect', 'Infect'],
   ['lunapark', '/inside/lunapark', 'Lunapark'],
   ['drop', '/inside/drop', 'Drop'],
   ['account', '/inside/account', 'Account'],

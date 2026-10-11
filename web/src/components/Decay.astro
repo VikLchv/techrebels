@@ -1,0 +1,102 @@
+---
+// The site rots when the community is quiet. After 3 days without activity it starts to decay
+// (washed out colors, cracks, vanishing letters). Any activity repairs it. A bar explains how.
+// ?decay=0.7 previews a state.
+---
+<div class="dc-bar" id="dc-bar" hidden role="status">
+  <div class="dc-in">
+    <p class="dc-msg"><b>Site health <span id="dc-health">100</span>%</b> <span id="dc-why">Nothing happened in the community for a while, so the site is falling apart.</span></p>
+    <div class="dc-fix" aria-label="Ways to repair the site">
+      <span class="dc-label">Repair it:</span>
+      <a href="/lab">Build a bug</a>
+      <a href="/inside/lunapark">Play Bug Rush</a>
+      <a href="/radar">Vote on the Radar</a>
+      <a href="/sins">Confess a tech sin</a>
+    </div>
+    <button type="button" class="dc-x" id="dc-x" aria-label="Hide for now">×</button>
+  </div>
+</div>
+<svg class="dc-cracks" id="dc-cracks" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
+  <path d="M0 120 L140 160 L210 120 L320 210 L360 190 M210 120 L230 40" />
+  <path d="M1000 300 L880 330 L820 410 L700 420 L640 520 M820 410 L860 520 L840 600" />
+  <path d="M120 1000 L180 880 L300 840 L330 760 L420 720 M300 840 L360 900" />
+  <path d="M1000 860 L900 820 L860 740 L760 720" />
+</svg>
+
+<style is:global>
+  .dc-bar { position: sticky; top: 72px; z-index: 40; margin: 0 auto; padding: 10px clamp(16px, 4vw, 48px) 0; }
+  .dc-bar[hidden] { display: none; }
+  .dc-in { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; padding: 12px 44px 12px 16px; border-radius: 14px; background: #2A1416; border: 1.5px solid var(--pink); box-shadow: 4px 4px 0 var(--pink); }
+  .dc-msg { margin: 0; font-size: .9rem; color: var(--bone); }
+  .dc-msg b { color: var(--pink); font-family: var(--f-mono); margin-right: 6px; }
+  .dc-fix { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .dc-label { font: 700 .72rem var(--f-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .dc-fix a { padding: 5px 11px; border-radius: 999px; background: var(--lime); color: var(--night); text-decoration: none; font: 700 .8rem "Satoshi", system-ui, sans-serif; }
+  .dc-fix a:hover { background: var(--bone); }
+  .dc-x { position: absolute; right: 10px; top: 8px; background: none; border: 0; color: var(--bone); font-size: 1.4rem; cursor: pointer; }
+  .dc-cracks { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 30; pointer-events: none; opacity: 0; }
+  .dc-cracks path { fill: none; stroke: rgba(237, 231, 220, .35); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+
+  html.decaying { --d: 0; }
+  html.decaying .dc-cracks { opacity: calc(var(--d) * 1); }
+  html.decaying .club main { filter: saturate(calc(1 - var(--d) * .7)) sepia(calc(var(--d) * .35)) contrast(calc(1 - var(--d) * .12)); }
+  html.decaying .club main p:nth-of-type(3n+2) { opacity: calc(1 - var(--d) * .7); }
+  html.decaying .club main .pill:nth-of-type(2n) { transform: rotate(calc(var(--d) * 7deg)) translateY(calc(var(--d) * 8px)); }
+  html.decaying .club main section:nth-of-type(3n) { transform: translateY(calc(var(--d) * 14px)) rotate(calc(var(--d) * -.8deg)); }
+  html.decay-hard .club main h1, html.decay-hard .club main h2 { animation: dc-flicker 4s steps(1) infinite; }
+  .dc-gone { color: transparent !important; text-shadow: none !important; border-bottom: 2px dotted rgba(237, 231, 220, .25); }
+  @keyframes dc-flicker { 0%, 88%, 100% { opacity: 1; } 89% { opacity: .25; } 91% { opacity: .9; } 93% { opacity: .1; } 95% { opacity: 1; } }
+  @media (max-width: 760px) { .dc-bar { top: 64px; } .dc-in { font-size: .85rem; } }
+  @media (prefers-reduced-motion: reduce) { html.decay-hard .club main h1, html.decay-hard .club main h2 { animation: none; } }
+</style>
+
+<script>
+  import { supabase } from '../lib/supabase';
+
+  const KEY = 'tr-decay-hidden';
+  const ago = (days: number) => days < 1 ? 'less than a day' : `${Math.floor(days)} ${Math.floor(days) === 1 ? 'day' : 'days'}`;
+
+  // a few letters in each heading go missing, more the worse it gets
+  function eatLetters(d: number) {
+    document.querySelectorAll<HTMLElement>('.club main h1, .club main h2').forEach((h) => {
+      if (h.childElementCount || h.dataset.eaten) return;
+      const text = h.textContent ?? '';
+      const n = Math.round(text.replace(/\s/g, '').length * d * 0.25);
+      if (!n) return;
+      const idx = new Set<number>();
+      for (let k = 0; k < n * 3 && idx.size < n; k++) { const i = (Math.random() * text.length) | 0; if (text[i].trim()) idx.add(i); }
+      h.replaceChildren(...[...text].map((ch, i) => {
+        if (!idx.has(i)) return document.createTextNode(ch);
+        const s = document.createElement('span'); s.className = 'dc-gone'; s.textContent = ch; return s;
+      }));
+      h.dataset.eaten = '1';
+      h.setAttribute('aria-label', text);
+    });
+  }
+
+  async function run() {
+    const q = new URLSearchParams(location.search).get('decay');
+    let d = 0, days = 0;
+    if (q !== null) { d = Math.max(0, Math.min(1, Number(q) || 0)); days = 3 + d * 11; }
+    else if (supabase) {
+      const { data, error } = await supabase.rpc('community_health');
+      if (error || !data) return;
+      d = Number(data.decay) || 0; days = Number(data.days_quiet) || 0;
+    }
+    if (d <= 0) return;
+    const root = document.documentElement;
+    root.classList.add('decaying');
+    root.classList.toggle('decay-hard', d > 0.35);
+    root.style.setProperty('--d', d.toFixed(3));
+    eatLetters(d);
+    let hidden = false;
+    try { hidden = sessionStorage.getItem(KEY) === '1'; } catch {}
+    const bar = document.getElementById('dc-bar');
+    if (!bar || hidden) return;
+    document.getElementById('dc-health')!.textContent = String(Math.round((1 - d) * 100));
+    document.getElementById('dc-why')!.textContent = `No sign of life in the community for ${ago(days)}, so the site is falling apart. Any of these fixes it for everyone:`;
+    bar.hidden = false;
+    document.getElementById('dc-x')?.addEventListener('click', () => { bar.hidden = true; try { sessionStorage.setItem(KEY, '1'); } catch {} });
+  }
+  run();
+</script>

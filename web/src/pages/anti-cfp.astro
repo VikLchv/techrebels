@@ -1,0 +1,85 @@
+---
+// Anti-CFP: no speaker application. Tell us which tech opinion is complete nonsense.
+// The best controversies become Rebel Session topics.
+import Club from '../layouts/Club.astro';
+---
+<Club title="Anti-CFP · techRebels" description="No call for papers. Tell us which opinion in tech is complete nonsense. The best controversies become Rebel Session topics.">
+  <section class="block first acfp">
+    <div class="acfp-grid">
+      <div class="head">
+        <p class="eyebrow">Anti-CFP</p>
+        <h1 class="h2">We don't want your talk. We want your hot take.</h1>
+        <p class="lede">No abstract, no bio, no slides. Just one opinion in tech you think is complete nonsense, and why. The spiciest ones become Rebel Session topics, and yes, you might end up defending yours on stage.</p>
+        <ul class="acfp-ex" aria-label="Examples">
+          <li>"Everyone should learn to code."</li>
+          <li>"AI will replace juniors."</li>
+          <li>"Culture fit matters most."</li>
+        </ul>
+      </div>
+
+      <form class="acfp-form" id="acfp-form" novalidate>
+        <label>The opinion that is total nonsense<textarea id="acfp-take" rows="2" required minlength="8" maxlength="120" placeholder="Hustle culture builds great products."></textarea></label>
+        <label>Why it is wrong <span class="opt">optional</span><textarea id="acfp-why" rows="3" maxlength="800"></textarea></label>
+        <div class="acfp-two">
+          <label>Your name<input id="acfp-name" required maxlength="80" autocomplete="name" /></label>
+          <label>Your email<input id="acfp-email" type="email" required maxlength="120" autocomplete="email" /></label>
+        </div>
+        <label class="acfp-check"><input type="checkbox" id="acfp-stage" /> I would defend this on stage.</label>
+        <label class="acfp-check"><input type="checkbox" id="acfp-consent" required /> techRebels may contact me about this take.</label>
+        <label class="hp" aria-hidden="true">Website<input id="acfp-web" tabindex="-1" autocomplete="off" /></label>
+        <button class="pill pill-pink" type="submit">Drop the take <span aria-hidden="true">→</span></button>
+        <p class="acfp-note" id="acfp-note" role="status"></p>
+      </form>
+    </div>
+  </section>
+</Club>
+
+<style is:global>
+  .acfp-grid { display: grid; grid-template-columns: 1fr minmax(0, 520px); gap: clamp(28px, 5vw, 64px); align-items: start; }
+  .acfp-ex { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 8px; }
+  .acfp-ex li { justify-self: start; padding: 8px 14px; border-radius: 10px; background: var(--night-2); font-weight: 700; text-decoration: line-through; text-decoration-color: var(--pink); text-decoration-thickness: 3px; transform: rotate(var(--r, -1deg)); }
+  .acfp-ex li:nth-child(2) { --r: 1.5deg; } .acfp-ex li:nth-child(3) { --r: -.5deg; }
+  .acfp-form { display: grid; gap: 14px; padding: 22px; border-radius: 22px; background: var(--night-2); border: 1.5px solid rgba(237, 231, 220, .12); box-shadow: 6px 6px 0 var(--pink); }
+  .acfp-form label { display: grid; gap: 6px; font-weight: 700; font-size: .9rem; }
+  .acfp-form input:not([type=checkbox]), .acfp-form textarea { font: 500 .95rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 12px; padding: 11px 13px; }
+  .acfp-form input:focus, .acfp-form textarea:focus { outline: none; border-color: var(--pink); }
+  .acfp-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .acfp-check { display: flex !important; align-items: center; gap: 8px; font-weight: 500 !important; color: #C3CBC6; }
+  .acfp-check input { width: 16px; height: 16px; accent-color: var(--pink); }
+  .acfp-form .pill { justify-self: start; }
+  .acfp-note { margin: 0; min-height: 1.1em; font: 500 .82rem var(--f-mono); color: var(--mint); }
+  .hp { position: absolute !important; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  @media (max-width: 860px) { .acfp-grid { grid-template-columns: 1fr; } .acfp-two { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  import { supabase } from '../lib/supabase';
+  import { track } from '../lib/track';
+
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const val = (id: string) => ($(id) as HTMLInputElement).value.trim();
+
+  if (supabase) supabase.auth.getSession().then(({ data }) => { if (data.session?.user.email) $<HTMLInputElement>('acfp-email').value = data.session.user.email; });
+
+  $('acfp-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = $<HTMLFormElement>('acfp-form');
+    const note = $('acfp-note');
+    const bad = [...form.querySelectorAll<HTMLInputElement>('input:not(#acfp-web), textarea')].find((el) => !el.checkValidity());
+    if (bad) { note.textContent = 'Fill in the take, your name, a valid email and tick the consent box.'; bad.focus(); return; }
+    if (val('acfp-web')) { form.reset(); note.textContent = 'Take received.'; return; }
+    if (!supabase) { note.textContent = 'Not connected yet.'; return; }
+    const stage = $<HTMLInputElement>('acfp-stage').checked;
+    const { error } = await supabase.from('submissions').insert({
+      kind: 'anti_cfp', consent: true,
+      name: val('acfp-name').slice(0, 80), email: val('acfp-email').slice(0, 120),
+      topic: val('acfp-take').slice(0, 120),
+      details: val('acfp-why').slice(0, 800) || null,
+      kind_detail: stage ? 'would defend on stage' : null,
+    });
+    if (error) { note.textContent = 'The take bounced. Try again in a moment.'; console.error(error); return; }
+    form.reset();
+    note.textContent = 'Spicy. The crew will read it with popcorn.';
+    track('anti_cfp', stage ? 'stage' : 'take');
+  });
+</script>

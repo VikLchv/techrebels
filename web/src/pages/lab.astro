@@ -110,6 +110,7 @@ const swatch = (key: string, v: string) => {
 </Club>
 
 <style is:global>
+  .lab-infected { margin: 0 0 18px; display: inline-block; padding: 10px 16px; border-radius: 12px; background: var(--lime); color: var(--night); font: 700 .9rem var(--f-mono); box-shadow: 4px 4px 0 var(--pink); }
   .lab-page { padding-top: clamp(40px, 6vw, 80px); }
   .lab { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); gap: clamp(24px, 4vw, 56px); align-items: start; }
   .lab-left { position: sticky; top: 88px; display: grid; gap: 18px; }
@@ -181,6 +182,18 @@ const swatch = (key: string, v: string) => {
   import { applyCardBg, renderCardPNG, severityOf } from '../lib/bug/card';
   import { supabase } from '../lib/supabase';
   import { track } from '../lib/track';
+  import { rememberInfection } from '../lib/entry';
+
+  // ?infect=CODE: a member shared one of their invites
+  const infectCode = new URLSearchParams(location.search).get('infect');
+  if (infectCode) {
+    rememberInfection(infectCode);
+    const note = document.createElement('p');
+    note.className = 'lab-infected';
+    note.textContent = 'You have been infected by a rebel. Build your bug and apply: your application jumps the queue.';
+    document.querySelector('main section')?.prepend(note);
+    track('infect_link');
+  }
 
   type State = Record<string, string | number>;
   const KEYS = ['role', 'shape', 'pose', 'attitude', 'shell', 'pattern', 'accent', 'eyes', 'eyewear', 'mouth', 'antennae', 'hat', 'extra', 'bg', 'bgpattern'];

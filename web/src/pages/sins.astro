@@ -1,0 +1,115 @@
+---
+// Tech sins: an anonymous confession wall. Icebreakers for Rebel Sessions.
+import Club from '../layouts/Club.astro';
+---
+<Club title="Tech sins · techRebels" description="Anonymous confessions from people in tech. Pushed to prod on a Friday? You are not alone.">
+  <section class="block first sins">
+    <div class="head">
+      <p class="eyebrow">Confession booth</p>
+      <h1 class="h2">Tech sins.</h1>
+      <p class="lede">Anonymous. Nobody sees who wrote what, not even the crew. Confess, then absolve the others with a "me too". The best ones get read out loud before a Rebel Session.</p>
+    </div>
+
+    <form class="sn-form" id="sn-form" hidden novalidate>
+      <label for="sn-body">Forgive me, rebels, for I have…</label>
+      <textarea id="sn-body" rows="2" maxlength="280" required placeholder="pushed to production on Friday at 17:00"></textarea>
+      <div class="sn-row"><span id="sn-left">280</span><button class="pill pill-pink" type="submit">Confess <span aria-hidden="true">→</span></button></div>
+      <p class="sn-note" id="sn-note" role="status"></p>
+    </form>
+    <p class="sn-login" id="sn-login"><a class="pill pill-ghost" href="/login?next=%2Fsins">Log in to confess</a> <span>Reading is free. Confessing needs an account, so the wall stays human.</span></p>
+
+    <div class="sn-wall" id="sn-wall" aria-live="polite"><p class="sn-empty">Opening the confession booth…</p></div>
+  </section>
+</Club>
+
+<style is:global>
+  .sn-form { display: grid; gap: 10px; max-width: 640px; margin-top: 8px; padding: 18px; border-radius: 18px; background: var(--night-2); border: 1.5px solid rgba(237, 231, 220, .12); }
+  .sn-form[hidden] { display: none; }
+  .sn-form label { font: 800 1.2rem var(--f-display); }
+  .sn-form textarea { font: 500 1rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 12px; padding: 12px 14px; resize: vertical; }
+  .sn-form textarea:focus { outline: none; border-color: var(--pink); }
+  .sn-row { display: flex; justify-content: space-between; align-items: center; font: 500 .8rem var(--f-mono); color: var(--muted); }
+  .sn-note { margin: 0; min-height: 1.1em; font: 500 .82rem var(--f-mono); color: var(--mint); }
+  .sn-login { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; color: var(--muted); }
+  .sn-login[hidden] { display: none; }
+  .sn-wall { margin-top: 30px; columns: 4 230px; column-gap: 16px; }
+  .sn-empty { color: var(--muted); }
+  .sn-card { break-inside: avoid; margin: 0 0 16px; padding: 18px 16px 14px; border-radius: 4px 4px 14px 4px; color: var(--night); background: var(--c); transform: rotate(var(--r)); box-shadow: 0 12px 26px rgba(0, 0, 0, .35); display: grid; gap: 12px; }
+  .sn-card p { margin: 0; font: 700 1.05rem/1.3 "Satoshi", system-ui, sans-serif; }
+  .sn-card footer { display: flex; justify-content: space-between; align-items: center; font: 500 .72rem var(--f-mono); opacity: .75; }
+  .sn-card button { font: 700 .76rem var(--f-mono); color: var(--night); background: rgba(11, 15, 13, .1); border: 1.5px solid rgba(11, 15, 13, .35); border-radius: 999px; padding: 5px 10px; cursor: pointer; }
+  .sn-card button[aria-pressed="true"] { background: var(--night); color: var(--bone); }
+</style>
+
+<script>
+  import { supabase } from '../lib/supabase';
+  import { track } from '../lib/track';
+
+  type Sin = { id: string; body: string; created_at: string; same: number; me_too: boolean };
+  const $ = (id: string) => document.getElementById(id)!;
+  const COLORS = ['var(--pink)', 'var(--lime)', 'var(--mint)', 'var(--bone)', '#E8C9A8'];
+  let signedIn = false;
+
+  const ago = (iso: string) => {
+    const m = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+    if (m < 60) return `${Math.max(m, 1)} min ago`;
+    if (m < 1440) return `${Math.round(m / 60)} h ago`;
+    return `${Math.round(m / 1440)} d ago`;
+  };
+
+  function card(s: Sin, i: number) {
+    const el = document.createElement('article');
+    el.className = 'sn-card';
+    el.style.setProperty('--c', COLORS[i % COLORS.length]);
+    el.style.setProperty('--r', `${((i * 37) % 7) - 3}deg`);
+    const p = document.createElement('p'); p.textContent = s.body;
+    const f = document.createElement('footer');
+    const t = document.createElement('span'); t.textContent = ago(s.created_at);
+    const b = document.createElement('button'); b.type = 'button';
+    const label = () => { b.textContent = `${s.me_too ? 'Me too ✓' : 'Me too'} · ${s.same}`; b.setAttribute('aria-pressed', String(s.me_too)); };
+    label();
+    b.addEventListener('click', async () => {
+      if (!signedIn) { location.href = '/login?next=%2Fsins'; return; }
+      const { data, error } = await supabase!.rpc('toggle_me_too', { p_sin: s.id });
+      if (error) return;
+      s.me_too = !!data; s.same += data ? 1 : -1; label();
+      track('sin_me_too');
+    });
+    f.append(t, b);
+    el.append(p, f);
+    return el;
+  }
+
+  async function load() {
+    const { data, error } = await supabase!.rpc('sins_feed', { p_limit: 120 });
+    const wall = $('sn-wall');
+    if (error) { wall.innerHTML = '<p class="sn-empty">The confession booth is locked. Try again later.</p>'; return; }
+    const sins = (data ?? []) as Sin[];
+    if (!sins.length) { wall.innerHTML = '<p class="sn-empty">No sins yet. Suspiciously clean. Go first.</p>'; return; }
+    wall.replaceChildren(...sins.map((s, i) => card({ ...s, same: Number(s.same) }, i)));
+  }
+
+  $('sn-body').addEventListener('input', () => { $('sn-left').textContent = String(280 - ($('sn-body') as HTMLTextAreaElement).value.length); });
+  $('sn-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const box = $('sn-body') as HTMLTextAreaElement;
+    const body = box.value.trim();
+    if (body.length < 8) { $('sn-note').textContent = 'A sin needs at least 8 characters. Be honest.'; return; }
+    const { error } = await supabase!.rpc('confess_sin', { p_body: body });
+    if (error) { $('sn-note').textContent = error.message.includes('three sins') ? 'Three sins a day is enough. Come back tomorrow.' : 'The booth jammed. Try again.'; return; }
+    box.value = ''; $('sn-left').textContent = '280';
+    $('sn-note').textContent = 'Confessed. You are forgiven. Probably.';
+    track('sin_confessed');
+    load();
+  });
+
+  async function start() {
+    if (!supabase) { $('sn-wall').innerHTML = '<p class="sn-empty">The confession booth is not connected yet.</p>'; return; }
+    const { data } = await supabase.auth.getSession();
+    signedIn = !!data.session;
+    $('sn-form').hidden = !signedIn;
+    $('sn-login').hidden = signedIn;
+    load();
+  }
+  start();
+</script>

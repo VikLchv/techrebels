@@ -29,9 +29,42 @@ import '../styles/swarm.css';
       <div class="sw-grid" id="sw-grid"></div>
     </div>
   </section>
+
+  <section class="block outbreak" id="outbreak">
+    <div class="head">
+      <p class="eyebrow">The outbreak</p>
+      <h2 class="h2">Who infected whom.</h2>
+      <p class="lede">Every member bug carries three infections. This is how the swarm spreads, one invite at a time.</p>
+    </div>
+    <div class="ob-tree" id="ob-tree"><p class="ob-empty">Tracing the infection…</p></div>
+  </section>
+
+  <section class="block ghosts" id="ghosts">
+    <div class="head">
+      <p class="eyebrow">Ragequit wall</p>
+      <h2 class="h2">Gone, not forgotten.</h2>
+      <p class="lede">Rebels who ragequit can leave their bug's ghost and a last message. No names, just the drama.</p>
+    </div>
+    <div class="gh-wall" id="gh-wall"><p class="ob-empty">Summoning ghosts…</p></div>
+  </section>
 </Club>
 
 <style is:global>
+  .ob-tree { display: grid; gap: 14px; margin-top: 20px; }
+  .ob-empty { color: var(--muted); margin: 0; }
+  .ob-chain { padding: 14px 16px; border-radius: 18px; background: var(--night-2); border: 1px solid rgba(237, 231, 220, .08); }
+  .ob-node { display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border-radius: 999px; background: rgba(237, 231, 220, .05); font: 700 .78rem var(--f-mono); }
+  .ob-node svg { width: 34px; height: auto; }
+  .ob-kids { list-style: none; margin: 8px 0 0 18px; padding: 0 0 0 16px; border-left: 2px dashed rgba(205, 220, 39, .45); display: grid; gap: 8px; }
+  .ob-kids > li::before { content: "🦠 "; font-size: .8rem; }
+  .gh-wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-top: 20px; }
+  .gh-card { position: relative; display: grid; justify-items: center; gap: 10px; padding: 18px 14px; border-radius: 18px; background: var(--night-2); border: 1px dashed rgba(237, 231, 220, .16); }
+  .gh-card svg { width: 110px; height: auto; filter: grayscale(1) opacity(.45); animation: gh-float 5s ease-in-out infinite; }
+  .gh-card blockquote { margin: 0; font: 600 .92rem/1.35 "Satoshi", system-ui, sans-serif; text-align: center; color: var(--bone); }
+  .gh-card small { font: 500 .7rem var(--f-mono); color: var(--muted); }
+  @keyframes gh-float { 50% { transform: translateY(-8px) rotate(3deg); } }
+  @media (prefers-reduced-motion: reduce) { .gh-card svg { animation: none; } }
+
   .sw-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 20px; }
   .sw-controls .pill { padding: 11px 18px; font-size: .9rem; }
   .sw-msg { font: 500 .85rem var(--f-mono); color: var(--mint); }
@@ -130,4 +163,72 @@ import '../styles/swarm.css';
   });
 
   start();
+</script>
+
+<script>
+  // outbreak tree and ragequit ghosts
+  import { supabase } from '../lib/supabase';
+  import { bugSVG } from '../lib/bug/render.js';
+
+  type Edge = { from_bug: number; to_bug: number; at: string };
+  type B = { bug_number: number; name: string; config: Record<string, string | number | undefined> };
+  const id = (n: number | null) => n == null ? 'BUG-????' : `BUG-${String(n).padStart(4, '0')}`;
+
+  function node(n: number, bugs: Map<number, B>) {
+    const span = document.createElement('span'); span.className = 'ob-node';
+    const b = bugs.get(n);
+    if (b) span.innerHTML = bugSVG(b.config, 60);
+    span.append(document.createTextNode(`${id(n)}${b ? ' · ' + b.name : ''}`));
+    return span;
+  }
+
+  function branch(n: number, kids: Map<number, number[]>, bugs: Map<number, B>, depth = 0): HTMLElement {
+    const wrap = document.createElement('div');
+    wrap.append(node(n, bugs));
+    const list = kids.get(n) ?? [];
+    if (list.length && depth < 12) {
+      const ul = document.createElement('ul'); ul.className = 'ob-kids';
+      for (const k of list) { const li = document.createElement('li'); li.append(branch(k, kids, bugs, depth + 1)); ul.append(li); }
+      wrap.append(ul);
+    }
+    return wrap;
+  }
+
+  async function outbreak() {
+    const box = document.getElementById('ob-tree')!;
+    if (!supabase) { box.innerHTML = '<p class="ob-empty">Not connected yet.</p>'; return; }
+    const [{ data: edges, error }, { data: swarm }] = await Promise.all([
+      supabase.rpc('infection_tree'),
+      supabase.rpc('get_swarm', { max_rows: 1000 }),
+    ]);
+    if (error) { box.innerHTML = '<p class="ob-empty">The outbreak map is not installed yet.</p>'; return; }
+    const list = (edges ?? []) as Edge[];
+    if (!list.length) { box.innerHTML = '<p class="ob-empty">Patient zero is still waiting. Members: open a vial in Inside → Infect.</p>'; return; }
+    const bugs = new Map(((swarm ?? []) as B[]).map((b) => [b.bug_number, b]));
+    const kids = new Map<number, number[]>();
+    const infected = new Set<number>();
+    for (const e of list) { kids.set(e.from_bug, [...(kids.get(e.from_bug) ?? []), e.to_bug]); infected.add(e.to_bug); }
+    const roots = [...kids.keys()].filter((n) => !infected.has(n));
+    box.replaceChildren(...roots.map((r) => { const c = document.createElement('div'); c.className = 'ob-chain'; c.append(branch(r, kids, bugs)); return c; }));
+  }
+
+  async function ghosts() {
+    const box = document.getElementById('gh-wall')!;
+    if (!supabase) { box.innerHTML = ''; return; }
+    const { data, error } = await supabase.rpc('ghost_wall', { p_limit: 40 });
+    if (error) { box.innerHTML = '<p class="ob-empty">The ghost wall is not installed yet.</p>'; return; }
+    const rows = (data ?? []) as { bug_number: number | null; config: Record<string, string | number | undefined> | null; message: string | null; left_at: string }[];
+    if (!rows.length) { box.innerHTML = '<p class="ob-empty">Nobody has ragequit. Yet.</p>'; return; }
+    box.replaceChildren(...rows.map((g) => {
+      const card = document.createElement('article'); card.className = 'gh-card';
+      if (g.config) card.innerHTML = bugSVG(g.config, 160);
+      const q = document.createElement('blockquote'); q.textContent = g.message ? `“${g.message}”` : '…';
+      const s = document.createElement('small'); s.textContent = `${id(g.bug_number)} · left ${new Date(g.left_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+      card.append(q, s);
+      return card;
+    }));
+  }
+
+  outbreak();
+  ghosts();
 </script>

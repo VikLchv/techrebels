@@ -152,6 +152,7 @@ const adminSection = pathPart === 'admin' ? 'overview' : pathPart;
   .adm-badge { border-radius: 999px; padding: 5px 9px; color: var(--night); background: var(--mint); font: 700 .68rem var(--f-mono); text-transform: uppercase; }
   .adm-badge.draft { background: var(--lime); }
   .adm-badge.archived { background: var(--muted); }
+  .adm-badge.priority { background: var(--pink); margin-left: 6px; }
   .adm-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
   .adm-group { padding: 13px; border-radius: 14px; background: rgba(237,231,220,.04); }
   .adm-group h4 { margin: 0 0 8px; color: var(--pink); }
@@ -214,7 +215,7 @@ const adminSection = pathPart === 'admin' ? 'overview' : pathPart;
     clearError();
     const results = await Promise.all([
       supabase!.rpc('admin_stats'),
-      supabase!.from('profiles').select('id,email,full_name,title,job_title,company,topics,activities,ambitions,matching_consent,marketing_consent,created_at,membership_status,city,application_reason,application_contribution,application_submitted_at,reviewed_at,admin_note,approved_at').order('created_at', { ascending: false }),
+      supabase!.from('profiles').select('id,email,full_name,title,job_title,company,topics,activities,ambitions,matching_consent,marketing_consent,created_at,membership_status,city,application_reason,application_contribution,application_submitted_at,reviewed_at,admin_note,approved_at,entry_route,entry_priority').order('created_at', { ascending: false }),
       supabase!.from('community_invites').select('id,email,role,message,status,invited_by,invited_user_id,expires_at,accepted_at,created_at').order('created_at', { ascending: false }),
       supabase!.from('user_roles').select('user_id,role,created_at'),
       supabase!.from('admin_audit_log').select('id,actor_id,target_user_id,action,details,created_at').order('created_at', { ascending: false }).limit(100),
@@ -287,7 +288,7 @@ const adminSection = pathPart === 'admin' ? 'overview' : pathPart;
       .filter((p) => p.application_submitted_at && p.membership_status !== 'approved')
       .sort((a, b) => {
         const rank = (status: string) => status === 'pending' ? 0 : status === 'waitlisted' ? 1 : status === 'rejected' ? 2 : 3;
-        return rank(a.membership_status) - rank(b.membership_status) || String(b.application_submitted_at).localeCompare(String(a.application_submitted_at));
+        return rank(a.membership_status) - rank(b.membership_status) || Number(!!b.entry_priority) - Number(!!a.entry_priority) || String(b.application_submitted_at).localeCompare(String(a.application_submitted_at));
       });
     const pending = applications.filter((p) => p.membership_status === 'pending').length;
     $('application-count').textContent = `${pending} awaiting review · ${applications.length} open`;
@@ -305,6 +306,7 @@ const adminSection = pathPart === 'admin' ? 'overview' : pathPart;
       actions.append(note, buttons);
       const status = document.createElement('span'); status.className = `adm-badge ${p.membership_status === 'pending' ? 'draft' : ''}`; status.textContent = p.membership_status;
       const applicant = personCell(p.full_name, p.email, [p.city, p.company].filter(Boolean).join(' · ')); applicant.append(status);
+      if (p.entry_route) { const ticket = document.createElement('span'); ticket.className = 'adm-badge priority'; ticket.textContent = p.entry_route === 'invite' ? 'infected · priority' : 'exploit · priority'; applicant.append(ticket); }
       row.append(td(date(p.application_submitted_at)), td(applicant), td(application), td(bug ? `BUG-${String(bug.bug_number).padStart(4, '0')} · ${bug.name}` : 'No bug'), td(actions));
       return row;
     });
