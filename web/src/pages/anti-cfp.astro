@@ -37,17 +37,17 @@ import Club from '../layouts/Club.astro';
 <style is:global>
   .acfp-grid { display: grid; grid-template-columns: 1fr minmax(0, 520px); gap: clamp(28px, 5vw, 64px); align-items: start; }
   .acfp-ex { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 8px; }
-  .acfp-ex li { justify-self: start; padding: 8px 14px; border-radius: 10px; background: var(--night-2); font-weight: 700; text-decoration: line-through; text-decoration-color: var(--pink); text-decoration-thickness: 3px; transform: rotate(var(--r, -1deg)); }
+  .acfp-ex li { justify-self: start; padding: 8px 14px; border-radius: 10px; background: var(--bg-2); font-weight: 700; text-decoration: line-through; text-decoration-color: var(--pink); text-decoration-thickness: 3px; transform: rotate(var(--r, -1deg)); }
   .acfp-ex li:nth-child(2) { --r: 1.5deg; } .acfp-ex li:nth-child(3) { --r: -.5deg; }
-  .acfp-form { display: grid; gap: 14px; padding: 22px; border-radius: 22px; background: var(--night-2); border: 1.5px solid rgba(237, 231, 220, .12); box-shadow: 6px 6px 0 var(--pink); }
+  .acfp-form { display: grid; gap: 14px; padding: 22px; border-radius: 22px; background: var(--bg-2); border: 1.5px solid rgba(var(--fg-rgb), .12); box-shadow: 6px 6px 0 var(--pink); }
   .acfp-form label { display: grid; gap: 6px; font-weight: 700; font-size: .9rem; }
-  .acfp-form input:not([type=checkbox]), .acfp-form textarea { font: 500 .95rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 12px; padding: 11px 13px; }
+  .acfp-form input:not([type=checkbox]), .acfp-form textarea { font: 500 .95rem "Satoshi", system-ui, sans-serif; color: var(--fg); background: var(--bg); border: 1.5px solid rgba(var(--fg-rgb), .16); border-radius: 12px; padding: 11px 13px; }
   .acfp-form input:focus, .acfp-form textarea:focus { outline: none; border-color: var(--pink); }
   .acfp-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .acfp-check { display: flex !important; align-items: center; gap: 8px; font-weight: 500 !important; color: #C3CBC6; }
+  .acfp-check { display: flex !important; align-items: center; gap: 8px; font-weight: 500 !important; color: var(--soft); }
   .acfp-check input { width: 16px; height: 16px; accent-color: var(--pink); }
   .acfp-form .pill { justify-self: start; }
-  .acfp-note { margin: 0; min-height: 1.1em; font: 500 .82rem var(--f-mono); color: var(--mint); }
+  .acfp-note { margin: 0; min-height: 1.1em; font: 500 .82rem var(--f-mono); color: var(--mint-text); }
   .hp { position: absolute !important; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   @media (max-width: 860px) { .acfp-grid { grid-template-columns: 1fr; } .acfp-two { grid-template-columns: 1fr; } }
 </style>

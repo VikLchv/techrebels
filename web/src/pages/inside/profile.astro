@@ -36,7 +36,7 @@ const chips = (name: string, items: string[], type: 'checkbox' | 'radio' = 'chec
   </section>
 </Club>
 
-<style is:global>.profile-consents { display:grid; gap:12px; padding-top:18px; border-top:1px solid rgba(237,231,220,.1); }</style>
+<style is:global>.profile-consents { display:grid; gap:12px; padding-top:18px; border-top:1px solid rgba(var(--fg-rgb), .1); }</style>
 
 <script>
   import { supabase } from '../../lib/supabase';

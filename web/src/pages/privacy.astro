@@ -65,22 +65,22 @@ import { contactEmail } from '../config/site';
   .privacy { display: grid; gap: 28px; }
   .privacy-head { display: grid; gap: 14px; max-width: 850px; }
   .privacy-updated { margin: 0; color: var(--muted); font: 500 .76rem var(--f-mono); }
-  .privacy-warning { max-width: 950px; padding: 16px 18px; border: 1.5px solid var(--pink); border-radius: 16px; background: rgba(244,165,212,.08); color: #D6DCD8; }
-  .privacy-warning strong { color: var(--pink); }
+  .privacy-warning { max-width: 950px; padding: 16px 18px; border: 1.5px solid var(--pink); border-radius: 16px; background: rgba(244,165,212,.08); color: var(--soft); }
+  .privacy-warning strong { color: var(--pink-text); }
   .privacy-grid { display: grid; grid-template-columns: 220px minmax(0, 760px); gap: clamp(28px, 6vw, 80px); align-items: start; }
   .privacy aside { position: sticky; top: 100px; }
   .privacy aside nav { display: grid; gap: 9px; }
   .privacy aside a { color: var(--muted); text-decoration: none; font: 600 .78rem var(--f-mono); }
-  .privacy aside a:hover { color: var(--lime); }
+  .privacy aside a:hover { color: var(--lime-text); }
   .privacy-copy { display: grid; gap: 42px; }
   .privacy-copy section { scroll-margin-top: 100px; }
-  .privacy-copy h2 { margin: 0 0 12px; color: var(--pink); font: 800 clamp(1.45rem, 3vw, 2rem)/1 var(--f-display); }
-  .privacy-copy p, .privacy-copy li { color: #C3CBC6; }
+  .privacy-copy h2 { margin: 0 0 12px; color: var(--pink-text); font: 800 clamp(1.45rem, 3vw, 2rem)/1 var(--f-display); }
+  .privacy-copy p, .privacy-copy li { color: var(--soft); }
   .privacy-copy p { margin: 0 0 12px; }
   .privacy-copy ul { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
-  .privacy-copy strong { color: var(--bone); }
-  .privacy-table { display: grid; gap: 1px; margin-bottom: 16px; background: rgba(237,231,220,.1); border: 1px solid rgba(237,231,220,.1); border-radius: 16px; overflow: hidden; }
-  .privacy-table > div { display: grid; grid-template-columns: minmax(180px,.8fr) minmax(0,1.2fr); gap: 18px; padding: 15px; background: var(--night-2); }
-  .privacy-table span { color: #C3CBC6; }
+  .privacy-copy strong { color: var(--fg); }
+  .privacy-table { display: grid; gap: 1px; margin-bottom: 16px; background: rgba(var(--fg-rgb), .1); border: 1px solid rgba(var(--fg-rgb), .1); border-radius: 16px; overflow: hidden; }
+  .privacy-table > div { display: grid; grid-template-columns: minmax(180px,.8fr) minmax(0,1.2fr); gap: 18px; padding: 15px; background: var(--bg-2); }
+  .privacy-table span { color: var(--soft); }
   @media (max-width: 760px) { .privacy-grid { grid-template-columns: 1fr; } .privacy aside { position: static; } .privacy aside nav { display: flex; flex-wrap: wrap; gap: 8px 14px; } .privacy-table > div { grid-template-columns: 1fr; gap: 5px; } }
 </style>

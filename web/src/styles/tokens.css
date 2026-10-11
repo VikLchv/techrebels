@@ -25,6 +25,41 @@
 
   --r-tile: 22px;
   --r-win: 14px;
+
+  /* semantic theme tokens: pages use these, the light theme overrides them */
+  --bg: var(--night);
+  --bg-2: var(--night-2);
+  --fg: var(--bone);
+  --soft: #C3CBC6;
+  --on-dark: var(--bone);
+  --fg-rgb: 237, 231, 220;
+  --bg-rgb: 11, 15, 13;
+  --bg2-rgb: 19, 26, 23;
+  --glow: #18241F;
+  --lime-text: var(--lime);
+  --mint-text: var(--mint);
+  --pink-text: var(--pink);
+  --scan: .25;
+}
+
+/* Light mode: the same brand printed on warm paper. Accents stay loud on surfaces;
+   accent text gets darker inks so it stays readable on light backgrounds. */
+html[data-theme="light"] {
+  color-scheme: light;
+  --bg: #F3EEE3;
+  --bg-2: #FFFCF6;
+  --fg: #141A17;
+  --soft: #3E4843;
+  --muted: #66706B;
+  --line: #D9D1C3;
+  --fg-rgb: 20, 26, 23;
+  --bg-rgb: 243, 238, 227;
+  --bg2-rgb: 255, 252, 246;
+  --glow: #FFFFFF;
+  --lime-text: #5E6A00;
+  --mint-text: #0B7A52;
+  --pink-text: #C23F8E;
+  --scan: .06;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -32,12 +67,13 @@
 html, body { margin: 0; }
 
 body {
-  background-color: var(--night);
+  background-color: var(--bg);
   background-image:
-    linear-gradient(rgba(237, 231, 220, .04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(237, 231, 220, .04) 1px, transparent 1px);
+    linear-gradient(rgba(var(--fg-rgb), .04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--fg-rgb), .04) 1px, transparent 1px);
   background-size: 80px 80px;
-  color: var(--bone);
+  color: var(--fg);
+  transition: background-color .3s, color .3s;
   font: 400 16px/1.55 var(--f-mono);
   -webkit-font-smoothing: antialiased;
 }
@@ -49,14 +85,30 @@ body::after {
   inset: 0;
   pointer-events: none;
   background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .12) 0 1px, transparent 1px 3px);
-  opacity: .25;
+  opacity: var(--scan);
   z-index: 9999;
 }
 
 :focus-visible { outline: 3px solid var(--lime); outline-offset: 3px; }
 
-a { color: var(--mint); }
+a { color: var(--mint-text); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* Dark surfaces (purple, green, brown tiles, the swarm screen, the night-time Lunapark) keep light ink in both themes. */
+html[data-theme="light"] :is(.p-bugs, .p-rebels, .w-green, .w-purple, .w-brown, .dc-in, .overview-id, .lsev, .cp-body, .stage, .hx-peek-a, .c-right, .lunapark-page) {
+  --bg: var(--night);
+  --bg-2: var(--night-2);
+  --bg2-rgb: 19, 26, 23;
+  --glow: #18241F;
+  --fg: var(--bone);
+  --soft: #C3CBC6;
+  --muted: #A7B2AC;
+  --fg-rgb: 237, 231, 220;
+  --bg-rgb: 11, 15, 13;
+  --lime-text: var(--lime);
+  --mint-text: var(--mint);
+  --pink-text: var(--pink);
 }

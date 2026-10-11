@@ -80,15 +80,15 @@ import { crew } from '../config/site';
   .member-bug svg { display: block; width: 100%; height: auto; }
   .member:hover .member-bug { animation: sticker .6s ease-in-out; }
   @keyframes sticker { 30% { transform: rotate(2deg) scale(1.06); } 60% { transform: rotate(14deg) scale(1.02); } 100% { transform: rotate(10deg); } }
-  .member-tag { position: absolute; left: 16px; top: 16px; background: var(--night); color: var(--lime); font: 700 .78rem var(--f-mono); padding: 6px 12px; border-radius: 999px; transform: rotate(-2deg); }
+  .member-tag { position: absolute; left: 16px; top: 16px; background: var(--bg); color: var(--lime-text); font: 700 .78rem var(--f-mono); padding: 6px 12px; border-radius: 999px; transform: rotate(-2deg); }
   .member-copy { display: grid; gap: 6px; }
   .member-copy h3 { margin: 0; font: 800 clamp(1.9rem, 3vw, 2.4rem)/1 var(--f-display); letter-spacing: -.035em; }
-  .member-copy p { margin: 0; color: #C3CBC6; }
-  .member-role { font: 700 .8rem var(--f-mono) !important; letter-spacing: .14em; text-transform: uppercase; color: var(--pink) !important; }
+  .member-copy p { margin: 0; color: var(--soft); }
+  .member-role { font: 700 .8rem var(--f-mono) !important; letter-spacing: .14em; text-transform: uppercase; color: var(--pink-text) !important; }
   .member-nophoto { position: relative; width: 100%; height: 100%; border-radius: 28px; display: grid; place-items: center; padding: 8%; transform: rotate(-2deg); }
   .member-nophoto svg { display: block; width: 100%; height: auto; }
-  .member-li { justify-self: start; margin-top: 6px; display: inline-flex; gap: 6px; align-items: center; font: 700 .9rem "Satoshi", system-ui, sans-serif; color: var(--bone); text-decoration: none; padding: 8px 14px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px rgba(237, 231, 220, .3); }
-  .member-li:hover { box-shadow: inset 0 0 0 1.5px var(--lime); color: var(--lime); }
+  .member-li { justify-self: start; margin-top: 6px; display: inline-flex; gap: 6px; align-items: center; font: 700 .9rem "Satoshi", system-ui, sans-serif; color: var(--fg); text-decoration: none; padding: 8px 14px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px rgba(var(--fg-rgb), .3); }
+  .member-li:hover { box-shadow: inset 0 0 0 1.5px var(--lime); color: var(--lime-text); }
   @media (max-width: 960px) { .crew-grid { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 600px) { .crew-grid { grid-template-columns: 1fr; } }
 

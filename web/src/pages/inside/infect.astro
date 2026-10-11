@@ -29,17 +29,17 @@ import '../../styles/inside-pages.css';
 
 <style is:global>
   .inf-vials { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-  .inf-vial { position: relative; display: grid; gap: 10px; align-content: start; min-height: 190px; padding: 18px; border-radius: 20px; background: var(--night); border: 1.5px dashed rgba(237, 231, 220, .18); }
+  .inf-vial { position: relative; display: grid; gap: 10px; align-content: start; min-height: 190px; padding: 18px; border-radius: 20px; background: var(--bg); border: 1.5px dashed rgba(var(--fg-rgb), .18); }
   .inf-vial.live { border: 1.5px solid var(--lime); box-shadow: inset 0 -60px 80px -60px rgba(205, 220, 39, .35); }
   .inf-vial.used { border: 1.5px solid var(--pink); box-shadow: inset 0 -60px 80px -60px rgba(244, 165, 212, .35); }
-  .inf-vial h3 { margin: 0; font: 800 1.1rem var(--f-display); color: var(--bone); }
+  .inf-vial h3 { margin: 0; font: 800 1.1rem var(--f-display); color: var(--fg); }
   .inf-vial p { margin: 0; color: var(--muted); font-size: .85rem; }
-  .inf-code { font: 800 1.4rem var(--f-mono); letter-spacing: .12em; color: var(--lime); }
+  .inf-code { font: 800 1.4rem var(--f-mono); letter-spacing: .12em; color: var(--lime-text); }
   .inf-vial .pill { justify-self: start; padding: 9px 15px; font-size: .84rem; }
   .inf-tag { position: absolute; right: 14px; top: 14px; font: 700 .68rem var(--f-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-  .inf-vial.live .inf-tag { color: var(--lime); }
-  .inf-vial.used .inf-tag { color: var(--pink); }
-  .inf-note { min-height: 1.2em; margin: 12px 0; font: 500 .82rem var(--f-mono); color: var(--mint); }
+  .inf-vial.live .inf-tag { color: var(--lime-text); }
+  .inf-vial.used .inf-tag { color: var(--pink-text); }
+  .inf-note { min-height: 1.2em; margin: 12px 0; font: 500 .82rem var(--f-mono); color: var(--mint-text); }
   @media (max-width: 760px) { .inf-vials { grid-template-columns: 1fr; } .inf-vial { min-height: 0; } }
 </style>
 

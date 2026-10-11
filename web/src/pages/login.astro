@@ -23,13 +23,13 @@ import Club from '../layouts/Club.astro';
   .login-card { max-width: 560px; display: grid; gap: 18px; }
   .login-card form { display: grid; gap: 14px; }
   .login-card label { display: grid; gap: 7px; font-weight: 700; }
-  .login-card input { font: 500 1rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night-2); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 14px; padding: 13px 15px; }
+  .login-card input { font: 500 1rem "Satoshi", system-ui, sans-serif; color: var(--fg); background: var(--bg-2); border: 1.5px solid rgba(var(--fg-rgb), .16); border-radius: 14px; padding: 13px 15px; }
   .login-card input:focus { outline: none; border-color: var(--lime); }
   .login-card .pill { justify-self: start; }
   .login-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
-  .login-actions a, .login-new a { color: var(--mint); }
+  .login-actions a, .login-new a { color: var(--mint-text); }
   .login-new { margin: 0; color: var(--muted); }
-  .lerr { margin: 0; color: var(--pink); font-weight: 700; }
+  .lerr { margin: 0; color: var(--pink-text); font-weight: 700; }
 </style>
 
 <script>

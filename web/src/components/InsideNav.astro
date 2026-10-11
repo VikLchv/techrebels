@@ -16,7 +16,7 @@ const items = [
 </nav>
 
 <style is:global>
-  .inside-nav { position: sticky; top: 76px; z-index: 12; display: flex; gap: 7px; margin: 0 0 22px; padding: 8px; overflow-x: auto; border: 1px solid rgba(237,231,220,.1); border-radius: 999px; background: rgba(17,23,19,.88); backdrop-filter: blur(12px); }
+  .inside-nav { position: sticky; top: 76px; z-index: 12; display: flex; gap: 7px; margin: 0 0 22px; padding: 8px; overflow-x: auto; border: 1px solid rgba(var(--fg-rgb), .1); border-radius: 999px; background: rgba(var(--bg2-rgb), .88); backdrop-filter: blur(12px); }
   .inside-nav a { flex: none; padding: 8px 14px; border-radius: 999px; color: var(--muted); text-decoration: none; font: 650 .78rem var(--f-mono); }
   .inside-nav a:hover, .inside-nav a[aria-current="page"] { color: var(--night); background: var(--lime); }
   @media (max-width: 760px) { .inside-nav { top: 68px; border-radius: 18px; } }

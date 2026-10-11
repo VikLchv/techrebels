@@ -86,29 +86,29 @@ import Club from '../layouts/Club.astro';
 
 <style is:global>
   .rd-filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 18px; }
-  .rd-f { display: inline-flex; align-items: center; gap: 8px; font: 700 .9rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: transparent; border: 1.5px solid rgba(237, 231, 220, .2); border-radius: 999px; padding: 9px 16px; cursor: pointer; }
-  .rd-f[aria-pressed="true"] { background: var(--bone); color: var(--night); border-color: var(--bone); }
-  .rd-f .dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 0 1.5px rgba(237, 231, 220, .4); }
-  .rd-sep { width: 1px; height: 24px; background: rgba(237, 231, 220, .2); margin-inline: 4px; }
+  .rd-f { display: inline-flex; align-items: center; gap: 8px; font: 700 .9rem "Satoshi", system-ui, sans-serif; color: var(--fg); background: transparent; border: 1.5px solid rgba(var(--fg-rgb), .2); border-radius: 999px; padding: 9px 16px; cursor: pointer; }
+  .rd-f[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .rd-f .dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 0 1.5px rgba(var(--fg-rgb), .4); }
+  .rd-sep { width: 1px; height: 24px; background: rgba(var(--fg-rgb), .2); margin-inline: 4px; }
 
   .rd-wrap { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); }
   .rd-stage { position: relative; overflow: hidden; border-radius: 28px; aspect-ratio: 16 / 10; min-height: 520px; max-width: 100%;
     background:
       radial-gradient(circle at 50% 50%, rgba(205, 220, 39, .08) 0 12%, transparent 12.2%),
-      repeating-radial-gradient(circle at 50% 50%, transparent 0 9%, rgba(237, 231, 220, .06) 9% 9.25%),
-      radial-gradient(ellipse at 50% 50%, #18241F 0%, var(--night) 75%);
-    border: 1px solid rgba(237, 231, 220, .08); }
+      repeating-radial-gradient(circle at 50% 50%, transparent 0 9%, rgba(var(--fg-rgb), .06) 9% 9.25%),
+      radial-gradient(ellipse at 50% 50%, var(--glow) 0%, var(--bg) 75%);
+    border: 1px solid rgba(var(--fg-rgb), .08); }
   .rd-stage::after { content: ""; position: absolute; left: 50%; top: 50%; width: 140%; aspect-ratio: 1; transform: translate(-50%, -50%); pointer-events: none;
     background: conic-gradient(from 0deg, rgba(205, 220, 39, .16), transparent 18%); border-radius: 50%; animation: sweep 6s linear infinite; }
   @keyframes sweep { to { transform: translate(-50%, -50%) rotate(360deg); } }
-  .rd-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; font: 800 clamp(1.4rem, 4vw, 3rem)/.8 var(--f-display); letter-spacing: -.05em; color: var(--pink); opacity: .9; pointer-events: none; }
+  .rd-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; font: 800 clamp(1.4rem, 4vw, 3rem)/.8 var(--f-display); letter-spacing: -.05em; color: var(--pink-text); opacity: .9; pointer-events: none; }
   .rd-center span { display: block; }
   .rd-loading { position: absolute; left: 50%; bottom: 8%; transform: translateX(-50%); margin: 0; font: 500 .85rem var(--f-mono); color: var(--muted); }
 
   .rd-bug { position: absolute; left: 0; top: 0; display: grid; justify-items: center; gap: 4px; cursor: pointer; border: 0; padding: 0; background: none; color: inherit; will-change: transform; transition: opacity .3s; z-index: 2; }
   .rd-bug svg { display: block; width: var(--w, 70px); height: auto; transform: rotate(var(--tilt, 0deg)); transition: transform .2s; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .45)); }
   .rd-bug:hover svg, .rd-bug:focus-visible svg { transform: scale(1.12) rotate(-6deg); }
-  .rd-bug .lbl { position: absolute; left: 50%; top: 100%; transform: translate(-50%, 4px); width: max-content; max-width: 180px; text-align: center; font: 700 .74rem/1.15 "Satoshi", system-ui, sans-serif; color: var(--bone); background: rgba(11, 15, 13, .88); padding: 5px 10px; border-radius: 10px; opacity: 0; transition: opacity .15s; pointer-events: none; z-index: 5; }
+  .rd-bug .lbl { position: absolute; left: 50%; top: 100%; transform: translate(-50%, 4px); width: max-content; max-width: 180px; text-align: center; font: 700 .74rem/1.15 "Satoshi", system-ui, sans-serif; color: var(--fg); background: rgba(var(--bg-rgb), .88); padding: 5px 10px; border-radius: 10px; opacity: 0; transition: opacity .15s; pointer-events: none; z-index: 5; }
   .rd-bug:hover .lbl, .rd-bug:focus-visible .lbl, .rd-bug.sel .lbl, .rd-bug.top .lbl { opacity: 1; }
   .rd-bug:hover, .rd-bug:focus-visible, .rd-bug.sel { z-index: 6; }
   .rd-bug.person .lbl { border: 1.5px solid var(--pink); }
@@ -118,25 +118,25 @@ import Club from '../layouts/Club.astro';
   .rd-bug svg { transition: transform .2s, opacity .3s, filter .3s; }
   .rd-bug.mine svg { filter: drop-shadow(0 0 10px rgba(205, 220, 39, .75)) drop-shadow(0 6px 10px rgba(0, 0, 0, .45)); }
   .rd-bug.mine .lbl { opacity: 1; border: 1.5px solid var(--lime); }
-  .rd-bug.mine .lbl::before { content: "✓ "; color: var(--lime); }
+  .rd-bug.mine .lbl::before { content: "✓ "; color: var(--lime-text); }
   .rd-bug.mine { z-index: 4; }
 
-  .rd-card { position: absolute; right: 16px; top: 16px; bottom: 16px; width: min(380px, calc(100% - 32px)); overflow: auto; z-index: 10; background: var(--night-2); border: 1.5px solid rgba(237, 231, 220, .14); border-radius: 22px; padding: 22px; display: grid; gap: 10px; align-content: start; box-shadow: 0 30px 70px rgba(0, 0, 0, .5); }
+  .rd-card { position: absolute; right: 16px; top: 16px; bottom: 16px; width: min(380px, calc(100% - 32px)); overflow: auto; z-index: 10; background: var(--bg-2); border: 1.5px solid rgba(var(--fg-rgb), .14); border-radius: 22px; padding: 22px; display: grid; gap: 10px; align-content: start; box-shadow: 0 30px 70px rgba(0, 0, 0, .5); }
   .rd-card { display: flex; flex-direction: column; } .rd-card > * { flex-shrink: 0; }
   .rd-card[hidden] { display: none; }
-  .rd-close { position: absolute; right: 12px; top: 10px; background: none; border: 0; color: var(--bone); font-size: 1.6rem; cursor: pointer; line-height: 1; }
+  .rd-close { position: absolute; right: 12px; top: 10px; background: none; border: 0; color: var(--fg); font-size: 1.6rem; cursor: pointer; line-height: 1; }
   .rd-card-bug { width: 110px; border-radius: 18px; padding: 6px; }
   .rd-card-bug svg { display: block; width: 100%; height: auto; }
-  .rd-meta { margin: 0; font: 500 .78rem var(--f-mono); color: var(--mint); letter-spacing: .06em; text-transform: uppercase; }
-  .rd-card h2 { margin: 0; font: 800 1.7rem/1 var(--f-display); letter-spacing: -.03em; color: var(--bone); }
-  .rd-desc { margin: 0; color: #C3CBC6; }
+  .rd-meta { margin: 0; font: 500 .78rem var(--f-mono); color: var(--mint-text); letter-spacing: .06em; text-transform: uppercase; }
+  .rd-card h2 { margin: 0; font: 800 1.7rem/1 var(--f-display); letter-spacing: -.03em; color: var(--fg); }
+  .rd-desc { margin: 0; color: var(--soft); }
   .rd-votes { margin: 0; font: 500 .85rem var(--f-mono); color: var(--muted); }
-  .rd-votes b { font: 800 1.6rem var(--f-display); color: var(--lime); }
+  .rd-votes b { font: 800 1.6rem var(--f-display); color: var(--lime-text); }
   .rd-actions { display: flex; flex-wrap: wrap; gap: 8px; }
   .rd-actions .pill { padding: 10px 16px; font-size: .9rem; }
   #rd-vote[aria-pressed="true"] { background: var(--lime); }
-  .rd-note { margin: 0; min-height: 1.1em; font: 500 .82rem var(--f-mono); color: var(--mint); }
-  .rd-note a { color: var(--pink); }
+  .rd-note { margin: 0; min-height: 1.1em; font: 500 .82rem var(--f-mono); color: var(--mint-text); }
+  .rd-note a { color: var(--pink-text); }
   .rd-tip, #rd-suggest-form { display: grid; gap: 12px; }
   .rd-tip { order: 10; }
   .rd-tip .rd-tip-sub { margin: 0; font: 500 .78rem var(--f-mono); color: var(--muted); }
@@ -144,10 +144,10 @@ import Club from '../layouts/Club.astro';
   .rd-tip-h { margin: 0; font-weight: 700; }
   .rd-tip label, #rd-suggest-form label:not(.lchip) { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; font-weight: 700; font-size: .88rem; }
   .rd-tip label > input:not([type=checkbox]), .rd-tip label > textarea, #rd-suggest-form label > input { flex-basis: 100%; }
-  .rd-tip input:not([type=checkbox]), .rd-tip textarea, #rd-suggest-form input:not([type=radio]) { font: 500 .95rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 12px; padding: 10px 12px; width: 100%; }
+  .rd-tip input:not([type=checkbox]), .rd-tip textarea, #rd-suggest-form input:not([type=radio]) { font: 500 .95rem "Satoshi", system-ui, sans-serif; color: var(--fg); background: var(--bg); border: 1.5px solid rgba(var(--fg-rgb), .16); border-radius: 12px; padding: 10px 12px; width: 100%; }
   .rd-tip input:focus, .rd-tip textarea:focus, #rd-suggest-form input:focus { outline: none; border-color: var(--lime); }
   .rd-tip .f2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .rd-tip .check { display: flex !important; align-items: flex-start; gap: 8px; font-weight: 500 !important; color: #C3CBC6; }
+  .rd-tip .check { display: flex !important; align-items: flex-start; gap: 8px; font-weight: 500 !important; color: var(--soft); }
   .rd-tip .check input { width: 16px; height: 16px; margin-top: 3px; accent-color: var(--lime); }
   .rd-tip .pill, #rd-suggest-form .pill { justify-self: start; }
   .opt { font: 500 .72rem var(--f-mono); color: var(--muted); margin-left: 4px; }
@@ -157,17 +157,17 @@ import Club from '../layouts/Club.astro';
   .rd-h { margin: 0; font: 800 clamp(1.7rem, 3vw, 2.3rem)/1 var(--f-display); letter-spacing: -.03em; }
   .rd-sub { margin: 0; color: var(--muted); }
   .rd-list { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 8px; }
-  .rd-row { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding: 12px 16px; border-radius: 16px; background: var(--night-2); border: 1px solid rgba(237, 231, 220, .06); }
+  .rd-row { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; padding: 12px 16px; border-radius: 16px; background: var(--bg-2); border: 1px solid rgba(var(--fg-rgb), .06); }
   .rd-row .pdot { width: 12px; height: 12px; border-radius: 50%; }
   .rd-row b { display: block; }
   .rd-row small { font: 500 .78rem var(--f-mono); color: var(--muted); }
-  .rd-row button { font: 700 .85rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: transparent; border: 1.5px solid rgba(237, 231, 220, .2); border-radius: 999px; padding: 7px 14px; cursor: pointer; white-space: nowrap; }
+  .rd-row button { font: 700 .85rem "Satoshi", system-ui, sans-serif; color: var(--fg); background: transparent; border: 1.5px solid rgba(var(--fg-rgb), .2); border-radius: 999px; padding: 7px 14px; cursor: pointer; white-space: nowrap; }
   .rd-row button[aria-pressed="true"] { background: var(--lime); color: var(--night); border-color: var(--lime); }
   .rd-row[hidden] { display: none; }
   .rd-suggest form { max-width: 560px; margin-top: 8px; }
   .rd-kind { display: flex; gap: 8px; }
   .rd-kind .lchip input { position: absolute; opacity: 0; }
-  .rd-kind .lchip span { display: inline-flex; padding: 8px 14px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px rgba(237, 231, 220, .2); cursor: pointer; font-weight: 500; }
+  .rd-kind .lchip span { display: inline-flex; padding: 8px 14px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px rgba(var(--fg-rgb), .2); cursor: pointer; font-weight: 500; }
   .rd-kind .lchip input:checked + span { background: var(--pink); color: var(--night); box-shadow: none; }
   #rd-suggest-login { justify-self: start; margin-top: 8px; }
 

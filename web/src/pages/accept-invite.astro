@@ -45,22 +45,22 @@ import Club from '../layouts/Club.astro';
   .invite-card { max-width: 680px; display: grid; gap: 18px; }
   .invite-card form { display: grid; gap: 14px; padding-top: 6px; }
   .invite-card label { display: grid; gap: 7px; font-weight: 700; }
-  .invite-card input[type=text], .invite-card input[type=password] { width: 100%; border: 1.5px solid rgba(237,231,220,.16); border-radius: 14px; padding: 13px 15px; background: var(--night-2); color: var(--bone); font: 500 1rem "Satoshi", system-ui, sans-serif; }
+  .invite-card input[type=text], .invite-card input[type=password] { width: 100%; border: 1.5px solid rgba(var(--fg-rgb), .16); border-radius: 14px; padding: 13px 15px; background: var(--bg-2); color: var(--fg); font: 500 1rem "Satoshi", system-ui, sans-serif; }
   .invite-card input:focus { outline: none; border-color: var(--lime); }
-  .invite-role { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 17px 19px; border-radius: 17px; background: var(--night-2); color: var(--muted); }
-  .invite-role strong { color: var(--pink); font: 800 1.2rem var(--f-display); text-transform: capitalize; }
-  .invite-card blockquote { margin: 0; padding: 15px 18px; border-left: 3px solid var(--lime); color: var(--bone); background: rgba(205,220,39,.06); }
+  .invite-role { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 17px 19px; border-radius: 17px; background: var(--bg-2); color: var(--muted); }
+  .invite-role strong { color: var(--pink-text); font: 800 1.2rem var(--f-display); text-transform: capitalize; }
+  .invite-card blockquote { margin: 0; padding: 15px 18px; border-left: 3px solid var(--lime); color: var(--fg); background: rgba(205,220,39,.06); }
   .invite-hint { margin: -7px 0 0; color: var(--muted); font: 500 .76rem/1.45 var(--f-mono); }
-  .invite-check { grid-template-columns: 20px 1fr; align-items: start; font-weight: 500 !important; color: #C3CBC6; }
+  .invite-check { grid-template-columns: 20px 1fr; align-items: start; font-weight: 500 !important; color: var(--soft); }
   .invite-check input { width: 18px; height: 18px; accent-color: var(--lime); }
-  .invite-check a { color: var(--mint); }
-  .invite-error { margin: 0; color: var(--pink); font-weight: 700; }
+  .invite-check a { color: var(--mint-text); }
+  .invite-error { margin: 0; color: var(--pink-text); font-weight: 700; }
   .invite-card .pill { justify-self: start; }
   .invite-state { display: grid; gap: 12px; padding: 20px; border: 1.5px solid var(--lime); border-radius: 18px; }
   .invite-state h2, .invite-state p { margin: 0; }
-  .invite-state h2 { color: var(--lime); font: 800 1.6rem var(--f-display); }
+  .invite-state h2 { color: var(--lime-text); font: 800 1.6rem var(--f-display); }
   .invite-invalid { border-color: var(--pink); }
-  .invite-invalid h2 { color: var(--pink); }
+  .invite-invalid h2 { color: var(--pink-text); }
 </style>
 
 <script>

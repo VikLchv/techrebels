@@ -3,26 +3,26 @@
 .inside-page .page-head { display: flex; justify-content: space-between; align-items: end; gap: 22px; margin-bottom: 28px; }
 .inside-page .page-head .h2 { margin: 7px 0 10px; }
 .inside-page .page-head .lede { max-width: 62ch; }
-.inside-page .page-panel { border-radius: 28px; background: var(--night-2); border: 1px solid rgba(237,231,220,.09); padding: clamp(22px, 3.5vw, 42px); }
-.inside-page .section-title { margin: 0 0 8px; color: var(--pink); font: 800 clamp(1.7rem,3vw,2.4rem)/1 var(--f-display); letter-spacing: -.03em; }
-.inside-page .section-copy { margin: 0; max-width: 65ch; color: #C3CBC6; }
+.inside-page .page-panel { border-radius: 28px; background: var(--bg-2); border: 1px solid rgba(var(--fg-rgb), .09); padding: clamp(22px, 3.5vw, 42px); }
+.inside-page .section-title { margin: 0 0 8px; color: var(--pink-text); font: 800 clamp(1.7rem,3vw,2.4rem)/1 var(--f-display); letter-spacing: -.03em; }
+.inside-page .section-copy { margin: 0; max-width: 65ch; color: var(--soft); }
 .inside-page .field-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
 .inside-page form { display: grid; gap: 23px; }
 .inside-page form label:not(.chip):not(.check) { display: grid; gap: 7px; font-weight: 700; font-size: .92rem; }
-.inside-page input[type=text], .inside-page textarea, .inside-page select { width: 100%; border: 1.5px solid rgba(237,231,220,.16); border-radius: 14px; padding: 12px 14px; background: var(--night); color: var(--bone); font: 500 1rem "Satoshi",system-ui,sans-serif; }
+.inside-page input[type=text], .inside-page textarea, .inside-page select { width: 100%; border: 1.5px solid rgba(var(--fg-rgb), .16); border-radius: 14px; padding: 12px 14px; background: var(--bg); color: var(--fg); font: 500 1rem "Satoshi",system-ui,sans-serif; }
 .inside-page input:focus, .inside-page textarea:focus, .inside-page select:focus { outline: none; border-color: var(--lime); }
 .inside-page textarea { resize: vertical; }
 .inside-page fieldset { min-width: 0; padding: 0; margin: 0; border: 0; }
 .inside-page legend { padding: 0; margin-bottom: 10px; color: var(--muted); font: 500 .8rem var(--f-mono); letter-spacing: .12em; text-transform: uppercase; }
 .inside-page .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .inside-page .chip input { position: absolute; opacity: 0; pointer-events: none; }
-.inside-page .chip span { display: inline-flex; padding: 8px 14px; border-radius: 999px; background: var(--night); box-shadow: inset 0 0 0 1.5px rgba(237,231,220,.14); cursor: pointer; font-size: .92rem; }
+.inside-page .chip span { display: inline-flex; padding: 8px 14px; border-radius: 999px; background: var(--bg); box-shadow: inset 0 0 0 1.5px rgba(var(--fg-rgb), .14); cursor: pointer; font-size: .92rem; }
 .inside-page .chip input:checked + span { color: var(--night); background: var(--lime); box-shadow: none; }
 .inside-page .chip input:focus-visible + span { outline: 3px solid var(--lime); outline-offset: 2px; }
-.inside-page .check { display: flex; align-items: flex-start; gap: 10px; color: #C3CBC6; }
+.inside-page .check { display: flex; align-items: flex-start; gap: 10px; color: var(--soft); }
 .inside-page .check input { flex: none; width: 18px; height: 18px; margin-top: 3px; accent-color: var(--lime); }
 .inside-page .form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-.inside-page .status { color: var(--mint); font: 500 .82rem var(--f-mono); }
-.inside-page .error { margin: 0; color: var(--pink); font-weight: 700; }
+.inside-page .status { color: var(--mint-text); font: 500 .82rem var(--f-mono); }
+.inside-page .error { margin: 0; color: var(--pink-text); font-weight: 700; }
 .inside-page .opt { margin-left: 5px; color: var(--muted); font: 500 .72rem var(--f-mono); }
 @media (max-width: 760px) { .inside-page .page-head { align-items: start; flex-direction: column; } .inside-page .field-grid { grid-template-columns: 1fr; } }

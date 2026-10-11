@@ -23,13 +23,13 @@ import Club from '../layouts/Club.astro';
 </Club>
 
 <style is:global>
-  .sn-form { display: grid; gap: 10px; max-width: 640px; margin-top: 8px; padding: 18px; border-radius: 18px; background: var(--night-2); border: 1.5px solid rgba(237, 231, 220, .12); }
+  .sn-form { display: grid; gap: 10px; max-width: 640px; margin-top: 8px; padding: 18px; border-radius: 18px; background: var(--bg-2); border: 1.5px solid rgba(var(--fg-rgb), .12); }
   .sn-form[hidden] { display: none; }
   .sn-form label { font: 800 1.2rem var(--f-display); }
-  .sn-form textarea { font: 500 1rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 12px; padding: 12px 14px; resize: vertical; }
+  .sn-form textarea { font: 500 1rem "Satoshi", system-ui, sans-serif; color: var(--fg); background: var(--bg); border: 1.5px solid rgba(var(--fg-rgb), .16); border-radius: 12px; padding: 12px 14px; resize: vertical; }
   .sn-form textarea:focus { outline: none; border-color: var(--pink); }
   .sn-row { display: flex; justify-content: space-between; align-items: center; font: 500 .8rem var(--f-mono); color: var(--muted); }
-  .sn-note { margin: 0; min-height: 1.1em; font: 500 .82rem var(--f-mono); color: var(--mint); }
+  .sn-note { margin: 0; min-height: 1.1em; font: 500 .82rem var(--f-mono); color: var(--mint-text); }
   .sn-login { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; color: var(--muted); }
   .sn-login[hidden] { display: none; }
   .sn-wall { margin-top: 30px; columns: 4 230px; column-gap: 16px; }
@@ -37,8 +37,8 @@ import Club from '../layouts/Club.astro';
   .sn-card { break-inside: avoid; margin: 0 0 16px; padding: 18px 16px 14px; border-radius: 4px 4px 14px 4px; color: var(--night); background: var(--c); transform: rotate(var(--r)); box-shadow: 0 12px 26px rgba(0, 0, 0, .35); display: grid; gap: 12px; }
   .sn-card p { margin: 0; font: 700 1.05rem/1.3 "Satoshi", system-ui, sans-serif; }
   .sn-card footer { display: flex; justify-content: space-between; align-items: center; font: 500 .72rem var(--f-mono); opacity: .75; }
-  .sn-card button { font: 700 .76rem var(--f-mono); color: var(--night); background: rgba(11, 15, 13, .1); border: 1.5px solid rgba(11, 15, 13, .35); border-radius: 999px; padding: 5px 10px; cursor: pointer; }
-  .sn-card button[aria-pressed="true"] { background: var(--night); color: var(--bone); }
+  .sn-card button { font: 700 .76rem var(--f-mono); color: var(--night); background: rgba(var(--bg-rgb), .1); border: 1.5px solid rgba(11, 15, 13, .35); border-radius: 999px; padding: 5px 10px; cursor: pointer; }
+  .sn-card button[aria-pressed="true"] { background: var(--bg); color: var(--fg); }
 </style>
 
 <script>

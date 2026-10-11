@@ -7,14 +7,14 @@
 </button>
 
 <style is:global>
-  .rm-btn { position: fixed; left: 16px; bottom: max(16px, env(safe-area-inset-bottom)); z-index: 90; display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px; border: 1.5px solid rgba(237, 231, 220, .2); background: rgba(19, 26, 23, .92); backdrop-filter: blur(8px); color: var(--bone); font: 700 .74rem var(--f-mono); letter-spacing: .08em; cursor: pointer; box-shadow: 0 10px 30px rgba(0, 0, 0, .4); }
+  .rm-btn { position: fixed; left: 16px; bottom: max(16px, env(safe-area-inset-bottom)); z-index: 90; display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px; border: 1.5px solid rgba(var(--fg-rgb), .2); background: rgba(var(--bg2-rgb), .92); backdrop-filter: blur(8px); color: var(--fg); font: 700 .74rem var(--f-mono); letter-spacing: .08em; cursor: pointer; box-shadow: 0 10px 30px rgba(0, 0, 0, .4); }
   .rm-btn:hover { border-color: var(--pink); }
   .rm-btn:focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
   .rm-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
   .rm-btn b { color: var(--muted); }
   html.rebel-mode .rm-btn { background: var(--pink); color: var(--night); border-color: var(--night); animation: rm-wob .5s steps(2) infinite; }
   html.rebel-mode .rm-btn b { color: var(--night); }
-  html.rebel-mode .rm-dot { background: var(--lime); box-shadow: 0 0 0 3px var(--night); }
+  html.rebel-mode .rm-dot { background: var(--lime); box-shadow: 0 0 0 3px var(--bg); }
 
   /* the mess */
   html.rebel-mode .club main > section:nth-of-type(odd) { transform: rotate(-1.2deg) translateX(-10px); }

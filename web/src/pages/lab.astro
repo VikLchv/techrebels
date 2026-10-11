@@ -115,57 +115,57 @@ const swatch = (key: string, v: string) => {
   .lab { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); gap: clamp(24px, 4vw, 56px); align-items: start; }
   .lab-left { position: sticky; top: 88px; display: grid; gap: 18px; }
 
-  .lcard { border-radius: 28px; overflow: hidden; background: var(--night-2); border: 1px solid rgba(237, 231, 220, .08); }
+  .lcard { border-radius: 28px; overflow: hidden; background: var(--bg-2); border: 1px solid rgba(var(--fg-rgb), .08); }
   .lcard-art { position: relative; padding: 18px 22px 6px; display: grid; transition: background-color .25s; }
   .lbug svg { display: block; width: 100%; max-width: 420px; height: auto; margin: 0 auto; }
   .lbug.wig svg { animation: lwig .45s ease-in-out; transform-origin: 50% 70%; }
   @keyframes lwig { 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
   .lpill { position: absolute; top: 16px; z-index: 1; font: 700 .8rem var(--f-mono); padding: 5px 12px; border-radius: 999px; }
   .lid { left: 18px; background: rgba(255, 255, 255, .88); color: var(--ink); }
-  .lsev { right: 18px; background: var(--ink); color: var(--lime); }
+  .lsev { right: 18px; background: var(--ink); color: var(--lime-text); }
   .lcard-body { padding: 20px 24px 22px; display: grid; gap: 6px; }
   .lname { margin: 0; font: 800 clamp(2rem, 4vw, 2.8rem)/.95 var(--f-display); letter-spacing: -.035em; overflow-wrap: anywhere; }
   .lname.placeholder { color: var(--muted); }
-  .lline { margin: 0; font: 700 .85rem var(--f-mono); color: var(--mint); }
-  .lquip { margin: 0; color: #C3CBC6; }
-  .lfoot { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(237, 231, 220, .15); font: 500 .74rem var(--f-mono); color: var(--muted); }
-  .lwm { font: 800 1.05rem/.82 var(--f-display); letter-spacing: -.04em; color: var(--pink); }
+  .lline { margin: 0; font: 700 .85rem var(--f-mono); color: var(--mint-text); }
+  .lquip { margin: 0; color: var(--soft); }
+  .lfoot { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(var(--fg-rgb), .15); font: 500 .74rem var(--f-mono); color: var(--muted); }
+  .lwm { font: 800 1.05rem/.82 var(--f-display); letter-spacing: -.04em; color: var(--pink-text); }
   .lwm span { display: block; }
 
   .lactions { display: grid; gap: 12px; justify-items: start; }
   .lrow { display: flex; flex-wrap: wrap; gap: 10px; }
   .lrow .pill { padding: 11px 18px; font-size: .9rem; }
-  .lstatus { margin: 0; min-height: 1.2em; font: 500 .85rem var(--f-mono); color: var(--mint); }
+  .lstatus { margin: 0; min-height: 1.2em; font: 500 .85rem var(--f-mono); color: var(--mint-text); }
   .lsigned { margin: 0; font: 500 .82rem var(--f-mono); color: var(--muted); }
-  .lsigned button { background: none; border: 0; color: var(--pink); font: inherit; text-decoration: underline; cursor: pointer; padding: 0; }
+  .lsigned button { background: none; border: 0; color: var(--pink-text); font: inherit; text-decoration: underline; cursor: pointer; padding: 0; }
 
-  .ljoin, .ldone, .lexport { border-radius: 24px; background: var(--night-2); border: 1.5px solid rgba(237, 231, 220, .12); padding: 22px; display: grid; gap: 14px; }
-  .ljoin h2, .ldone h2 { margin: 0; font: 800 1.8rem/1 var(--f-display); letter-spacing: -.03em; color: var(--pink); }
+  .ljoin, .ldone, .lexport { border-radius: 24px; background: var(--bg-2); border: 1.5px solid rgba(var(--fg-rgb), .12); padding: 22px; display: grid; gap: 14px; }
+  .ljoin h2, .ldone h2 { margin: 0; font: 800 1.8rem/1 var(--f-display); letter-spacing: -.03em; color: var(--pink-text); }
   .ldone { border-color: var(--lime); }
-  .ldone h2 { color: var(--lime); }
-  .ljoin p, .ldone p, .lexport p { margin: 0; color: #C3CBC6; }
+  .ldone h2 { color: var(--lime-text); }
+  .ljoin p, .ldone p, .lexport p { margin: 0; color: var(--soft); }
   .ljoin label { display: grid; gap: 7px; font-weight: 700; font-size: .92rem; }
-  .ljoin input[type=email], .ljoin input[type=text], .ljoin input[type=password] { font: 500 1rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 14px; padding: 13px 15px; }
+  .ljoin input[type=email], .ljoin input[type=text], .ljoin input[type=password] { font: 500 1rem "Satoshi", system-ui, sans-serif; color: var(--fg); background: var(--bg); border: 1.5px solid rgba(var(--fg-rgb), .16); border-radius: 14px; padding: 13px 15px; }
   .ljoin input[type=email]:focus, .ljoin input[type=text]:focus, .ljoin input[type=password]:focus { outline: none; border-color: var(--lime); }
   .ljoin .password-hint { margin-top: -8px; color: var(--muted); font: 500 .76rem/1.45 var(--f-mono); }
-  .ljoin .check { display: flex; align-items: flex-start; gap: 10px; font-weight: 500; color: #C3CBC6; }
+  .ljoin .check { display: flex; align-items: flex-start; gap: 10px; font-weight: 500; color: var(--soft); }
   .ljoin .check input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--lime); }
   .ljoin .pill { justify-self: start; }
-  .lerr { margin: 0; color: var(--pink) !important; font-weight: 700; }
+  .lerr { margin: 0; color: var(--pink-text) !important; font-weight: 700; }
   .lexport img { width: 100%; max-width: 320px; border-radius: 14px; }
   .lexport .pill { justify-self: start; }
 
   .lctrl { display: grid; gap: 22px; min-width: 0; }
   .lctrl .f2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .lctrl .ff { display: grid; gap: 8px; font: 500 .8rem var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-  .lctrl input[type=text], .lctrl select { font: 500 1.05rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night-2); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 14px; padding: 12px 14px; width: 100%; text-transform: none; letter-spacing: 0; }
+  .lctrl input[type=text], .lctrl select { font: 500 1.05rem "Satoshi", system-ui, sans-serif; color: var(--fg); background: var(--bg-2); border: 1.5px solid rgba(var(--fg-rgb), .16); border-radius: 14px; padding: 12px 14px; width: 100%; text-transform: none; letter-spacing: 0; }
   .lctrl input[type=text]:focus, .lctrl select:focus { outline: none; border-color: var(--lime); }
   .lctrl fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
   .lctrl legend { padding: 0; margin-bottom: 10px; font: 500 .8rem var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
   .lchips { display: flex; flex-wrap: wrap; gap: 8px; }
   .lchip input { position: absolute; opacity: 0; pointer-events: none; }
-  .lchip span { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: var(--night-2); box-shadow: inset 0 0 0 1.5px rgba(237, 231, 220, .14); font-weight: 500; font-size: .92rem; cursor: pointer; user-select: none; transition: box-shadow .15s, background .15s; }
-  .lchip span:hover { box-shadow: inset 0 0 0 1.5px rgba(237, 231, 220, .45); }
+  .lchip span { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: var(--bg-2); box-shadow: inset 0 0 0 1.5px rgba(var(--fg-rgb), .14); font-weight: 500; font-size: .92rem; cursor: pointer; user-select: none; transition: box-shadow .15s, background .15s; }
+  .lchip span:hover { box-shadow: inset 0 0 0 1.5px rgba(var(--fg-rgb), .45); }
   .lchip input:checked + span { background: var(--pink); color: var(--night); box-shadow: inset 0 0 0 1.5px var(--pink); }
   .lchip input:focus-visible + span { outline: 3px solid var(--lime); outline-offset: 2px; }
   .sw { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .25); flex: none; }

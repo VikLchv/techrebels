@@ -16,7 +16,7 @@ const items = [
 </nav>
 
 <style is:global>
-  .admin-nav { position: sticky; top: 76px; z-index: 24; display: flex; gap: 7px; margin: 0 0 20px; padding: 8px; overflow-x: auto; border: 1px solid rgba(237,231,220,.1); border-radius: 18px; background: rgba(17,23,19,.92); backdrop-filter: blur(14px); }
+  .admin-nav { position: sticky; top: 76px; z-index: 24; display: flex; gap: 7px; margin: 0 0 20px; padding: 8px; overflow-x: auto; border: 1px solid rgba(var(--fg-rgb), .1); border-radius: 18px; background: rgba(var(--bg2-rgb), .92); backdrop-filter: blur(14px); }
   .admin-nav a { flex: none; padding: 8px 13px; border-radius: 999px; color: var(--muted); text-decoration: none; font: 650 .75rem var(--f-mono); }
   .admin-nav a:hover, .admin-nav a[aria-current="page"] { color: var(--night); background: var(--lime); }
   @media (max-width: 760px) { .admin-nav { top: 68px; } }
