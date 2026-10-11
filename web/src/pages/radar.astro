@@ -114,7 +114,7 @@ import Club from '../layouts/Club.astro';
   .rd-bug.person .lbl { border: 1.5px solid var(--pink); }
   .rd-bug.dim { opacity: .12; pointer-events: none; }
   .rd-bug.sel .lbl { background: var(--lime); color: var(--night); }
-  .rd-stage.has-mine .rd-bug:not(.mine):not(.sel):not(:hover):not(:focus-visible) svg { opacity: .32; filter: saturate(.35); }
+  .rd-stage .rd-bug:not(.mine):not(.sel):not(:hover):not(:focus-visible) svg { opacity: .32; filter: saturate(.35); }
   .rd-bug svg { transition: transform .2s, opacity .3s, filter .3s; }
   .rd-bug.mine svg { filter: drop-shadow(0 0 10px rgba(205, 220, 39, .75)) drop-shadow(0 6px 10px rgba(0, 0, 0, .45)); }
   .rd-bug.mine .lbl { opacity: 1; border: 1.5px solid var(--lime); }
@@ -285,9 +285,7 @@ import Club from '../layouts/Club.astro';
 
   function markTop() {
     const top = new Set([...topics].filter((t) => t.votes > 0).sort((a, b) => b.votes - a.votes).slice(0, 6));
-    for (const f of flyers) { f.el.classList.toggle('top', top.has(f.t)); f.el.classList.toggle('mine', f.t.voted); }
-    // once you have votes, everything else steps back so your picks stand out
-    stage.classList.toggle('has-mine', topics.some((t) => t.voted));
+    for (const f of flyers) { f.el.classList.toggle('top', top.has(f.t)); f.el.classList.toggle('mine', f.t.voted); } // unvoted objects stay dimmed
   }
 
   function applyFilter() {
