@@ -33,7 +33,7 @@ export const changelog: Release[] = [
     changes: [
       { type: 'feat', text: 'Website with the Swarm, Rebel Radar, The Drop and Inside.' },
       { type: 'feat', text: 'Founder bugs get the lowest numbers. BUG-0000 is taken.' },
-      { type: 'chore', text: 'Tom joins the crew. Role: TBD. Vibe: confirmed.' },
+      { type: 'chore', text: 'Tom joins the crew as Creative & Design Guru. The bugs finally get a stylist.' },
     ],
   },
   {
