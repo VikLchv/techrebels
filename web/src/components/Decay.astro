@@ -83,7 +83,8 @@
       if (error || !data) return;
       d = Number(data.decay) || 0; days = Number(data.days_quiet) || 0;
     }
-    if (d <= 0) return;
+    // below 5% the rot is invisible, so do not nag about it
+    if (d < 0.05) return;
     const root = document.documentElement;
     root.classList.add('decaying');
     root.classList.toggle('decay-hard', d > 0.35);
