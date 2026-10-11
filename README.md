@@ -13,3 +13,9 @@ Website for techRebels, a community for curious people in tech. Less conference,
 - The public never reads tables directly. The Swarm uses `get_swarm()` / `swarm_count()` and the Realtime channel `swarm` (event `new_bug`).
 
 Never commit `.env` files, the database password or the service role key.
+
+## Git workflow
+- `dev` is where everything lands first. Push to `dev` directly, or open a branch (`feature/...`) and a pull request into `dev`.
+- `main` is production: Cloudflare deploys every commit on `main` to wearetechrebels.com.
+- `main` only changes through a pull request from `dev`, approved by a code owner (Vik or Tom, see `.github/CODEOWNERS`). No direct pushes, no force pushes.
+- Database migrations in `supabase/migrations/` are run by hand in the SQL editor after the pull request is merged.
