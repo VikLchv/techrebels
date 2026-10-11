@@ -8,18 +8,28 @@ import { ClientRouter } from 'astro:transitions';
 interface Props { title?: string; description?: string; clientRouter?: boolean }
 const { title = site.title, description = site.description, clientRouter = false } = Astro.props;
 const og = new URL('/og.png', Astro.site ?? Astro.url).href;
+
+// Keep the browser tab quiet and consistent: brand first, current page second.
+// Existing pages can keep their human-readable titles; the layout normalises them.
+const pageTitle = title
+  .split('·')
+  .map((part) => part.trim())
+  .filter((part) => part && !/^tech\s*rebels$/i.test(part) && !/^inside$/i.test(part))
+  .join(' · ')
+  .toLowerCase();
+const documentTitle = pageTitle ? `tech rebels · ${pageTitle}` : 'tech rebels';
 ---
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>{title}</title>
+    <title>{documentTitle}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#0B0F0D" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content={title} />
+    <meta property="og:title" content={documentTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={og} />
     <meta property="og:image:width" content="1200" />
