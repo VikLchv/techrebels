@@ -1,0 +1,10 @@
+// Cloudflare Workers static site: the Astro build in ./dist is served as-is.
+// Deployed by Workers Builds from GitHub (path: web, build: npm run build, deploy: npx wrangler deploy).
+{
+  "name": "techrebels",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}
