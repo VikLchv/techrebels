@@ -1,7 +1,20 @@
 type RushHooks = {
   onTick: (state: { score: number; combo: number; lives: number }) => void;
-  onEnd: (state: { score: number; durationMs: number }) => void;
+  onEnd: (state: { score: number; durationMs: number; path: number[] }) => void;
 };
+
+/** A duel run: the map comes from the seed, the ghost replays the other player's path. */
+export type RushRun = { seed?: number; ghost?: { path: number[]; svg: string; label: string } };
+
+// small deterministic PRNG, so both duel players get the same spawns in the same order
+const mulberry32 = (seed: number) => () => {
+  seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+const PATH_STEP_MS = 100; // one ghost sample every 100 ms, stored as x,y in 0..1000
+const PATH_MAX = 6000;
 
 type Orb = { x: number; y: number; r: number; pulse: number };
 type Hazard = { x: number; y: number; w: number; h: number; vx: number; vy: number; label: string; hit: boolean };
@@ -26,8 +39,13 @@ export function createBugRush(canvas: HTMLCanvasElement, bugSvg: string, hooks: 
   let width = 800, height = 500, dpr = 1, raf = 0, last = 0, started = 0, running = false, destroyed = false;
   let score = 0, combo = 1, lives = 3, orbClock = 0, hazardClock = 0, enemyClock = 0, shake = 0, lastShot = 0;
   let lastDirection = { x: 0, y: -1 };
+  let rng: () => number = Math.random;
+  let path: number[] = [], nextSample = 0;
+  let ghost: { path: number[]; label: string; image: HTMLImageElement; url: string } | null = null;
 
+  // rand is for effects only; grand drives the map so seeded runs match
   const rand = (min: number, max: number) => min + Math.random() * (max - min);
+  const grand = (min: number, max: number) => min + rng() * (max - min);
   const resize = () => {
     const rect = canvas.getBoundingClientRect();
     const nextDpr = Math.min(devicePixelRatio || 1, 2);
@@ -41,18 +59,18 @@ export function createBugRush(canvas: HTMLCanvasElement, bugSvg: string, hooks: 
     player.x = Math.min(width - player.r, Math.max(player.r, player.x));
     player.y = Math.min(height - player.r, Math.max(player.r, player.y));
   };
-  const addOrb = () => orbs.push({ x: rand(35, width - 35), y: rand(55, height - 45), r: rand(10, 14), pulse: rand(0, Math.PI * 2) });
+  const addOrb = () => orbs.push({ x: grand(35, width - 35), y: grand(55, height - 45), r: grand(10, 14), pulse: rand(0, Math.PI * 2) });
   const addHazard = (progress: number) => {
-    const w = rand(78, 126), h = rand(34, 47);
-    hazards.push({ x: rand(4, Math.max(5, width - w - 4)), y: -h - 10, w, h, vx: rand(-22, 22), vy: rand(105, 155) + progress * 90, label: labels[Math.floor(Math.random() * labels.length)], hit: false });
+    const w = grand(78, 126), h = grand(34, 47);
+    hazards.push({ x: grand(4, Math.max(5, width - w - 4)), y: -h - 10, w, h, vx: grand(-22, 22), vy: grand(105, 155) + progress * 90, label: labels[Math.floor(rng() * labels.length)], hit: false });
   };
   const addEnemy = (progress: number) => {
-    const edge = Math.floor(Math.random() * 4), r = rand(18, 25); let x = 0, y = 0;
-    if (edge === 0) { x = rand(r, width - r); y = -r; }
-    else if (edge === 1) { x = width + r; y = rand(r, height - r); }
-    else if (edge === 2) { x = rand(r, width - r); y = height + r; }
-    else { x = -r; y = rand(r, height - r); }
-    enemies.push({ x, y, r, speed: rand(58, 82) + progress * 65, wobble: rand(0, Math.PI * 2), dead: false });
+    const edge = Math.floor(rng() * 4), r = grand(18, 25); let x = 0, y = 0;
+    if (edge === 0) { x = grand(r, width - r); y = -r; }
+    else if (edge === 1) { x = width + r; y = grand(r, height - r); }
+    else if (edge === 2) { x = grand(r, width - r); y = height + r; }
+    else { x = -r; y = grand(r, height - r); }
+    enemies.push({ x, y, r, speed: grand(58, 82) + progress * 65, wobble: grand(0, Math.PI * 2), dead: false });
   };
   const burst = (x: number, y: number, color: string, count: number) => { for (let i = 0; i < count; i++) particles.push({ x, y, vx: rand(-150, 150), vy: rand(-150, 150), life: rand(.35, .75), color }); };
   const overlapCircle = (x: number, y: number, r: number) => Math.hypot(player.x - x, player.y - y) < player.r + r;
@@ -85,8 +103,9 @@ export function createBugRush(canvas: HTMLCanvasElement, bugSvg: string, hooks: 
     for (let i = hazards.length - 1; i >= 0; i--) if (hazards[i].y > height + 70 || hazards[i].x < -180 || hazards[i].x > width + 180) hazards.splice(i, 1);
     for(let i=enemies.length-1;i>=0;i--)if(enemies[i].dead)enemies.splice(i,1);for(let i=bullets.length-1;i>=0;i--)if(bullets[i].life<=0||bullets[i].x<0||bullets[i].x>width||bullets[i].y<0||bullets[i].y>height)bullets.splice(i,1);
     for (let i = particles.length - 1; i >= 0; i--) { const p = particles[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= .96; p.vy *= .96; p.life -= dt; if (p.life <= 0) particles.splice(i, 1); }
+    if (elapsed >= nextSample && path.length < PATH_MAX) { path.push(Math.round(player.x / width * 1000), Math.round(player.y / height * 1000)); nextSample += PATH_STEP_MS; }
     hooks.onTick({ score, combo, lives });
-    if (lives <= 0) { running = false; hooks.onEnd({ score, durationMs: Math.round(now - started) }); }
+    if (lives <= 0) { running = false; hooks.onEnd({ score, durationMs: Math.round(now - started), path: path.slice() }); }
   };
 
   const rounded = (x: number, y: number, w: number, h: number, r: number) => { context.beginPath(); context.roundRect(x, y, w, h, r); };
@@ -102,6 +121,16 @@ export function createBugRush(canvas: HTMLCanvasElement, bugSvg: string, hooks: 
     enemies.forEach(e=>{context.save();context.translate(e.x,e.y);context.rotate(Math.sin(e.wobble)*.12);context.fillStyle='#7A304F';context.strokeStyle='#F4A5D4';context.lineWidth=3;context.beginPath();context.arc(0,0,e.r,0,Math.PI*2);context.fill();context.stroke();context.beginPath();context.moveTo(-e.r*.7,-e.r*.65);context.lineTo(-e.r*.25,-e.r*1.15);context.lineTo(-e.r*.05,-e.r*.65);context.moveTo(e.r*.7,-e.r*.65);context.lineTo(e.r*.25,-e.r*1.15);context.lineTo(e.r*.05,-e.r*.65);context.stroke();context.fillStyle='#CDDC27';context.beginPath();context.arc(-e.r*.35,-2,4,0,Math.PI*2);context.arc(e.r*.35,-2,4,0,Math.PI*2);context.fill();context.strokeStyle='#0B0F0D';context.lineWidth=3;context.beginPath();context.moveTo(-e.r*.42,e.r*.42);context.lineTo(0,e.r*.2);context.lineTo(e.r*.42,e.r*.42);context.stroke();context.restore();});
     bullets.forEach(b=>{context.shadowColor='#3DDB9A';context.shadowBlur=12;context.fillStyle='#3DDB9A';context.beginPath();context.arc(b.x,b.y,6,0,Math.PI*2);context.fill();context.shadowBlur=0;});
     particles.forEach(p => { context.globalAlpha = Math.min(1, p.life * 2); context.fillStyle = p.color; context.fillRect(p.x - 3, p.y - 3, 6, 6); }); context.globalAlpha = 1;
+    if (ghost && running && ghost.path.length >= 2) {
+      const t = (now - started) / PATH_STEP_MS, i = Math.floor(t), n = ghost.path.length / 2;
+      const gone = i >= n - 1, a = Math.min(i, n - 1), b = Math.min(i + 1, n - 1), f = gone ? 0 : t - i;
+      const gx = (ghost.path[a * 2] + (ghost.path[b * 2] - ghost.path[a * 2]) * f) / 1000 * width;
+      const gy = (ghost.path[a * 2 + 1] + (ghost.path[b * 2 + 1] - ghost.path[a * 2 + 1]) * f) / 1000 * height;
+      context.save(); context.globalAlpha = gone ? .14 : .38; context.translate(gx, gy);
+      if (ghost.image.complete) context.drawImage(ghost.image, -40, -43, 80, 88);
+      context.globalAlpha = gone ? .3 : .8; context.fillStyle = '#EDE7DC'; context.font = '700 11px monospace'; context.textAlign = 'center';
+      context.fillText(gone ? `${ghost.label} · out` : ghost.label, 0, -50); context.restore();
+    }
     context.save(); if (player.invulnerable > 0 && Math.floor(player.invulnerable * 12) % 2) context.globalAlpha = .28; context.translate(player.x, player.y); const bob = running ? Math.sin(now / 100) * 3 : Math.sin(now / 300) * 4; context.rotate(Math.sin(now / 240) * .025); if (image.complete) context.drawImage(image, -48, -51 + bob, 96, 106); else { context.fillStyle = '#3DDB9A'; context.beginPath(); context.arc(0, bob, 28, 0, Math.PI * 2); context.fill(); } context.restore();
     context.restore();
   };
@@ -115,10 +144,19 @@ export function createBugRush(canvas: HTMLCanvasElement, bugSvg: string, hooks: 
   canvas.addEventListener('pointerdown', down); canvas.addEventListener('pointermove', move); canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up); window.addEventListener('keydown', keyDown); window.addEventListener('keyup', keyUp);
   resize(); addOrb(); addOrb(); raf = requestAnimationFrame(loop);
   return {
-    start() { score = 0; combo = 1; lives = 3; orbs.length = hazards.length = particles.length = enemies.length = bullets.length = 0; player.x = width / 2; player.y = height * .72; player.invulnerable = 0; pointer.active = false; addOrb(); addOrb(); orbClock = .4; hazardClock = 1; enemyClock = 2; started = performance.now(); last = started; running = true; hooks.onTick({ score: 0, combo: 1, lives: 3 }); },
+    start(run: RushRun = {}) {
+      rng = run.seed !== undefined ? mulberry32(run.seed) : Math.random;
+      path = []; nextSample = 0;
+      if (ghost) { URL.revokeObjectURL(ghost.url); ghost = null; }
+      if (run.ghost && run.ghost.path.length >= 2) {
+        const url = URL.createObjectURL(new Blob([run.ghost.svg], { type: 'image/svg+xml' }));
+        const img = new Image(); img.src = url;
+        ghost = { path: run.ghost.path, label: run.ghost.label, image: img, url };
+      }
+      score = 0; combo = 1; lives = 3; orbs.length = hazards.length = particles.length = enemies.length = bullets.length = 0; player.x = width / 2; player.y = height * .72; player.invulnerable = 0; pointer.active = false; addOrb(); addOrb(); orbClock = .4; hazardClock = 1; enemyClock = 2; started = performance.now(); last = started; running = true; hooks.onTick({ score: 0, combo: 1, lives: 3 }); },
     fire() { shoot(); },
     stop() { running = false; keys.clear(); pointer.active = false; },
-    destroy() { destroyed = true; running = false; cancelAnimationFrame(raf); URL.revokeObjectURL(imageUrl); canvas.removeEventListener('pointerdown', down); canvas.removeEventListener('pointermove', move); canvas.removeEventListener('pointerup', up); canvas.removeEventListener('pointercancel', up); window.removeEventListener('keydown', keyDown); window.removeEventListener('keyup', keyUp); },
+    destroy() { destroyed = true; running = false; cancelAnimationFrame(raf); URL.revokeObjectURL(imageUrl); if (ghost) URL.revokeObjectURL(ghost.url); canvas.removeEventListener('pointerdown', down); canvas.removeEventListener('pointermove', move); canvas.removeEventListener('pointerup', up); canvas.removeEventListener('pointercancel', up); window.removeEventListener('keydown', keyDown); window.removeEventListener('keyup', keyUp); },
     isRunning: () => running,
   };
 }

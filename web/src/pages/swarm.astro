@@ -76,6 +76,8 @@ import '../styles/swarm.css';
   .sw-card svg { display: block; width: 100%; height: auto; }
   .sw-card b { font-size: .98rem; overflow-wrap: anywhere; }
   .sw-card small { font: 500 .78rem var(--f-mono); color: var(--muted); }
+  .sw-duel { justify-self: start; padding: 4px 10px; border-radius: 999px; border: 1.5px solid rgba(var(--fg-rgb), .2); font: 700 .74rem var(--f-mono); color: var(--fg); cursor: pointer; }
+  .sw-duel:hover, .sw-duel:focus-visible { background: var(--pink); border-color: var(--pink); color: var(--night); }
   @media (max-width: 900px) { .sw-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   @media (max-width: 480px) { .sw-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 </style>
@@ -112,7 +114,17 @@ import '../styles/swarm.css';
       const meta = document.createElement('small');
       const sp = SPECIES[Number(b.species ?? 0)]?.[0] ?? '';
       meta.textContent = `${bugId(b.bug_number)} · ${roleLabel(b.role)}${sp ? ' · ' + sp : ''}`;
-      card.append(tile, name, meta);
+      // challenge this bug to a Bug Duel in the Lunapark
+      const duel = document.createElement('span');
+      duel.className = 'sw-duel';
+      duel.setAttribute('role', 'link');
+      duel.tabIndex = 0;
+      duel.textContent = 'Duel ⚔';
+      duel.setAttribute('aria-label', `Challenge ${bugId(b.bug_number)} to a Bug Duel`);
+      const goDuel = (e: Event) => { e.preventDefault(); e.stopPropagation(); location.href = `/inside/lunapark?duel=${b.bug_number}`; };
+      duel.addEventListener('click', goDuel);
+      duel.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') goDuel(e); });
+      card.append(tile, name, meta, duel);
       card.addEventListener('click', (e) => { e.preventDefault(); find(b.bug_number); stage.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
       grid.appendChild(card);
     }
