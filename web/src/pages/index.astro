@@ -30,26 +30,56 @@ const roleBugs = [
   <Intro slot="before" />
 
   <!-- Hero -->
-  <section class="hero">
+  <section class="hero hx">
     <div class="hero-copy">
-      <p class="eyebrow">A community for curious people in tech · Prague</p>
-      <h1 class="hero-h">Rebels don't<br /><span class="nw">do <em>safe mode.</em></span></h1>
-      <p class="hero-lede">techRebels is a club for people who build, break and rethink tech. Devs, PMs, designers, marketers, founders and the just curious. Real projects, real bugs, zero status games.</p>
+      <p class="hx-prompt"><span class="hx-user">rebel@prague</span>:<span class="hx-path">~</span>$ ./join --curious<i class="hx-cur" aria-hidden="true"></i></p>
+      <h1 class="hero-h">Rebels don't<br /><span class="nw">do <em class="hx-safe">safe mode.<svg class="hx-scribble" viewBox="0 0 300 40" preserveAspectRatio="none" aria-hidden="true"><path d="M4 26 C 60 8, 120 34, 180 16 S 270 10, 296 22" /></svg></em></span></h1>
+      <div class="hx-toggle">
+        <button class="hx-switch" id="hx-switch" type="button" role="switch" aria-checked="true" aria-label="Safe mode">
+          <span class="hx-track"><span class="hx-knob"></span></span>
+          <span class="hx-state">SAFE MODE <b id="hx-state">ON</b></span>
+        </button>
+        <span class="hx-hint" id="hx-hint">← go on, flip it</span>
+      </div>
+      <p class="hero-lede">A Prague club for people who build, break and rethink tech. Devs, PMs, designers, marketers, founders and the just curious.</p>
+      <ul class="hx-chips" aria-label="What we are about">
+        <li>Real projects</li><li>Real bugs</li><li>Zero status games</li>
+      </ul>
       <div class="hero-cta">
         <a class="pill pill-pink" href="/lab">Join the swarm <span aria-hidden="true">→</span></a>
         <a class="pill pill-ghost" href="/sessions">Next Rebel Session</a>
       </div>
-      <dl class="hero-meta">
-        <div><dt>Next session</dt><dd>{session.name} · {session.date}</dd></div>
-        <div><dt>Merch</dt><dd>Founding Drop 001 · soon</dd></div>
-        <div><dt>Status</dt><dd>won't fix</dd></div>
-      </dl>
     </div>
-    <div class="hero-art" aria-hidden="true">
-      <div class="card c-main"><Bug config={hero.main} size={440} /><span class="tag">BUG-0100 · Merge conflict</span></div>
-      <div class="card c-left"><Bug config={hero.left} size={220} /></div>
-      <div class="card c-right"><Bug config={hero.right} size={220} /></div>
+
+    <div class="hero-art hx-board">
+      <div class="hx-peek hx-peek-a" aria-hidden="true"><Bug config={hero.right} size={200} /></div>
+      <div class="hx-peek hx-peek-b" aria-hidden="true"><Bug config={hero.left} size={200} /></div>
+      <div class="hx-win">
+        <div class="hx-bar"><i></i><i></i><i></i><span>swarm.issues</span><b class="hx-live"><em></em>live</b></div>
+        <article class="hx-issue" id="hx-issue" aria-live="polite">
+          <div class="hx-tile" id="hx-tile"><Bug config={hero.main} size={300} label="A rebel bug" /></div>
+          <div class="hx-info">
+            <p class="hx-id" id="hx-id">BUG-0100</p>
+            <h2 class="hx-name" id="hx-name">Merge conflict</h2>
+            <dl class="hx-fields">
+              <div><dt>Role</dt><dd id="hx-role">Dev</dd></div>
+              <div><dt>Severity</dt><dd id="hx-sev">Chaotic</dd></div>
+              <div><dt>Status</dt><dd class="hx-wf">won't fix</dd></div>
+            </dl>
+          </div>
+        </article>
+        <ol class="hx-feed" id="hx-feed" aria-label="Newest bugs in the swarm" hidden></ol>
+        <a class="hx-yours" href="/lab"><span>BUG-????</span> Your bug goes here <b aria-hidden="true">→</b></a>
+      </div>
       <span class="stamp">Status:<br />won't fix</span>
+    </div>
+
+    <div class="hx-status" aria-label="Status">
+      <span class="hx-st-main">⎇ main</span>
+      <span>● {session.name} · {session.date}</span>
+      <span>⇡ Founding Drop 001 · soon</span>
+      <span id="hx-st-safe">safe mode: on</span>
+      <span class="hx-st-right">0 warnings · ∞ bugs · UTF-8</span>
     </div>
   </section>
 
@@ -131,3 +161,185 @@ const roleBugs = [
     <a class="pill pill-pink" href="/lab">Join the swarm <span aria-hidden="true">→</span></a>
   </section>
 </Club>
+
+<style is:global>
+  .hx { grid-template-columns: 1.05fr .95fr; row-gap: clamp(36px, 5vw, 60px); }
+  .hx .hero-copy { gap: 22px; }
+  .hx-prompt { margin: 0; font: 500 .9rem var(--f-mono); color: var(--muted); }
+  .hx-user { color: var(--mint); } .hx-path { color: var(--lime); }
+  .hx-cur { display: inline-block; width: .55em; height: 1.05em; margin-left: 4px; vertical-align: -.18em; background: var(--pink); animation: hx-blink 1s steps(1) infinite; }
+  @keyframes hx-blink { 50% { opacity: 0; } }
+
+  .hx-safe { position: relative; display: inline-block; transition: color .3s; }
+  .hx-scribble { position: absolute; left: -2%; top: 46%; width: 104%; height: .32em; overflow: visible; pointer-events: none; }
+  .hx-scribble path { fill: none; stroke: var(--lime); stroke-width: 9; stroke-linecap: round; stroke-dasharray: 340; stroke-dashoffset: 340; transition: stroke-dashoffset .5s cubic-bezier(.6, 0, .2, 1); }
+  .safe-off .hx-scribble path { stroke-dashoffset: 0; }
+  .safe-off .hx-safe { color: rgba(244, 165, 212, .55); }
+  .safe-off .hero-h { animation: hx-shake .45s; }
+  @keyframes hx-shake { 20% { transform: translate(-6px, 2px) rotate(-.6deg); } 40% { transform: translate(5px, -3px); } 60% { transform: translate(-3px, 1px) rotate(.4deg); } 80% { transform: translate(2px, 0); } }
+
+  .hx-toggle { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+  .hx-switch { display: inline-flex; align-items: center; gap: 12px; padding: 8px 16px 8px 8px; border-radius: 999px; border: 1.5px solid rgba(237, 231, 220, .2); background: var(--night-2); color: var(--bone); cursor: pointer; font: 700 .82rem var(--f-mono); letter-spacing: .08em; }
+  .hx-switch:hover { border-color: var(--lime); }
+  .hx-switch:focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+  .hx-track { position: relative; width: 52px; height: 28px; border-radius: 999px; background: var(--pink); transition: background .3s; }
+  .hx-knob { position: absolute; top: 3px; left: 27px; width: 22px; height: 22px; border-radius: 50%; background: var(--night); transition: left .3s cubic-bezier(.3, 1.6, .5, 1); }
+  .hx-switch[aria-checked="false"] .hx-track { background: rgba(237, 231, 220, .16); }
+  .hx-switch[aria-checked="false"] .hx-knob { left: 3px; background: var(--lime); }
+  .hx-switch.nope { animation: hx-nope .4s; }
+  @keyframes hx-nope { 25% { transform: translateX(-7px); } 50% { transform: translateX(6px); } 75% { transform: translateX(-3px); } }
+  .hx-state b { color: var(--pink); }
+  .safe-off .hx-state b { color: var(--lime); }
+  .hx-hint { font: 500 .85rem var(--f-mono); color: var(--muted); animation: hx-nudge 2.4s ease-in-out infinite; }
+  .safe-off .hx-hint { animation: none; color: var(--lime); }
+  @keyframes hx-nudge { 50% { transform: translateX(-5px); } }
+
+  .hx .hero-lede { max-width: 44ch; }
+  .hx-chips { list-style: none; margin: -6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+  .hx-chips li { font: 800 .95rem var(--f-display); letter-spacing: -.01em; padding: 7px 14px; border-radius: 10px; color: var(--night); transform: rotate(var(--r)); box-shadow: 0 6px 16px rgba(0, 0, 0, .3); }
+  .hx-chips li:nth-child(1) { background: var(--lime); --r: -2deg; }
+  .hx-chips li:nth-child(2) { background: var(--pink); --r: 1.5deg; }
+  .hx-chips li:nth-child(3) { background: var(--mint); --r: -1deg; }
+
+  /* the bug tracker */
+  .hx-board { aspect-ratio: auto; display: grid; place-items: center; padding: 6% 4%; }
+  .hx-peek { position: absolute; width: 34%; border-radius: 24px; padding: 12px; box-shadow: 0 24px 60px rgba(0, 0, 0, .45); }
+  .hx-peek svg { display: block; width: 100%; height: auto; }
+  .hx-peek-a { right: -2%; top: -2%; background: var(--purple); transform: rotate(9deg); }
+  .hx-peek-b { left: -3%; bottom: 0; background: var(--lime); transform: rotate(-10deg); width: 28%; }
+  .hx-win { position: relative; z-index: 1; width: 100%; max-width: 520px; background: var(--night-2); border: 1.5px solid rgba(237, 231, 220, .14); border-radius: 18px; box-shadow: 0 40px 90px rgba(0, 0, 0, .55); overflow: hidden; transform: rotate(-1.5deg); transition: transform .5s cubic-bezier(.2, .7, .2, 1); }
+  .hx-board:hover .hx-win { transform: rotate(0deg) translateY(-4px); }
+  .hx-bar { display: flex; align-items: center; gap: 7px; padding: 11px 14px; border-bottom: 1px solid rgba(237, 231, 220, .08); font: 500 .78rem var(--f-mono); color: var(--muted); }
+  .hx-bar i { width: 11px; height: 11px; border-radius: 50%; }
+  .hx-bar i:nth-child(1) { background: var(--pink); } .hx-bar i:nth-child(2) { background: var(--lime); } .hx-bar i:nth-child(3) { background: var(--mint); }
+  .hx-bar span { margin-left: 8px; }
+  .hx-live { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: var(--mint); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; font-size: .7rem; }
+  .hx-live em { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); animation: hx-blink 1.6s steps(1) infinite; }
+  .hx-issue { display: grid; grid-template-columns: 46% 1fr; gap: 18px; align-items: center; padding: 18px; }
+  .hx-tile { border-radius: 16px; padding: 10px; background: var(--pink); transition: background .4s; }
+  .hx-tile svg { display: block; width: 100%; height: auto; }
+  .hx-issue.swap .hx-tile, .hx-issue.swap .hx-info { animation: hx-swap .5s cubic-bezier(.2, .7, .2, 1); }
+  @keyframes hx-swap { from { opacity: 0; transform: translateY(10px) rotate(-2deg); } }
+  .hx-info { display: grid; gap: 8px; min-width: 0; }
+  .hx-id { margin: 0; font: 700 .78rem var(--f-mono); color: var(--lime); letter-spacing: .04em; }
+  .hx-name { margin: 0; font: 800 clamp(1.4rem, 2.3vw, 2rem)/1 var(--f-display); letter-spacing: -.03em; color: var(--bone); overflow-wrap: anywhere; }
+  .hx-fields { margin: 4px 0 0; display: grid; gap: 6px; }
+  .hx-fields div { display: flex; justify-content: space-between; gap: 10px; padding-bottom: 6px; border-bottom: 1px dashed rgba(237, 231, 220, .1); }
+  .hx-fields dt { font: 500 .72rem var(--f-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+  .hx-fields dd { margin: 0; font-weight: 700; font-size: .9rem; text-align: right; }
+  .hx-wf { color: var(--pink); }
+  .hx-feed[hidden] { display: none; }
+  .hx-feed { list-style: none; margin: 0; padding: 0 18px; display: grid; gap: 6px; }
+  .hx-feed li { display: grid; grid-template-columns: 30px auto 1fr auto; gap: 10px; align-items: center; padding: 7px 10px; border-radius: 10px; background: rgba(237, 231, 220, .04); font-size: .88rem; }
+  .hx-feed li svg { width: 30px; height: auto; display: block; }
+  .hx-feed code { font: 700 .74rem var(--f-mono); color: var(--muted); }
+  .hx-feed b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hx-feed small { font: 500 .7rem var(--f-mono); color: var(--mint); }
+  .hx-yours { display: flex; align-items: center; gap: 10px; margin: 10px 18px 18px; padding: 10px 12px; border-radius: 10px; border: 1.5px dashed rgba(244, 165, 212, .5); color: var(--bone); text-decoration: none; font-weight: 700; font-size: .9rem; }
+  .hx-yours span { font: 700 .74rem var(--f-mono); color: var(--pink); }
+  .hx-yours b { margin-left: auto; color: var(--pink); transition: transform .2s; }
+  .hx-yours:hover { border-color: var(--pink); background: rgba(244, 165, 212, .07); }
+  .hx-yours:hover b { transform: translateX(4px); }
+  .hx .stamp { right: 0; bottom: 4%; }
+
+  /* IDE status bar */
+  .hx-status { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: stretch; border-radius: 10px; overflow: hidden; background: var(--night-2); border: 1px solid rgba(237, 231, 220, .08); font: 500 .78rem var(--f-mono); color: var(--muted); }
+  .hx-status span { padding: 8px 14px; border-right: 1px solid rgba(237, 231, 220, .06); white-space: nowrap; }
+  .hx-status .hx-st-main { background: var(--mint); color: var(--night); font-weight: 700; }
+  .hx-status .hx-st-right { margin-left: auto; border-right: 0; }
+  #hx-st-safe { color: var(--pink); }
+  .safe-off #hx-st-safe { color: var(--lime); }
+
+  @media (max-width: 1000px) {
+    .hx { grid-template-columns: minmax(0, 1fr); }
+    .hx-board { max-width: 560px; width: 100%; justify-self: center; }
+  }
+  @media (max-width: 560px) {
+    .hx-issue { grid-template-columns: 1fr; }
+    .hx-tile { max-width: 220px; }
+    .hx-status .hx-st-right { display: none; }
+    .hx .stamp { width: 86px; font-size: .64rem; bottom: auto; top: 2%; right: -2%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hx-cur, .hx-hint, .hx-live em { animation: none; }
+    .safe-off .hero-h { animation: none; }
+  }
+</style>
+
+<script>
+  import { supabase } from '../lib/supabase';
+  import { bugSVG, ROLES, SPECIES } from '../lib/bug/render.js';
+  import { severityOf } from '../lib/bug/card';
+  import { onNewBug } from '../lib/swarm/live';
+  import { track } from '../lib/track';
+
+  type B = { bug_number: number; name: string; role: string; species?: number; config: Record<string, string | number | undefined>; created_at: string };
+  const $ = (id: string) => document.getElementById(id)!;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- safe mode switch: it turns off, it never turns back on ----
+  const sw = $('hx-switch');
+  const hints = ['Told you.', 'No take-backs.', 'Safe mode is not coming back.', 'Nice try.', 'It is a feature.'];
+  let flips = 0;
+  sw.addEventListener('click', () => {
+    if (sw.getAttribute('aria-checked') === 'true') {
+      sw.setAttribute('aria-checked', 'false');
+      document.documentElement.classList.add('safe-off');
+      $('hx-state').textContent = 'OFF';
+      $('hx-st-safe').textContent = 'safe mode: off';
+      $('hx-hint').textContent = 'Welcome in.';
+      const r = sw.getBoundingClientRect();
+      document.dispatchEvent(new CustomEvent('tr:release', { detail: { n: 36, x: r.left + r.width / 2, y: r.top + r.height / 2 } }));
+      track('hero_safe_mode_off');
+    } else {
+      sw.classList.remove('nope'); void sw.offsetWidth; sw.classList.add('nope');
+      $('hx-hint').textContent = hints[flips++ % hints.length];
+    }
+  });
+
+  // ---- bug tracker: the newest real bugs from the swarm ----
+  const roleName = (r: string) => ROLES.find((x) => x[0] === r)?.[1] ?? r;
+  const TILES = ['var(--pink)', 'var(--lime)', 'var(--mint)', 'var(--purple)'];
+  const SHELL_TILE: Record<string, string> = { pink: 'var(--pink)', lime: 'var(--lime)', mint: 'var(--mint)', purple: 'var(--purple)' };
+  const id = (n: number) => `BUG-${String(n).padStart(4, '0')}`;
+  let bugs: B[] = [];
+  let at = 0;
+
+  function show(b: B) {
+    const issue = $('hx-issue');
+    const tiles = TILES.filter((t) => t !== SHELL_TILE[String(b.config.shell)]);
+    $('hx-tile').style.background = tiles[b.bug_number % tiles.length];
+    $('hx-tile').innerHTML = bugSVG(b.config, 300);
+    $('hx-id').textContent = `${id(b.bug_number)} · ${b.species != null && SPECIES[b.species] ? SPECIES[b.species][0] : 'Unknown species'}`;
+    $('hx-name').textContent = b.name;
+    $('hx-role').textContent = roleName(b.role);
+    $('hx-sev').textContent = severityOf(b.config);
+    if (!reduce) { issue.classList.remove('swap'); void issue.offsetWidth; issue.classList.add('swap'); }
+  }
+
+  function feed() {
+    const list = $('hx-feed');
+    list.hidden = bugs.length < 2;
+    list.replaceChildren(...bugs.slice(1, 4).map((b) => {
+      const li = document.createElement('li');
+      li.innerHTML = bugSVG(b.config, 60);
+      const code = document.createElement('code'); code.textContent = id(b.bug_number);
+      const name = document.createElement('b'); name.textContent = b.name;
+      const role = document.createElement('small'); role.textContent = roleName(b.role);
+      li.append(code, name, role);
+      return li;
+    }));
+  }
+
+  async function startTracker() {
+    if (!supabase) return;
+    const { data } = await supabase.rpc('get_swarm', { max_rows: 12 });
+    bugs = ((data ?? []) as B[]).filter((b) => b.config);
+    if (!bugs.length) return;
+    show(bugs[0]);
+    feed();
+    if (bugs.length > 1 && !reduce) setInterval(() => { if (!document.hidden) { at = (at + 1) % bugs.length; show(bugs[at]); } }, 4500);
+    onNewBug((b) => { bugs.unshift(b as B); at = 0; show(bugs[0]); feed(); });
+  }
+  startTracker();
+</script>

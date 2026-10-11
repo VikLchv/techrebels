@@ -84,8 +84,11 @@
     });
 
     document.addEventListener('tr:release', (e) => {
-      const n = (e as CustomEvent<number>).detail || 50;
-      for (let k = 0; k < n; k++) spawn(sw.W / 2 + (Math.random() - 0.5) * 120, sw.H / 2 + (Math.random() - 0.5) * 120, true);
+      // detail: a count, or { n, x, y } to burst from a point
+      const d = (e as CustomEvent<number | { n: number; x: number; y: number }>).detail;
+      const n = (typeof d === 'number' ? d : d?.n) || 50;
+      const cx = typeof d === 'object' && d ? d.x : sw.W / 2, cy = typeof d === 'object' && d ? d.y : sw.H / 2;
+      for (let k = 0; k < n; k++) spawn(cx + (Math.random() - 0.5) * 60, cy + (Math.random() - 0.5) * 60, true);
     });
 
     if (document.documentElement.classList.contains('entered')) start();
