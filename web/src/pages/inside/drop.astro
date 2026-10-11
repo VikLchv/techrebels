@@ -1,0 +1,38 @@
+---
+import Club from '../../layouts/Club.astro';
+import InsideNav from '../../components/InsideNav.astro';
+import { merchItems, merchSizes } from '../../config/merch';
+import '../../styles/inside-pages.css';
+---
+<Club title="The Drop · Inside · techRebels" description="Private member interest for the techRebels Drop.">
+  <section class="block first inside-page drop-page">
+    <div class="page-loading" id="page-loading"><p class="eyebrow">Inside · Drop</p><h1 class="h2">Opening the stash…</h1></div>
+    <div class="page-out" id="page-out" hidden><p class="eyebrow">Inside · Drop</p><h1 class="h2">Member access required.</h1><a class="pill pill-pink" href="/login?next=%2Finside%2Fdrop">Log in</a></div>
+    <div id="page-app" hidden>
+      <header class="page-head"><div><p class="eyebrow">Inside · Drop 001</p><h1 class="h2">Wear the bug.</h1><p class="lede">Signal what we should make first. This is interest only — no payment and no obligation yet.</p></div><a class="pill pill-ghost" href="/drop">See the public drop</a></header>
+      <InsideNav active="drop" />
+      <section class="page-panel">
+        <h2 class="section-title">What should we make for you?</h2><p class="section-copy">Members get first access. Tee and hoodie sizes can be changed any time before pre-orders open.</p>
+        <div class="merch-grid">
+          {merchItems.map((item) => <article class="merch-card" data-card={item.id} style={`--merch:${item.color}`}><div class="merch-dot"></div><div><h3>{item.name}</h3><p>{item.short}</p></div>{item.sized&&<label>Size<select data-size={item.id}><option value="">Pick size</option>{merchSizes.map((size)=><option value={size}>{size}</option>)}</select></label>}<button class="pill pill-ghost" type="button" data-item={item.id} aria-pressed="false">I’m in</button><p class="merch-status" data-status={item.id}></p></article>)}
+        </div>
+      </section>
+    </div>
+  </section>
+</Club>
+
+<style is:global>
+  .drop-page .section-copy{margin-bottom:22px}.merch-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.merch-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:17px;border-radius:19px;background:var(--night);border:1px solid rgba(237,231,220,.1)}.merch-card.active{border-color:var(--merch);box-shadow:inset 0 0 0 1px var(--merch)}.merch-dot{width:44px;aspect-ratio:1;border-radius:13px;background:var(--merch);transform:rotate(-4deg)}.merch-card h3,.merch-card p{margin:0}.merch-card h3{color:var(--bone);font:750 1.15rem var(--f-display)}.merch-card p{color:var(--muted);font-size:.8rem}.merch-card label{display:grid;gap:4px;color:var(--muted);font:500 .68rem var(--f-mono);text-transform:uppercase}.merch-card select{min-width:108px;padding:8px}.merch-card button{grid-column:3;padding:9px 15px;font-size:.82rem}.merch-card.active button{color:var(--night);background:var(--merch);box-shadow:none}.merch-status{grid-column:2/-1;min-height:1.2em;color:var(--mint)!important;font:500 .72rem var(--f-mono)!important}@media(max-width:760px){.merch-grid{grid-template-columns:1fr}}@media(max-width:480px){.merch-card{grid-template-columns:auto 1fr}.merch-card label,.merch-card button,.merch-status{grid-column:2;justify-self:start}}
+</style>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+  type Item='tee'|'hoodie'|'cap'|'tote'; type Interest={item:Item;size:string|null}; let uid='';
+  const $=(id:string)=>document.getElementById(id)!;
+  function render(rows:Interest[]){const selected=new Map(rows.map(row=>[row.item,row]));document.querySelectorAll<HTMLElement>('[data-card]').forEach(card=>{const item=card.dataset.card as Item;const active=selected.has(item);card.classList.toggle('active',active);const button=document.querySelector<HTMLButtonElement>(`[data-item="${item}"]`)!;button.setAttribute('aria-pressed',String(active));button.textContent=active?'I’m in ✓':'I’m in';const size=document.querySelector<HTMLSelectElement>(`[data-size="${item}"]`);if(size)size.value=selected.get(item)?.size??'';});}
+  async function start(){if(!supabase){$('page-loading').hidden=true;$('page-out').hidden=false;return;}const {data:session}=await supabase.auth.getSession();if(!session.session){$('page-loading').hidden=true;$('page-out').hidden=false;return;}uid=session.session.user.id;const [{data:member},{data:admin},{data:rows}]=await Promise.all([supabase.rpc('is_member'),supabase.rpc('is_admin'),supabase.from('merch_interest').select('item,size').eq('user_id',uid)]);$('page-loading').hidden=true;if(!member&&!admin){location.replace('/inside');return;}$('page-app').hidden=false;render((rows as Interest[]|null)??[]);}
+  function setupDropPage(){if(!document.querySelector('.drop-page'))return;
+  document.querySelectorAll<HTMLButtonElement>('[data-item]').forEach(button=>button.addEventListener('click',async()=>{if(!supabase||!uid)return;const item=button.dataset.item as Item;const card=document.querySelector<HTMLElement>(`[data-card="${item}"]`)!;const status=document.querySelector<HTMLElement>(`[data-status="${item}"]`)!;const size=document.querySelector<HTMLSelectElement>(`[data-size="${item}"]`);const active=button.getAttribute('aria-pressed')==='true';if(!active&&size&&!size.value){status.textContent='Pick a size first.';return;}button.disabled=true;const result=active?await supabase.from('merch_interest').delete().eq('user_id',uid).eq('item',item):await supabase.from('merch_interest').insert({item,size:size?.value||null});button.disabled=false;if(result.error){status.textContent='Could not save. Try again.';return;}card.classList.toggle('active',!active);button.setAttribute('aria-pressed',String(!active));button.textContent=!active?'I’m in ✓':'I’m in';status.textContent=!active?'Saved. No payment or obligation yet.':'Removed.';}));
+  document.querySelectorAll<HTMLSelectElement>('[data-size]').forEach(select=>select.addEventListener('change',async()=>{if(!supabase||!uid||!select.value)return;const item=select.dataset.size as Item;const button=document.querySelector<HTMLButtonElement>(`[data-item="${item}"]`)!;if(button.getAttribute('aria-pressed')!=='true')return;const status=document.querySelector<HTMLElement>(`[data-status="${item}"]`)!;const {error}=await supabase.from('merch_interest').update({size:select.value}).eq('user_id',uid).eq('item',item);status.textContent=error?'Could not update the size.':`Size ${select.value} saved.`;}));start();}
+  document.addEventListener('astro:page-load',setupDropPage);
+</script>

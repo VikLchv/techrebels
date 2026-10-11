@@ -7,14 +7,15 @@ import { links } from '../config/links';
 
 interface Props { title?: string; description?: string }
 const { title, description } = Astro.props;
+const clientRouter = Astro.url.pathname.startsWith('/inside') && !Astro.url.pathname.startsWith('/inside/admin');
 ---
-<Base title={title} description={description}>
+<Base title={title} description={description} clientRouter={clientRouter}>
   <link slot="head" rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" />
   <script slot="head" is:inline>document.documentElement.classList.add('js');</script>
   <slot name="before" />
 
   <div class="club">
-    <header class="nav" id="nav">
+    <header class="nav" id="nav" transition:persist="club-nav">
       <a class="nav-mark" href="/" aria-label="techRebels home"><span>tech</span><span>Rebels</span></a>
       <nav aria-label="Main">
         <a href="/manifesto">Manifesto</a>
@@ -24,21 +25,25 @@ const { title, description } = Astro.props;
         <a href="/drop">The Drop</a>
         <a href="/get-involved">Get involved</a>
         <a href="/crew">Crew</a>
+        <a class="nav-lunapark" href="/inside/lunapark">Lunapark</a>
       </nav>
       <div class="nav-right">
         <a class="nav-count" href="/swarm" title="See every bug in the swarm"><i aria-hidden="true"></i><b id="bug-count">·</b> <span id="bug-count-label">bugs in the swarm</span></a>
-        <a class="nav-inside" href="/inside">Inside</a>
-        <a class="pill pill-pink" href="/lab">Join the swarm</a>
+        <a class="nav-account" id="nav-account" href="/inside/account" hidden><i aria-hidden="true"></i><span id="nav-account-name">Signed in</span></a>
+        <a class="nav-inside" id="nav-inside" href="/inside" data-astro-reload>Inside</a>
+        <a class="nav-inside nav-partner" id="nav-partner" href="/inside/partner" data-astro-reload hidden>Partner space</a>
+        <a class="nav-inside nav-admin" id="nav-admin" href="/inside/admin" hidden>Control room</a>
+        <a class="pill pill-pink" id="nav-join" href="/lab">Join the swarm</a>
       </div>
     </header>
 
-    <Ambient />
+    <div transition:persist="club-ambient"><Ambient /></div>
 
     <main id="main">
       <slot />
     </main>
 
-    <footer class="foot">
+    <footer class="foot" transition:persist="club-footer">
       <p class="foot-mark" aria-label="techRebels"><span>tech</span><span>Rebels</span></p>
       <div class="foot-cols">
         <div>
@@ -51,6 +56,7 @@ const { title, description } = Astro.props;
             <li><a href="/swarm">The Swarm</a></li>
             <li><a href="/get-involved">Get involved</a></li>
             <li><a href="/crew">The crew</a></li>
+            <li><a href="/inside/lunapark">Lunapark</a></li>
           </ul>
         </div>
         <div>
@@ -72,11 +78,17 @@ const { title, description } = Astro.props;
 </Base>
 
 <style is:global>
+  @view-transition { navigation: auto; }
   .club { font-family: "Satoshi", "Figtree", system-ui, sans-serif; font-size: 17px; line-height: 1.55; }
   .club .eyebrow { margin: 0; font: 500 .8rem var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
   /* ambient bugs crawl under the content, so they never sit on top of text */
   .club #ambient { z-index: 0; }
   .club main, .club .foot { position: relative; z-index: 1; }
+  .club main { view-transition-name: inside-content; }
+  ::view-transition-old(inside-content) { animation: tr-content-out .13s ease both; }
+  ::view-transition-new(inside-content) { animation: tr-content-in .24s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes tr-content-out { to { opacity: 0; transform: translateY(-5px); } }
+  @keyframes tr-content-in { from { opacity: 0; transform: translateY(9px); } }
 
   .pill { display: inline-flex; align-items: center; gap: 10px; border: 0; border-radius: 999px; padding: 14px 24px; font: 700 .95rem "Satoshi", system-ui, sans-serif; text-decoration: none; cursor: pointer; transition: transform .2s ease, background-color .2s ease, box-shadow .2s ease; }
   .pill:hover { transform: translateY(-2px); }
@@ -109,16 +121,24 @@ const { title, description } = Astro.props;
   .nav nav { display: flex; justify-content: center; gap: clamp(16px, 2.5vw, 36px); }
   .nav nav a { color: var(--bone); text-decoration: none; font-weight: 500; font-size: .95rem; opacity: .8; transition: opacity .2s; white-space: nowrap; }
   .nav nav a:hover { opacity: 1; }
+  .nav nav .nav-lunapark { color: var(--lime); font-weight: 800; opacity: 1; }
+  .nav nav .nav-lunapark::before { content: "✦ "; color: var(--pink); }
   .nav-right { display: flex; align-items: center; gap: 16px; }
   .nav-count { text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font: 500 .8rem var(--f-mono); color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .nav-count i { width: 8px; height: 8px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 4px rgba(205, 220, 39, .18); animation: live 2s ease-in-out infinite; }
   .nav-count b { color: var(--bone); }
+  .nav-account { display: inline-flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 999px; background: rgba(61,219,154,.1); color: var(--bone); text-decoration: none; font: 700 .75rem var(--f-mono); white-space: nowrap; }
+  .nav-account[hidden] { display: none; }
+  .nav-account i { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 3px rgba(61,219,154,.14); }
+  .nav-account:hover { background: rgba(61,219,154,.17); }
   .nav .pill { padding: 11px 20px; font-size: .9rem; }
   .nav-inside { color: var(--bone); text-decoration: none; font-weight: 700; font-size: .95rem; opacity: .85; }
   .nav-inside:hover { opacity: 1; color: var(--lime); }
+  .nav-admin { color: var(--lime); }
+  .nav-partner { color: var(--mint); }
   @keyframes live { 50% { box-shadow: 0 0 0 8px rgba(205, 220, 39, 0); } }
-  @media (max-width: 1180px) { .nav nav { display: none; } .nav { grid-template-columns: auto 1fr; } .nav-right { justify-content: flex-end; } }
-  @media (max-width: 480px) { .nav-count { display: none; } }
+  @media (max-width: 1540px) { .nav nav { display: none; } .nav { grid-template-columns: auto minmax(0, 1fr); } .nav-right { min-width: 0; justify-content: flex-end; } }
+  @media (max-width: 640px) { .nav-count, .nav-account span { display: none; } .nav-account { padding: 9px; } }
 
   /* footer */
   .foot { padding: clamp(56px, 8vw, 96px) clamp(16px, 4vw, 48px) calc(env(safe-area-inset-bottom, 0px) + 40px); border-top: 1px solid rgba(237, 231, 220, .08); display: grid; gap: 48px; }
@@ -136,6 +156,7 @@ const { title, description } = Astro.props;
   html.js .rv { opacity: 0; transform: translateY(28px); transition: opacity .8s ease, transform .8s cubic-bezier(.2, .7, .2, 1); }
   html.js .rv.in { opacity: 1; transform: none; }
   @media (prefers-reduced-motion: reduce) { html.js .rv { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { ::view-transition-old(inside-content), ::view-transition-new(inside-content) { animation: none; } }
 </style>
 
 <script>
@@ -156,6 +177,30 @@ const { title, description } = Astro.props;
   if (supabase) {
     supabase.rpc('swarm_count').then(({ data }) => { if (typeof data === 'number') showCount(data); });
     onNewBug(() => showCount(swarmTotal + 1));
+    supabase.auth.getSession().then(async ({ data }) => {
+      const user = data.session?.user;
+      if (!user) return;
+      const inside = document.getElementById('nav-inside');
+      const join = document.getElementById('nav-join') as HTMLAnchorElement | null;
+      const adminLink = document.getElementById('nav-admin');
+      const partnerLink = document.getElementById('nav-partner');
+      const accountLink = document.getElementById('nav-account');
+      const accountName = document.getElementById('nav-account-name');
+      const [{ data: profile }, { data: admin }, { data: partner }, { data: bug }] = await Promise.all([
+        supabase.from('profiles').select('membership_status,full_name').eq('id', user.id).maybeSingle(),
+        supabase.rpc('is_admin'),
+        supabase.rpc('has_role', { requested_role: 'partner' }),
+        supabase.from('bugs').select('bug_number').eq('user_id', user.id).maybeSingle(),
+      ]);
+      const firstName = String(profile?.full_name ?? '').trim().split(/\s+/)[0];
+      const bugName = bug?.bug_number ? `BUG-${String(bug.bug_number).padStart(4, '0')}` : '';
+      if (accountLink) accountLink.hidden = false;
+      if (accountName) accountName.textContent = `Signed in · ${firstName || bugName || user.email?.split('@')[0] || 'account'}`;
+      if (inside) inside.textContent = profile?.membership_status === 'approved' || admin ? 'Inside · member' : 'Application';
+      if (join) { join.textContent = 'My bug'; join.href = '/lab'; }
+      if (admin && adminLink) adminLink.hidden = false;
+      if (partner && partnerLink) partnerLink.hidden = false;
+    });
   }
 
   document.getElementById('replay')?.addEventListener('click', () => {

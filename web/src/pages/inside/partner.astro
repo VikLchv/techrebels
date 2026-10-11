@@ -1,0 +1,69 @@
+---
+import Club from '../../layouts/Club.astro';
+---
+<Club title="Partner Space · techRebels" description="Private techRebels partner space.">
+  <section class="block first partner-space">
+    <div id="partner-loading"><p class="eyebrow">Inside · Partner</p><h1 class="h2">Opening Partner Space…</h1></div>
+    <div id="partner-out" hidden>
+      <p class="eyebrow">Inside · Partner</p><h1 class="h2">Partner access only.</h1>
+      <p class="lede" id="partner-out-copy">Log in with the account connected to your invitation.</p>
+      <a class="pill pill-pink" href="/login?next=%2Finside%2Fpartner">Log in</a>
+    </div>
+    <div id="partner-app" hidden>
+      <header class="partner-head">
+        <div><p class="eyebrow">Inside · Partner</p><h1 class="h2" id="partner-hello">Welcome to Partner Space.</h1><p class="lede">A private lane for things we are building together — without exposing member profiles or community conversations.</p></div>
+        <a class="pill pill-ghost" id="partner-member" href="/inside" data-astro-reload hidden>Open member Inside</a>
+      </header>
+      <div class="partner-grid">
+        <article><p class="eyebrow">Active collaboration</p><h2>Briefs & deliverables</h2><p>Your shared project briefs, owners and deadlines will live here. The first collaboration module is next in the build.</p><span class="partner-state">Space ready · content coming next</span></article>
+        <article><p class="eyebrow">Brand kit</p><h2>Assets that stay current</h2><p>Approved logos, copy and event materials will be available from one place instead of email threads.</p><span class="partner-state">Planned</span></article>
+        <article><p class="eyebrow">Results</p><h2>What happened</h2><p>Post-event recap, agreed metrics and useful outputs — scoped only to your partnership.</p><span class="partner-state">Planned</span></article>
+      </div>
+      <section class="partner-account"><p id="partner-email"></p><div><a class="pill pill-ghost" href="/forgot-password">Change password</a><button class="pill pill-ghost" id="partner-signout" type="button">Sign out</button></div></section>
+    </div>
+  </section>
+</Club>
+
+<style is:global>
+  .partner-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; }
+  .partner-head .h2 { margin: 7px 0 12px; }
+  .partner-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 38px; }
+  .partner-grid article { display: grid; align-content: start; gap: 12px; min-height: 240px; padding: 24px; border-radius: 22px; background: var(--night-2); border: 1px solid rgba(237,231,220,.1); }
+  .partner-grid h2, .partner-grid p { margin: 0; }
+  .partner-grid h2 { color: var(--pink); font: 800 1.55rem/1 var(--f-display); }
+  .partner-grid p:not(.eyebrow) { color: #B9C2BD; }
+  .partner-state { align-self: end; margin-top: auto; color: var(--lime); font: 600 .72rem var(--f-mono); text-transform: uppercase; letter-spacing: .08em; }
+  .partner-account { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-top: 18px; padding: 18px 22px; border-radius: 18px; background: rgba(237,231,220,.04); color: var(--muted); }
+  .partner-account p { margin: 0; font: 500 .8rem var(--f-mono); }
+  .partner-account div { display: flex; flex-wrap: wrap; gap: 9px; }
+  .partner-account .pill { padding: 10px 16px; }
+  @media (max-width: 800px) { .partner-head, .partner-account { align-items: start; flex-direction: column; } .partner-grid { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+  const loading = document.getElementById('partner-loading')!;
+  const out = document.getElementById('partner-out')!;
+  const app = document.getElementById('partner-app')!;
+
+  async function start() {
+    if (!supabase) { loading.hidden = true; out.hidden = false; return; }
+    const { data } = await supabase.auth.getSession();
+    const user = data.session?.user;
+    if (!user) { loading.hidden = true; out.hidden = false; return; }
+    const [{ data: partner }, { data: member }, { data: profile }] = await Promise.all([
+      supabase.rpc('has_role', { requested_role: 'partner' }),
+      supabase.rpc('is_member'),
+      supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle(),
+    ]);
+    loading.hidden = true;
+    if (!partner) { out.hidden = false; document.getElementById('partner-out-copy')!.textContent = 'This account does not have partner access.'; return; }
+    app.hidden = false;
+    const first = String(profile?.full_name ?? '').split(/\s+/)[0];
+    if (first) document.getElementById('partner-hello')!.textContent = `Welcome, ${first}.`;
+    document.getElementById('partner-email')!.textContent = `Signed in as ${user.email ?? ''}`;
+    if (member) document.getElementById('partner-member')!.hidden = false;
+  }
+  document.getElementById('partner-signout')!.addEventListener('click', async () => { await supabase?.auth.signOut(); location.href = '/'; });
+  start();
+</script>

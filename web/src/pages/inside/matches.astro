@@ -1,0 +1,50 @@
+---
+import Club from '../../layouts/Club.astro';
+import InsideNav from '../../components/InsideNav.astro';
+import '../../styles/inside-pages.css';
+---
+<Club title="Matches · Inside · techRebels" description="Your reviewed techRebels introductions.">
+  <section class="block first inside-page matches-page">
+    <div class="page-loading" id="page-loading"><p class="eyebrow">Inside · Matches</p><h1 class="h2">Checking the swarm…</h1></div>
+    <div class="page-out" id="page-out" hidden><p class="eyebrow">Inside · Matches</p><h1 class="h2">Member access required.</h1><a class="pill pill-pink" href="/login?next=%2Finside%2Fmatches">Log in</a></div>
+    <div id="page-app" hidden>
+      <header class="page-head"><div><p class="eyebrow">Inside · Matches</p><h1 class="h2">People worth meeting.</h1><p class="lede">No infinite directory and no popularity contest. The crew reviews every bug buddy and squad before it appears here.</p></div><a class="pill pill-ghost" href="/inside/profile">Tune my profile</a></header>
+      <InsideNav active="matches" />
+      <section class="page-panel">
+        <div class="matches-head"><div><h2 class="section-title">Your bug buddy & squad</h2><p class="section-copy">Matching uses only the profile signals you chose to share.</p></div><span class="round" id="round" hidden></span></div>
+        <div class="match-state" id="match-state"><p>Checking your latest matching round…</p></div>
+        <div class="match-grid" id="match-grid" hidden>
+          <article class="match-card buddy"><p class="eyebrow">One strong connection</p><h3 id="buddy-title"></h3><p class="reason" id="buddy-reason"></p><div class="people" id="buddy-people"></div><a class="pill pill-ghost" id="buddy-slack" hidden target="_blank" rel="noopener noreferrer">Open our Slack space ↗</a></article>
+          <article class="match-card squad"><p class="eyebrow">Your small crew</p><h3 id="squad-title"></h3><p class="reason" id="squad-reason"></p><div class="people" id="squad-people"></div><a class="pill pill-ghost" id="squad-slack" hidden target="_blank" rel="noopener noreferrer">Open squad Slack ↗</a></article>
+        </div>
+      </section>
+    </div>
+  </section>
+</Club>
+
+<style is:global>
+  .matches-head { display:flex; align-items:end; justify-content:space-between; gap:18px; margin-bottom:20px; }
+  .round { padding:7px 12px; border-radius:999px; background:var(--night); color:var(--mint); font:600 .76rem var(--f-mono); }
+  .match-state { padding:22px; border:1.5px dashed rgba(237,231,220,.2); border-radius:18px; color:#C3CBC6; }
+  .match-state p { margin:0; }.match-state strong { color:var(--bone); }.match-state .pill { margin-top:14px; }
+  .match-grid { display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); gap:16px; }
+  .match-card { padding:clamp(19px,3vw,28px); border-radius:22px; background:var(--night); border:1px solid rgba(237,231,220,.1); }
+  .match-card.buddy { box-shadow:inset 0 3px 0 var(--pink); }.match-card.squad { box-shadow:inset 0 3px 0 var(--lime); }
+  .match-card h3 { margin:8px 0 0; color:var(--bone); font:800 clamp(1.45rem,2.7vw,2rem)/1 var(--f-display); }
+  .reason { margin:9px 0 18px; color:var(--muted); font:500 .82rem/1.5 var(--f-mono); }
+  .people { display:grid; gap:10px; margin-bottom:18px; }.person { display:grid; grid-template-columns:58px 1fr; gap:12px; align-items:center; padding:10px; border-radius:16px; background:rgba(237,231,220,.045); }.person.me { background:rgba(205,220,39,.08); }
+  .avatar { width:58px; aspect-ratio:1; display:grid; place-items:center; overflow:hidden; border-radius:14px; background:var(--purple); }.avatar svg { width:100%; height:auto; }.person p { margin:0; }.person-name { color:var(--bone); font-weight:750; }.person-bug { color:var(--mint); font:500 .72rem var(--f-mono); }.person-why { margin-top:5px!important; color:#AEB7B1; font-size:.8rem; }
+  @media(max-width:760px){.matches-head{align-items:start;flex-direction:column}.match-grid{grid-template-columns:1fr}}
+</style>
+
+<script>
+  import { supabase } from '../../lib/supabase'; import { bugSVG } from '../../lib/bug/render.js';
+  const $ = <T extends HTMLElement>(id:string) => document.getElementById(id) as T;
+  type Member={is_me:boolean;name:string;bug_number:number|null;bug_name:string|null;bug_config:Record<string,any>|null;why:string|null};
+  type Group={label:string;reason:string|null;slack_url:string|null;members:Member[]};
+  type Payload={status:'opted_out'|'waiting'|'matched';round:{name:string}|null;buddy:Group|null;squad:Group|null};
+  function person(member:Member){const node=document.createElement('div');node.className=`person${member.is_me?' me':''}`;const avatar=document.createElement('div');avatar.className='avatar';avatar.innerHTML=member.bug_config?bugSVG(member.bug_config,80):'<span>TR</span>';const copy=document.createElement('div');const name=document.createElement('p');name.className='person-name';name.textContent=member.is_me?`${member.name} (you)`:member.name;copy.append(name);if(member.bug_number!==null||member.bug_name){const bug=document.createElement('p');bug.className='person-bug';bug.textContent=[member.bug_number===null?'':`BUG-${String(member.bug_number).padStart(4,'0')}`,member.bug_name].filter(Boolean).join(' · ');copy.append(bug);}if(!member.is_me&&member.why){const why=document.createElement('p');why.className='person-why';why.textContent=member.why;copy.append(why);}node.append(avatar,copy);return node;}
+  function group(kind:'buddy'|'squad',data:Group|null){const card=document.querySelector<HTMLElement>(`.match-card.${kind}`)!;if(!data){card.hidden=true;return;} $(`${kind}-title`).textContent=data.label;$(`${kind}-reason`).textContent=data.reason??'A strong fit from the swarm.';$(`${kind}-people`).replaceChildren(...data.members.map(person));const slack=$<HTMLAnchorElement>(`${kind}-slack`);if(data.slack_url){slack.href=data.slack_url;slack.hidden=false;}}
+  async function start(){if(!supabase){$('page-loading').hidden=true;$('page-out').hidden=false;return;}const {data:session}=await supabase.auth.getSession();if(!session.session){$('page-loading').hidden=true;$('page-out').hidden=false;return;}const [{data:member},{data:admin},{data:matches,error}]=await Promise.all([supabase.rpc('is_member'),supabase.rpc('is_admin'),supabase.rpc('my_matches')]);$('page-loading').hidden=true;if(!member&&!admin){location.replace('/inside');return;}$('page-app').hidden=false;const state=$('match-state');if(error){state.innerHTML='<p><strong>Matching is temporarily unavailable.</strong> Try again in a moment.</p>';return;}const payload=matches as Payload;if(!payload||payload.status==='waiting'){state.innerHTML='<p><strong>You’re in the matching pool.</strong> The crew is reviewing the next round.</p>';return;}if(payload.status==='opted_out'){state.innerHTML='<p><strong>Matching is off.</strong> Turn it on in your profile to join the next round.</p><a class="pill pill-lime" href="/inside/profile">Open profile</a>';return;}state.hidden=true;$('match-grid').hidden=false;if(payload.round){$('round').textContent=payload.round.name;$('round').hidden=false;}group('buddy',payload.buddy);group('squad',payload.squad);}
+  document.addEventListener('astro:page-load',()=>{if(document.getElementById('match-state'))start();});
+</script>

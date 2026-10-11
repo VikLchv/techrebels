@@ -2,10 +2,15 @@
 // Members area: your bug, your profile for matching, your account.
 import Club from '../layouts/Club.astro';
 import { ageRanges, topics, activities, ambitions } from '../config/profile';
+import { merchItems, merchSizes } from '../config/merch';
 import { links } from '../config/site';
+import { news } from '../config/news';
+import InsideNav from '../components/InsideNav.astro';
 
 const chips = (name: string, items: string[], type: 'checkbox' | 'radio' = 'checkbox') =>
   items.map((v, i) => ({ id: `${name}-${i}`, name, v, type }));
+const nextSession = news.find((item) => item.when === 'next' && item.tag === 'Session');
+const nextSessionDate = nextSession?.date.startsWith('[') ? 'Date TBA' : nextSession?.date ?? 'Soon';
 ---
 <Club title="Inside · techRebels" description="Your techRebels profile.">
   <section class="block first inside">
@@ -17,6 +22,48 @@ const chips = (name: string, items: string[], type: 'checkbox' | 'radio' = 'chec
       <div class="lrow"><a class="pill pill-pink" href="/login">Log in</a><a class="pill pill-ghost" href="/lab">Build your bug</a></div>
     </div>
 
+    <!-- signed in, waiting for crew approval -->
+    <div id="in-pending" hidden>
+      <div class="applicant-head">
+        <div class="in-bug" id="applicant-bug" aria-hidden="true"></div>
+        <div>
+          <div class="applicant-kicker"><p class="eyebrow" id="applicant-id">Membership application</p><span class="applicant-status" id="applicant-status">Pending</span></div>
+          <h1 class="h2" id="applicant-title">One last step.</h1>
+          <p class="lede" id="applicant-copy">Tell us why you want to join. The crew reviews every application personally.</p>
+          <div class="lrow"><a class="pill pill-lime" href="/inside/lunapark">Enter the Lunapark</a><a class="pill pill-ghost" href="/lab">Edit my bug</a><a class="pill pill-ghost" href="/forgot-password">Change password</a><button class="pill pill-ghost" type="button" id="applicant-signout">Sign out</button></div>
+        </div>
+      </div>
+
+      <ol class="application-timeline" aria-label="Application progress">
+        <li id="step-bug"><span>1</span><div><b>Bug created</b><small>Your private Rebel ID</small></div></li>
+        <li id="step-application"><span>2</span><div><b>Application sent</b><small>A few honest answers</small></div></li>
+        <li id="step-review"><span>3</span><div><b>Crew review</b><small>Personally reviewed</small></div></li>
+        <li id="step-inside"><span>4</span><div><b>Inside unlocked</b><small>Full member access</small></div></li>
+      </ol>
+
+      <form class="application-form" id="application-form" novalidate>
+        <div class="pf-head">
+          <p class="eyebrow">Your application</p>
+          <h2>Why techRebels?</h2>
+          <p>No CV theatre. A few honest sentences are enough.</p>
+        </div>
+        <label>City <span class="opt">optional</span><input type="text" id="application-city" maxlength="80" autocomplete="address-level2" placeholder="Prague" /></label>
+        <label>Why do you want to join?<textarea id="application-reason" rows="5" minlength="20" maxlength="800" required placeholder="What are you curious about, building or trying to change?"></textarea></label>
+        <label>What could you bring to the swarm? <span class="opt">optional</span><textarea id="application-contribution" rows="4" maxlength="800" placeholder="Experience, energy, questions, introductions, weird ideas…"></textarea></label>
+        <p class="lerr" id="application-error" role="alert" hidden></p>
+        <div class="lrow"><button class="pill pill-pink" type="submit" id="application-submit">Send application <span aria-hidden="true">→</span></button><span class="lstatus" id="application-message" role="status"></span></div>
+      </form>
+
+      <section class="applicant-account">
+        <p id="applicant-email"></p>
+        <button type="button" class="applicant-delete" id="applicant-delete">Delete my application and account</button>
+        <div class="in-confirm" id="applicant-confirm" hidden>
+          <p><b>Delete everything?</b> Your application, bug and account will be removed for good.</p>
+          <div class="lrow"><button type="button" class="pill pill-pink" id="applicant-delete-yes">Yes, delete it all</button><button type="button" class="pill pill-ghost" id="applicant-delete-no">Keep my application</button></div>
+        </div>
+      </section>
+    </div>
+
     <!-- logged in -->
     <div id="in-app" hidden>
       <div class="in-head">
@@ -25,11 +72,35 @@ const chips = (name: string, items: string[], type: 'checkbox' | 'radio' = 'chec
           <p class="eyebrow" id="in-id">Inside</p>
           <h1 class="h2" id="in-hello">Hey, rebel.</h1>
           <p class="lede" id="in-sub">This is your corner of techRebels.</p>
-          <div class="lrow"><a class="pill pill-ghost" href="/lab">Edit my bug</a><a class="pill pill-ghost" href={links.slackInvite}>Join the Slack</a></div>
+          <div class="role-strip" id="role-strip" aria-label="Your access"></div>
+          <div class="lrow"><a class="pill pill-ghost" href="/lab">Edit my bug</a><a class="pill pill-ghost" href={links.slackInvite}>Join the Slack</a><a class="pill pill-lime" id="in-admin" href="/inside/admin" hidden>Open admin</a></div>
         </div>
       </div>
 
-      <form class="pf" id="pf" novalidate>
+      <InsideNav active="overview" />
+
+      <section class="member-overview" id="overview">
+        <article class="overview-card overview-id">
+          <p class="eyebrow">Rebel ID</p><strong id="overview-bug">Your bug</strong><span>Active member · swarm visible</span><a href="/swarm">Find me in the swarm →</a>
+        </article>
+        <article class="overview-card">
+          <p class="eyebrow">Profile signal</p><strong id="overview-profile">0%</strong><span id="overview-profile-copy">Complete your profile for stronger matches.</span><div class="profile-meter"><i id="overview-profile-meter"></i></div><a href="/inside/profile">Tune my profile →</a>
+        </article>
+        <article class="overview-card">
+          <p class="eyebrow">Matching</p><strong id="overview-matching">Checking…</strong><span id="overview-matching-copy">Looking for your latest matching state.</span><a href="/inside/matches">Open matches →</a>
+        </article>
+        <article class="overview-card overview-session">
+          <p class="eyebrow">Next session</p><strong>{nextSession?.title ?? 'Next Rebel Session'}</strong><span>{nextSessionDate} · Prague</span><a href={nextSession?.href ?? '/sessions'}>{nextSession?.cta ?? 'See sessions'} →</a>
+        </article>
+        <article class="overview-card overview-radar">
+          <p class="eyebrow">Rebel Radar</p><strong>Shape what happens next.</strong><span>Vote for topics, people and experiments worth putting on stage.</span><a href="/radar">Open the Radar →</a>
+        </article>
+        <article class="overview-card">
+          <p class="eyebrow">Lunapark · Now playing</p><strong>Bug Rush</strong><span>45 seconds. One bug. Far too much corporate nonsense.</span><a href="/inside/lunapark">Release my bug →</a>
+        </article>
+      </section>
+
+      <form class="pf inside-detail-legacy" id="pf" novalidate>
         <div class="pf-head">
           <h2>Your profile</h2>
           <p>We use this to match you with people worth meeting: a bug buddy and a small squad with shared interests. Only the techRebels crew sees your answers, and titles, job titles and companies are never shown on the site. Fill in as much as you like.</p>
@@ -65,15 +136,69 @@ const chips = (name: string, items: string[], type: 'checkbox' | 'radio' = 'chec
         <div class="lrow"><button class="pill pill-pink" type="submit" id="pf-save" data-track="save profile">Save profile <span aria-hidden="true">→</span></button><span class="lstatus" id="pf-status" role="status"></span></div>
       </form>
 
-      <section class="in-matches">
-        <h2>Your bug buddy and squad</h2>
-        <p>Coming soon. Once matching starts, this is where you'll meet your bug buddy and your squad, with a link to your group on Slack.</p>
+      <section class="in-matches inside-detail-legacy" id="matches">
+        <div class="match-head">
+          <div>
+            <p class="eyebrow">People worth meeting</p>
+            <h2>Your bug buddy and squad</h2>
+          </div>
+          <span class="match-round" id="match-round" hidden></span>
+        </div>
+        <div class="match-state" id="match-state" role="status">
+          <p>Checking the swarm for your matches…</p>
+        </div>
+        <div class="match-grid" id="match-grid" hidden>
+          <article class="match-card match-buddy">
+            <p class="eyebrow">One strong connection</p>
+            <h3 id="match-buddy-title">Bug buddies</h3>
+            <p class="match-reason" id="match-buddy-reason"></p>
+            <div class="match-people" id="match-buddy-people"></div>
+            <a class="pill pill-ghost match-slack" id="match-buddy-slack" href="#" target="_blank" rel="noopener noreferrer" hidden>Open our Slack space <span aria-hidden="true">↗</span></a>
+          </article>
+          <article class="match-card match-squad">
+            <p class="eyebrow">Your small crew</p>
+            <h3 id="match-squad-title">Squad</h3>
+            <p class="match-reason" id="match-squad-reason"></p>
+            <div class="match-people" id="match-squad-people"></div>
+            <a class="pill pill-ghost match-slack" id="match-squad-slack" href="#" target="_blank" rel="noopener noreferrer" hidden>Open squad Slack <span aria-hidden="true">↗</span></a>
+          </article>
+        </div>
       </section>
 
-      <section class="in-account">
+      <section class="in-merch inside-detail-legacy" id="merch">
+        <div class="merch-head">
+          <div>
+            <p class="eyebrow">Founding Drop 001</p>
+            <h2>What should we make for you?</h2>
+          </div>
+          <a class="pill pill-ghost" href="/drop">See the drop</a>
+        </div>
+        <p class="merch-intro">No payment and no obligation yet. Tap “I’m in” so we know what to produce. Tee and hoodie sizes can be changed any time before pre-orders open.</p>
+        <div class="merch-grid">
+          {merchItems.map((item) => (
+            <article class="merch-card" data-merch-card={item.id} style={`--merch:${item.color}`}>
+              <div class="merch-dot" aria-hidden="true"></div>
+              <div class="merch-copy"><h3>{item.name}</h3><p>{item.short}</p></div>
+              {item.sized && (
+                <label>Size
+                  <select data-merch-size={item.id} aria-label={`${item.name} size`}>
+                    <option value="">Pick size</option>
+                    {merchSizes.map((size) => <option value={size}>{size}</option>)}
+                  </select>
+                </label>
+              )}
+              <button class="pill pill-ghost merch-toggle" type="button" data-merch-item={item.id} aria-pressed="false">I’m in</button>
+              <p class="merch-status" data-merch-status={item.id} role="status"></p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="in-account inside-detail-legacy" id="account">
         <h2>Your account</h2>
         <p id="in-email"></p>
         <div class="lrow">
+          <a class="pill pill-ghost" href="/forgot-password">Change password</a>
           <button type="button" class="pill pill-ghost" id="in-signout">Sign out</button>
           <button type="button" class="pill pill-ghost" id="in-delete">Delete my account</button>
         </div>
@@ -88,15 +213,57 @@ const chips = (name: string, items: string[], type: 'checkbox' | 'radio' = 'chec
 
 <style is:global>
   .inside .lrow { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .inside-detail-legacy { display: none !important; }
   .in-head { display: grid; grid-template-columns: 200px 1fr; gap: clamp(20px, 4vw, 40px); align-items: center; margin-bottom: clamp(32px, 5vw, 56px); }
+  .applicant-head { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: clamp(20px, 4vw, 40px); align-items: center; margin-bottom: clamp(32px, 5vw, 56px); }
+  .applicant-kicker { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .applicant-status { border-radius: 999px; padding: 5px 10px; background: var(--lime); color: var(--night); font: 700 .7rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; }
+  .applicant-head .h2 { margin: 6px 0 10px; }
+  .applicant-head .lede { margin-bottom: 16px; }
+  .application-form { max-width: 820px; border-radius: 28px; background: var(--night-2); border: 1px solid rgba(237, 231, 220, .08); padding: clamp(22px, 3.5vw, 44px); display: grid; gap: 20px; }
+  .application-form label { display: grid; gap: 7px; font-weight: 700; font-size: .92rem; }
+  .application-form .opt { font: 500 .75rem var(--f-mono); color: var(--muted); margin-left: 6px; }
+  .application-form input, .application-form textarea { width: 100%; resize: vertical; border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 14px; padding: 12px 14px; background: var(--night); color: var(--bone); font: 500 1rem "Satoshi", system-ui, sans-serif; }
+  .application-form input:focus, .application-form textarea:focus { outline: none; border-color: var(--lime); }
+  .application-form.submitted { border-color: rgba(205, 220, 39, .5); }
+  .applicant-account { margin-top: 24px; color: var(--muted); font: 500 .82rem var(--f-mono); }
+  .applicant-delete { padding: 0; border: 0; background: none; color: var(--muted); font: inherit; text-decoration: underline; cursor: pointer; }
+  .application-timeline { list-style: none; margin: 0 0 26px; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .application-timeline li { display: grid; grid-template-columns: 34px 1fr; gap: 9px; align-items: center; min-width: 0; padding: 13px; border-radius: 16px; background: var(--night-2); border: 1px solid rgba(237,231,220,.08); opacity: .48; }
+  .application-timeline li > span { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: rgba(237,231,220,.1); color: var(--bone); font: 700 .76rem var(--f-mono); }
+  .application-timeline b, .application-timeline small { display: block; overflow-wrap: anywhere; }
+  .application-timeline b { color: var(--bone); font-size: .86rem; }
+  .application-timeline small { margin-top: 2px; color: var(--muted); font-size: .7rem; line-height: 1.3; }
+  .application-timeline li.done, .application-timeline li.current { opacity: 1; }
+  .application-timeline li.done > span { background: var(--lime); color: var(--night); }
+  .application-timeline li.current { border-color: var(--pink); }
+  .application-timeline li.current > span { background: var(--pink); color: var(--night); }
   .in-bug { border-radius: 24px; padding: 10px; background: var(--purple); }
   .in-bug svg { display: block; width: 100%; height: auto; }
   .in-head .h2 { margin: 6px 0 10px; }
   .in-head .lede { margin-bottom: 16px; }
+  .role-strip { display: flex; flex-wrap: wrap; gap: 7px; margin: -5px 0 15px; }
+  .role-strip span { padding: 5px 9px; border-radius: 999px; background: rgba(61,219,154,.12); color: var(--mint); font: 700 .68rem var(--f-mono); letter-spacing: .07em; text-transform: uppercase; }
+  .inside-nav { position: sticky; top: 76px; z-index: 12; display: flex; gap: 7px; margin: 0 0 18px; padding: 8px; overflow-x: auto; border: 1px solid rgba(237,231,220,.1); border-radius: 999px; background: rgba(17,23,19,.88); backdrop-filter: blur(12px); }
+  .inside-nav a { flex: none; padding: 8px 14px; border-radius: 999px; color: var(--muted); text-decoration: none; font: 650 .78rem var(--f-mono); }
+  .inside-nav a:hover { color: var(--night); background: var(--lime); }
+  .member-overview { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: clamp(28px, 4vw, 48px); scroll-margin-top: 140px; }
+  .overview-card { min-width: 0; min-height: 205px; display: flex; flex-direction: column; align-items: flex-start; padding: 21px; border-radius: 22px; background: var(--night-2); border: 1px solid rgba(237,231,220,.09); }
+  .overview-card strong { margin: 13px 0 7px; color: var(--bone); font: 800 clamp(1.25rem, 2vw, 1.75rem)/1.05 var(--f-display); overflow-wrap: anywhere; }
+  .overview-card > span { color: var(--muted); font-size: .82rem; line-height: 1.45; }
+  .overview-card > a { margin-top: auto; padding-top: 18px; color: var(--mint); text-decoration: none; font-weight: 700; font-size: .82rem; }
+  .overview-card > a:hover { color: var(--lime); }
+  .overview-id { background: var(--purple); }
+  .overview-id .eyebrow, .overview-id > span { color: rgba(237,231,220,.7); }
+  .overview-session { box-shadow: inset 0 3px 0 var(--pink); }
+  .overview-radar { grid-column: span 2; min-height: 170px; background: linear-gradient(135deg, rgba(205,220,39,.12), var(--night-2) 60%); }
+  .profile-meter { width: 100%; height: 6px; margin-top: 13px; overflow: hidden; border-radius: 999px; background: rgba(237,231,220,.1); }
+  .profile-meter i { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--lime); transition: width .4s ease; }
+  #pf, #matches, #merch, #account { scroll-margin-top: 140px; }
 
   .pf { border-radius: 28px; background: var(--night-2); border: 1px solid rgba(237, 231, 220, .08); padding: clamp(22px, 3.5vw, 44px); display: grid; gap: 24px; }
-  .pf-head h2, .in-matches h2, .in-account h2 { margin: 0 0 8px; font: 800 clamp(1.7rem, 3vw, 2.4rem)/1 var(--f-display); letter-spacing: -.03em; color: var(--pink); }
-  .pf-head p, .in-matches p, .in-account p { margin: 0; max-width: 64ch; color: #C3CBC6; }
+  .pf-head h2, .in-matches h2, .in-merch h2, .in-account h2 { margin: 0 0 8px; font: 800 clamp(1.7rem, 3vw, 2.4rem)/1 var(--f-display); letter-spacing: -.03em; color: var(--pink); }
+  .pf-head p, .in-matches p, .in-merch p, .in-account p { margin: 0; max-width: 64ch; color: #C3CBC6; }
   .pf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
   .pf label:not(.lchip):not(.check) { display: grid; gap: 7px; font-weight: 700; font-size: .92rem; }
   .pf .opt { font: 500 .75rem var(--f-mono); color: var(--muted); margin-left: 6px; }
@@ -116,10 +283,54 @@ const chips = (name: string, items: string[], type: 'checkbox' | 'radio' = 'chec
   .lstatus { font: 500 .85rem var(--f-mono); color: var(--mint); }
   .lerr { margin: 0; color: var(--pink); font-weight: 700; }
 
-  .in-matches, .in-account { margin-top: clamp(28px, 4vw, 48px); display: grid; gap: 12px; }
-  .in-matches { border-radius: 24px; padding: clamp(22px, 3vw, 32px); border: 1.5px dashed rgba(237, 231, 220, .2); }
+  .in-matches, .in-merch, .in-account { margin-top: clamp(28px, 4vw, 48px); display: grid; gap: 12px; }
+  .in-matches { border-radius: 28px; padding: clamp(22px, 3vw, 36px); border: 1px solid rgba(237, 231, 220, .1); background: var(--night-2); }
+  .match-head { display: flex; justify-content: space-between; gap: 20px; align-items: end; }
+  .match-head .eyebrow { margin: 0 0 8px; }
+  .match-round { flex: none; border-radius: 999px; padding: 7px 12px; background: var(--night); color: var(--mint); font: 600 .76rem var(--f-mono); letter-spacing: .06em; }
+  .match-state { border: 1.5px dashed rgba(237, 231, 220, .2); border-radius: 18px; padding: 20px; }
+  .match-state p { margin: 0; }
+  .match-state strong { color: var(--bone); }
+  .match-state .pill { margin-top: 14px; }
+  .match-grid { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 16px; margin-top: 8px; }
+  .match-card { min-width: 0; border-radius: 22px; padding: clamp(18px, 2.5vw, 28px); background: var(--night); border: 1px solid rgba(237, 231, 220, .1); }
+  .match-buddy { box-shadow: inset 0 3px 0 var(--pink); }
+  .match-squad { box-shadow: inset 0 3px 0 var(--lime); }
+  .match-card > .eyebrow { margin: 0 0 8px; }
+  .match-card h3 { margin: 0; font: 800 clamp(1.45rem, 2.7vw, 2rem)/1 var(--f-display); color: var(--bone); }
+  .match-reason { min-height: 1.4em; margin: 9px 0 18px !important; color: var(--muted) !important; font: 500 .82rem/1.5 var(--f-mono); }
+  .match-people { display: grid; gap: 10px; }
+  .match-person { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px; border-radius: 16px; background: rgba(237, 231, 220, .045); }
+  .match-person.me { background: rgba(205, 220, 39, .08); }
+  .match-avatar { width: 58px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 14px; background: var(--purple); overflow: hidden; }
+  .match-avatar svg { display: block; width: 100%; height: auto; }
+  .match-avatar-fallback { font: 800 1rem var(--f-display); color: var(--bone); }
+  .match-person-copy { min-width: 0; }
+  .match-person-name { margin: 0 !important; color: var(--bone) !important; font-weight: 750; overflow-wrap: anywhere; }
+  .match-person-bug { margin: 2px 0 0 !important; color: var(--mint) !important; font: 500 .72rem/1.35 var(--f-mono); }
+  .match-person-why { margin: 5px 0 0 !important; color: #AEB7B1 !important; font-size: .8rem; line-height: 1.35; }
+  .match-slack { margin-top: 18px; justify-self: start; }
+  .in-merch { border-radius: 28px; padding: clamp(22px, 3vw, 36px); background: var(--night-2); border: 1px solid rgba(237, 231, 220, .1); }
+  .merch-head { display: flex; align-items: end; justify-content: space-between; gap: 18px; }
+  .merch-head .eyebrow { margin: 0 0 8px; }
+  .merch-intro { margin-bottom: 8px !important; }
+  .merch-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .merch-card { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 16px; border-radius: 18px; background: var(--night); border: 1px solid rgba(237, 231, 220, .1); }
+  .merch-card.active { border-color: var(--merch); box-shadow: inset 0 0 0 1px var(--merch); }
+  .merch-dot { width: 42px; aspect-ratio: 1; border-radius: 13px; background: var(--merch); transform: rotate(-4deg); }
+  .merch-copy h3 { margin: 0; color: var(--bone); font: 750 1.15rem var(--f-display); }
+  .merch-copy p { margin-top: 2px; color: var(--muted); font-size: .8rem; }
+  .merch-card label { display: grid; gap: 4px; color: var(--muted); font: 500 .68rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; }
+  .merch-card select { min-width: 108px; border: 1px solid rgba(237, 231, 220, .16); border-radius: 10px; background: var(--night-2); color: var(--bone); padding: 8px 9px; font: 600 .84rem "Satoshi", system-ui, sans-serif; }
+  .merch-card select:focus { outline: 2px solid var(--lime); }
+  .merch-toggle { grid-column: 3; padding: 9px 15px; font-size: .82rem; }
+  .merch-card.active .merch-toggle { background: var(--merch); color: var(--night); box-shadow: none; }
+  .merch-status { grid-column: 2 / -1; min-height: 1.2em; color: var(--mint) !important; font: 500 .72rem var(--f-mono); }
   .in-confirm { border-radius: 18px; border: 1.5px solid var(--pink); padding: 18px; display: grid; gap: 12px; max-width: 640px; }
-  @media (max-width: 760px) { .pf-grid { grid-template-columns: 1fr; } .in-head { grid-template-columns: 1fr; } .in-bug { max-width: 200px; } }
+  @media (max-width: 1000px) { .member-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 760px) { .pf-grid, .match-grid, .merch-grid { grid-template-columns: 1fr; } .in-head, .applicant-head { grid-template-columns: 1fr; } .in-bug { max-width: 200px; } .match-head, .merch-head { align-items: start; flex-direction: column; } .application-timeline { grid-template-columns: 1fr 1fr; } .inside-nav { top: 68px; border-radius: 18px; } }
+  @media (max-width: 560px) { .member-overview { grid-template-columns: 1fr; } .overview-radar { grid-column: auto; } }
+  @media (max-width: 480px) { .merch-card { grid-template-columns: auto minmax(0, 1fr); } .merch-card label, .merch-toggle, .merch-status { grid-column: 2; justify-self: start; } }
 </style>
 
 <script>
@@ -133,19 +344,194 @@ const chips = (name: string, items: string[], type: 'checkbox' | 'radio' = 'chec
   const clean = (s: string, n: number) => s.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, n);
   let uid = '';
 
+  type MatchMember = { is_me: boolean; name: string; bug_number: number | null; bug_name: string | null; bug_config: Record<string, string | number | undefined> | null; why: string | null };
+  type MatchGroup = { label: string; reason: string | null; slack_url: string | null; members: MatchMember[] };
+  type MatchPayload = { status: 'opted_out' | 'waiting' | 'matched'; round: { name: string; published_at: string } | null; buddy: MatchGroup | null; squad: MatchGroup | null };
+  type MerchInterest = { item: 'tee' | 'hoodie' | 'cap' | 'tote'; size: string | null };
+  type ApplicantProfile = { full_name: string | null; membership_status?: 'pending' | 'waitlisted' | 'approved' | 'rejected' | 'suspended'; city?: string | null; application_reason?: string | null; application_contribution?: string | null; application_submitted_at?: string | null };
+
+  const emptyMatchState = (html: string) => {
+    const state = $('match-state');
+    state.innerHTML = html;
+    state.hidden = false;
+    $('match-grid').hidden = true;
+    $('match-round').hidden = true;
+  };
+
+  function memberNode(member: MatchMember) {
+    const card = document.createElement('div');
+    card.className = `match-person${member.is_me ? ' me' : ''}`;
+    const avatar = document.createElement('div');
+    avatar.className = 'match-avatar';
+    if (member.bug_config) avatar.innerHTML = bugSVG(member.bug_config, 80);
+    else { const fallback = document.createElement('span'); fallback.className = 'match-avatar-fallback'; fallback.textContent = 'TR'; avatar.append(fallback); }
+    const copy = document.createElement('div');
+    copy.className = 'match-person-copy';
+    const name = document.createElement('p');
+    name.className = 'match-person-name';
+    name.textContent = member.is_me ? `${member.name} (you)` : member.name;
+    copy.append(name);
+    if (member.bug_number !== null || member.bug_name) {
+      const bug = document.createElement('p');
+      bug.className = 'match-person-bug';
+      const id = member.bug_number === null ? '' : `BUG-${String(member.bug_number).padStart(4, '0')}`;
+      bug.textContent = [id, member.bug_name].filter(Boolean).join(' · ');
+      copy.append(bug);
+    }
+    if (!member.is_me && member.why) { const why = document.createElement('p'); why.className = 'match-person-why'; why.textContent = member.why; copy.append(why); }
+    card.append(avatar, copy);
+    return card;
+  }
+
+  function renderGroup(kind: 'buddy' | 'squad', group: MatchGroup | null) {
+    const card = document.querySelector<HTMLElement>(`.match-${kind}`)!;
+    if (!group) { card.hidden = true; return; }
+    card.hidden = false;
+    $(`match-${kind}-title`).textContent = group.label;
+    $(`match-${kind}-reason`).textContent = group.reason ?? (kind === 'buddy' ? 'A strong one-to-one fit from the swarm.' : 'A small mix of shared interests and useful contrasts.');
+    const people = $(`match-${kind}-people`);
+    people.replaceChildren(...group.members.map(memberNode));
+    const slack = $(`match-${kind}-slack`) as HTMLAnchorElement;
+    if (group.slack_url) { slack.href = group.slack_url; slack.hidden = false; } else slack.hidden = true;
+  }
+
+  function renderMatches(matches: MatchPayload | null, unavailable = false) {
+    if (unavailable) { emptyMatchState('<p><strong>Matching is almost connected.</strong> The database migration for this phase still needs to be run.</p>'); return; }
+    if (!matches || matches.status === 'waiting') {
+      emptyMatchState('<p><strong>You’re in the matching pool.</strong> The crew is preparing the next round. Your buddy and squad will appear here after review.</p>');
+      return;
+    }
+    if (matches.status === 'opted_out') {
+      emptyMatchState('<p><strong>Matching is off.</strong> Tick “Match me with people” in your profile and save it to join the next round.</p>');
+      return;
+    }
+    $('match-state').hidden = true;
+    $('match-grid').hidden = false;
+    const round = $('match-round');
+    round.textContent = matches.round?.name ?? 'Latest round';
+    round.hidden = false;
+    renderGroup('buddy', matches.buddy);
+    renderGroup('squad', matches.squad);
+  }
+
+  function renderMerch(rows: MerchInterest[]) {
+    const selected = new Map(rows.map((row) => [row.item, row]));
+    document.querySelectorAll<HTMLElement>('[data-merch-card]').forEach((card) => {
+      const item = card.dataset.merchCard as MerchInterest['item'];
+      const active = selected.has(item);
+      card.classList.toggle('active', active);
+      const button = document.querySelector<HTMLButtonElement>(`[data-merch-item="${item}"]`)!;
+      button.setAttribute('aria-pressed', String(active));
+      button.textContent = active ? 'I’m in ✓' : 'I’m in';
+      const size = document.querySelector<HTMLSelectElement>(`[data-merch-size="${item}"]`);
+      if (size) size.value = selected.get(item)?.size ?? '';
+    });
+  }
+
+  function renderProfileSignal(profile: any) {
+    const checks = [
+      !!profile?.full_name,
+      !!(profile?.job_title || profile?.company),
+      !!profile?.age_range,
+      (profile?.topics?.length ?? 0) > 0,
+      (profile?.activities?.length ?? 0) > 0,
+      (profile?.ambitions?.length ?? 0) > 0,
+      !!profile?.dream_project,
+    ];
+    const percent = Math.round(checks.filter(Boolean).length / checks.length * 100);
+    $('overview-profile').textContent = `${percent}%`;
+    $('overview-profile-copy').textContent = percent === 100 ? 'Your matching signal is fully tuned.' : percent >= 70 ? 'Strong signal. A little more context can sharpen it.' : 'Complete your profile for stronger matches.';
+    ($('overview-profile-meter') as HTMLElement).style.width = `${percent}%`;
+  }
+
+  function renderMemberOverview(profile: any, bug: any, matches: MatchPayload | null, matchingUnavailable: boolean, admin: boolean, partner: boolean) {
+    const roles = ['member', ...(partner ? ['partner'] : []), ...(admin ? ['admin'] : [])];
+    $('role-strip').replaceChildren(...roles.map((role) => Object.assign(document.createElement('span'), { textContent: role })));
+    $('overview-bug').textContent = bug ? `BUG-${String(bug.bug_number).padStart(4, '0')} · ${bug.name}` : 'Build your Rebel Bug';
+    renderProfileSignal(profile);
+    const title = $('overview-matching');
+    const copy = $('overview-matching-copy');
+    if (matchingUnavailable) { title.textContent = 'Almost connected'; copy.textContent = 'Matching data is temporarily unavailable.'; }
+    else if (matches?.status === 'matched') { title.textContent = 'Match ready'; copy.textContent = 'Your bug buddy or squad is waiting below.'; }
+    else if (matches?.status === 'waiting') { title.textContent = 'In the pool'; copy.textContent = 'The crew is preparing the next reviewed round.'; }
+    else { title.textContent = 'Matching off'; copy.textContent = 'Turn matching on in your profile to join the next round.'; }
+  }
+
+  function renderApplicant(profile: ApplicantProfile | null, bug: any, email: string) {
+    const state = profile?.membership_status ?? 'pending';
+    $('in-pending').hidden = false;
+    $('applicant-email').textContent = `Signed in as ${email}`;
+    if (bug) {
+      $('applicant-bug').innerHTML = bugSVG(bug.config, 200);
+      $('applicant-id').textContent = `BUG-${String(bug.bug_number).padStart(4, '0')} · ${bug.name}`;
+    } else {
+      $('applicant-bug').innerHTML = bugSVG({ role: 'curious', shape: 'round', shell: 'white', pattern: 'plain', eyes: 'sleepy', mouth: 'o', antennae: 'classic', hat: 'none' }, 200);
+    }
+    $('applicant-status').textContent = state;
+    ($('application-city') as HTMLInputElement).value = profile?.city ?? '';
+    ($('application-reason') as HTMLTextAreaElement).value = profile?.application_reason ?? '';
+    ($('application-contribution') as HTMLTextAreaElement).value = profile?.application_contribution ?? '';
+
+    const submitted = !!profile?.application_submitted_at;
+    const setStep = (id: string, value: 'done' | 'current' | '') => { $(id).className = value; };
+    setStep('step-bug', bug ? 'done' : 'current');
+    setStep('step-application', submitted ? 'done' : bug ? 'current' : '');
+    setStep('step-review', submitted ? 'current' : '');
+    setStep('step-inside', '');
+    const form = $('application-form');
+    form.hidden = state === 'suspended';
+    form.classList.toggle('submitted', submitted && state === 'pending');
+    const copy = {
+      pending: submitted
+        ? ['Your application is with us.', 'The crew reviews every application personally. Your status will update here as soon as the decision is ready. You can still edit your answers below.']
+        : ['One last step.', 'Your bug is saved privately. Tell us why you want to join and the crew will review your application.'],
+      waitlisted: ['You’re on the waitlist.', 'We like what we see, but we’re keeping the next intake small. Your bug stays private until approval.'],
+      rejected: ['Not this time.', 'You can update your answers and apply again whenever something meaningful has changed.'],
+      suspended: ['Your membership is paused.', 'Member access is currently unavailable. Contact the crew if you think this is a mistake.'],
+      approved: ['', ''],
+    }[state];
+    $('applicant-title').textContent = copy[0];
+    $('applicant-copy').textContent = copy[1];
+    if (submitted && state === 'pending') {
+      $('application-message').textContent = 'Application sent ✓';
+      ($('application-submit') as HTMLButtonElement).innerHTML = 'Update application <span aria-hidden="true">→</span>';
+    }
+  }
+
   async function start() {
     if (!supabase) { $('in-out').hidden = false; return; }
     const { data } = await supabase.auth.getSession();
     const session = data.session;
     if (!session) { $('in-out').hidden = false; return; }
     uid = session.user.id;
+    const [{ data: prof }, { data: bug }, { data: admin }, { data: partner }] = await Promise.all([
+      supabase.from('profiles').select('full_name, title, job_title, company, age_range, topics, activities, ambitions, dream_project, matching_consent, marketing_consent, membership_status, city, application_reason, application_contribution, application_submitted_at').eq('id', uid).maybeSingle(),
+      supabase.from('bugs').select('bug_number, name, config').eq('user_id', uid).maybeSingle(),
+      supabase.rpc('is_admin'),
+      supabase.rpc('has_role', { requested_role: 'partner' }),
+    ]);
+
+    if (partner && prof?.membership_status !== 'approved' && !admin) {
+      location.replace('/inside/partner');
+      return;
+    }
+
+    if (prof?.membership_status !== 'approved' && !admin) {
+      renderApplicant(prof as ApplicantProfile | null, bug, session.user.email ?? '');
+      return;
+    }
+
     $('in-app').hidden = false;
     $('in-email').textContent = `Signed in as ${session.user.email ?? ''}`;
-
-    const [{ data: prof }, { data: bug }] = await Promise.all([
-      supabase.from('profiles').select('full_name, title, job_title, company, age_range, topics, activities, ambitions, dream_project, matching_consent, marketing_consent').eq('id', uid).maybeSingle(),
-      supabase.from('bugs').select('bug_number, name, config').eq('user_id', uid).maybeSingle(),
+    if (admin) $('in-admin').hidden = false;
+    const [matchResult, merchResult] = await Promise.all([
+      supabase.rpc('my_matches'),
+      supabase.from('merch_interest').select('item,size').eq('user_id', uid),
     ]);
+
+    renderMatches((matchResult.data as MatchPayload | null) ?? null, !!matchResult.error);
+    renderMerch((merchResult.data as MerchInterest[] | null) ?? []);
+    renderMemberOverview(prof, bug, (matchResult.data as MatchPayload | null) ?? null, !!matchResult.error, !!admin, !!partner);
 
     if (bug) {
       $('in-bug').innerHTML = bugSVG(bug.config, 200);
@@ -165,6 +551,56 @@ const chips = (name: string, items: string[], type: 'checkbox' | 'radio' = 'chec
       ($('pf-marketing_consent') as HTMLInputElement).checked = !!prof.marketing_consent;
     }
   }
+
+  $('application-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!supabase || !uid) return;
+    const reason = clean(($('application-reason') as HTMLTextAreaElement).value, 800);
+    const errorBox = $('application-error');
+    errorBox.hidden = true;
+    if (reason.length < 20) {
+      errorBox.textContent = 'Tell us a little more — at least 20 characters.';
+      errorBox.hidden = false;
+      $('application-reason').focus();
+      return;
+    }
+    const button = $('application-submit') as HTMLButtonElement;
+    button.disabled = true;
+    $('application-message').textContent = 'Sending…';
+    const { error } = await supabase.rpc('submit_membership_application', {
+      applicant_city: clean(($('application-city') as HTMLInputElement).value, 80) || null,
+      reason,
+      contribution: clean(($('application-contribution') as HTMLTextAreaElement).value, 800) || null,
+    });
+    button.disabled = false;
+    if (error) {
+      $('application-message').textContent = '';
+      errorBox.textContent = 'We could not send the application. Try again in a moment.';
+      errorBox.hidden = false;
+      console.error(error);
+      return;
+    }
+    $('application-form').classList.add('submitted');
+    $('applicant-status').textContent = 'pending';
+    $('applicant-title').textContent = 'Your application is with us.';
+    $('applicant-copy').textContent = 'The crew reviews every application personally. Your status will update here as soon as the decision is ready. You can still edit your answers below.';
+    $('application-message').textContent = 'Application sent ✓';
+    button.innerHTML = 'Update application <span aria-hidden="true">→</span>';
+    track('membership_application_sent');
+    const sent = await supabase.functions.invoke('send-community-email', { body: { kind: 'application_received' } });
+    if (sent.error) console.error('Application email failed', sent.error);
+  });
+
+  $('applicant-signout').addEventListener('click', async () => { await supabase?.auth.signOut(); location.href = '/'; });
+  $('applicant-delete').addEventListener('click', () => { $('applicant-confirm').hidden = false; ($('applicant-delete-no') as HTMLButtonElement).focus(); });
+  $('applicant-delete-no').addEventListener('click', () => { $('applicant-confirm').hidden = true; });
+  $('applicant-delete-yes').addEventListener('click', async () => {
+    if (!supabase) return;
+    const { error } = await supabase.rpc('delete_my_account');
+    if (error) { $('application-error').textContent = 'Deleting failed. Write to us and we will do it by hand.'; $('application-error').hidden = false; return; }
+    await supabase.auth.signOut();
+    location.href = '/';
+  });
 
   $('pf').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -190,10 +626,44 @@ const chips = (name: string, items: string[], type: 'checkbox' | 'radio' = 'chec
     if (error) { $('pf-status').textContent = ''; err.textContent = 'Saving failed. Try again in a moment.'; err.hidden = false; console.error(error); return; }
     $('pf-status').textContent = 'Saved.';
     $('in-hello').textContent = `Hey, ${full_name.split(' ')[0]}.`;
+    renderProfileSignal(row);
+    const refreshed = await supabase.rpc('my_matches');
+    renderMatches((refreshed.data as MatchPayload | null) ?? null, !!refreshed.error);
     track('profile_saved', row.matching_consent ? 'matching on' : 'matching off', { props: { topics: row.topics.length, activities: row.activities.length, ambitions: row.ambitions.length } });
   });
 
   $('in-signout').addEventListener('click', async () => { await supabase?.auth.signOut(); location.href = '/'; });
+
+  document.querySelectorAll<HTMLButtonElement>('[data-merch-item]').forEach((button) => button.addEventListener('click', async () => {
+    if (!supabase || !uid) return;
+    const item = button.dataset.merchItem as MerchInterest['item'];
+    const card = document.querySelector<HTMLElement>(`[data-merch-card="${item}"]`)!;
+    const status = document.querySelector<HTMLElement>(`[data-merch-status="${item}"]`)!;
+    const size = document.querySelector<HTMLSelectElement>(`[data-merch-size="${item}"]`);
+    const active = button.getAttribute('aria-pressed') === 'true';
+    if (!active && size && !size.value) { status.textContent = 'Pick a size first.'; size.focus(); return; }
+    button.disabled = true; status.textContent = active ? 'Removing…' : 'Saving…';
+    const result = active
+      ? await supabase.from('merch_interest').delete().eq('user_id', uid).eq('item', item)
+      : await supabase.from('merch_interest').insert({ item, size: size?.value || null });
+    button.disabled = false;
+    if (result.error) { status.textContent = 'Could not save. Try again.'; console.error(result.error); return; }
+    card.classList.toggle('active', !active); button.setAttribute('aria-pressed', String(!active)); button.textContent = !active ? 'I’m in ✓' : 'I’m in'; status.textContent = !active ? 'Saved. No payment or obligation yet.' : 'Removed.';
+    track('merch_interest', `${item}:${!active ? 'on' : 'off'}`, { props: { size: size?.value || null } });
+  }));
+
+  document.querySelectorAll<HTMLSelectElement>('[data-merch-size]').forEach((select) => select.addEventListener('change', async () => {
+    if (!supabase || !uid || !select.value) return;
+    const item = select.dataset.merchSize as MerchInterest['item'];
+    const button = document.querySelector<HTMLButtonElement>(`[data-merch-item="${item}"]`)!;
+    if (button.getAttribute('aria-pressed') !== 'true') return;
+    const status = document.querySelector<HTMLElement>(`[data-merch-status="${item}"]`)!;
+    status.textContent = 'Updating size…';
+    const { error } = await supabase.from('merch_interest').update({ size: select.value }).eq('user_id', uid).eq('item', item);
+    status.textContent = error ? 'Could not update the size.' : `Size ${select.value} saved.`;
+    if (error) console.error(error);
+  }));
+
   $('in-delete').addEventListener('click', () => { $('in-confirm').hidden = false; ($('in-delete-no') as HTMLButtonElement).focus(); });
   $('in-delete-no').addEventListener('click', () => { $('in-confirm').hidden = true; });
   $('in-delete-yes').addEventListener('click', async () => {

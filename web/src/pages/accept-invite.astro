@@ -1,0 +1,137 @@
+---
+import Club from '../layouts/Club.astro';
+---
+<Club title="Accept invitation · techRebels" description="Accept your private techRebels invitation.">
+  <section class="block first invite-page">
+    <div class="invite-card">
+      <p class="eyebrow">Private invitation</p>
+      <h1 class="h2">Your place is waiting.</h1>
+      <p class="lede" id="invite-intro">Checking the invitation…</p>
+
+      <div class="invite-state" id="invite-login" hidden>
+        <h2>Log in with the invited email.</h2>
+        <p>This invitation belongs to an existing account. Log in first and we’ll bring you straight back here.</p>
+        <a class="pill pill-pink" id="invite-login-link" href="/login">Log in to continue</a>
+      </div>
+
+      <div class="invite-state invite-invalid" id="invite-invalid" hidden>
+        <h2>This invitation is not available.</h2>
+        <p>It may have expired, been revoked, already been accepted, or belong to another email. Ask the crew to send a fresh one.</p>
+        <a class="pill pill-ghost" href="/">Back home</a>
+      </div>
+
+      <form id="invite-form" hidden novalidate>
+        <div class="invite-role"><span>You’re joining as</span><strong id="invite-role">—</strong></div>
+        <blockquote id="invite-message" hidden></blockquote>
+        <label>Your name<input type="text" id="invite-name" required minlength="2" maxlength="80" autocomplete="name" /></label>
+        <label>Create a password<input type="password" id="invite-password" required minlength="12" maxlength="128" autocomplete="new-password" aria-describedby="invite-password-hint" /></label>
+        <p class="invite-hint" id="invite-password-hint">At least 12 characters with uppercase, lowercase, a number and a symbol.</p>
+        <label>Repeat password<input type="password" id="invite-repeat" required minlength="12" maxlength="128" autocomplete="new-password" /></label>
+        <label class="invite-check"><input type="checkbox" id="invite-privacy" required /> <span>I accept the <a href="/privacy" target="_blank">Privacy Notice</a> and the processing needed to manage my account and role.</span></label>
+        <p class="invite-error" id="invite-error" role="alert" hidden></p>
+        <button class="pill pill-lime" id="invite-submit" type="submit">Accept & enter <span aria-hidden="true">→</span></button>
+      </form>
+
+      <div class="invite-state invite-done" id="invite-done" hidden>
+        <h2>Invitation accepted.</h2>
+        <p id="invite-done-copy">Your access is ready.</p>
+        <a class="pill pill-lime" href="/inside">Enter Inside</a>
+      </div>
+    </div>
+  </section>
+</Club>
+
+<style is:global>
+  .invite-card { max-width: 680px; display: grid; gap: 18px; }
+  .invite-card form { display: grid; gap: 14px; padding-top: 6px; }
+  .invite-card label { display: grid; gap: 7px; font-weight: 700; }
+  .invite-card input[type=text], .invite-card input[type=password] { width: 100%; border: 1.5px solid rgba(237,231,220,.16); border-radius: 14px; padding: 13px 15px; background: var(--night-2); color: var(--bone); font: 500 1rem "Satoshi", system-ui, sans-serif; }
+  .invite-card input:focus { outline: none; border-color: var(--lime); }
+  .invite-role { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 17px 19px; border-radius: 17px; background: var(--night-2); color: var(--muted); }
+  .invite-role strong { color: var(--pink); font: 800 1.2rem var(--f-display); text-transform: capitalize; }
+  .invite-card blockquote { margin: 0; padding: 15px 18px; border-left: 3px solid var(--lime); color: var(--bone); background: rgba(205,220,39,.06); }
+  .invite-hint { margin: -7px 0 0; color: var(--muted); font: 500 .76rem/1.45 var(--f-mono); }
+  .invite-check { grid-template-columns: 20px 1fr; align-items: start; font-weight: 500 !important; color: #C3CBC6; }
+  .invite-check input { width: 18px; height: 18px; accent-color: var(--lime); }
+  .invite-check a { color: var(--mint); }
+  .invite-error { margin: 0; color: var(--pink); font-weight: 700; }
+  .invite-card .pill { justify-self: start; }
+  .invite-state { display: grid; gap: 12px; padding: 20px; border: 1.5px solid var(--lime); border-radius: 18px; }
+  .invite-state h2, .invite-state p { margin: 0; }
+  .invite-state h2 { color: var(--lime); font: 800 1.6rem var(--f-display); }
+  .invite-invalid { border-color: var(--pink); }
+  .invite-invalid h2 { color: var(--pink); }
+</style>
+
+<script>
+  import { supabase } from '../lib/supabase';
+
+  const params = new URLSearchParams(location.search);
+  let invitationId = params.get('invite');
+  const intro = document.getElementById('invite-intro')!;
+  const login = document.getElementById('invite-login')!;
+  const invalid = document.getElementById('invite-invalid')!;
+  const form = document.getElementById('invite-form') as HTMLFormElement;
+  const errorBox = document.getElementById('invite-error')!;
+  let sessionUser: any = null;
+
+  const showInvalid = () => { intro.textContent = 'We could not verify this invitation.'; form.hidden = true; login.hidden = true; invalid.hidden = false; };
+  const roleCopy = (role: string) => role === 'admin' ? 'admin' : role === 'partner' ? 'partner' : 'member';
+
+  async function inspect() {
+    if (!supabase) return showInvalid();
+    const { data: sessionData } = await supabase.auth.getSession();
+    sessionUser = sessionData.session?.user;
+    invitationId ||= String(sessionUser?.user_metadata?.community_invite_id ?? '') || null;
+    if (!invitationId) return showInvalid();
+    if (!sessionUser) {
+      intro.textContent = 'One secure login away.';
+      const back = `/accept-invite?invite=${encodeURIComponent(invitationId)}`;
+      (document.getElementById('invite-login-link') as HTMLAnchorElement).href = `/login?next=${encodeURIComponent(back)}`;
+      login.hidden = false;
+      return;
+    }
+    const { data, error } = await supabase.rpc('get_my_invitation', { invite_id: invitationId });
+    const invitation = data?.[0];
+    if (error || !invitation) return showInvalid();
+    intro.textContent = `Invitation for ${invitation.email}. It expires ${new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium' }).format(new Date(invitation.expires_at))}.`;
+    document.getElementById('invite-role')!.textContent = roleCopy(invitation.role);
+    const message = document.getElementById('invite-message')!;
+    if (invitation.message) { message.textContent = `“${invitation.message}”`; message.hidden = false; }
+    const name = document.getElementById('invite-name') as HTMLInputElement;
+    name.value = String(sessionUser.user_metadata?.full_name ?? sessionUser.user_metadata?.name ?? '');
+    form.hidden = false;
+  }
+
+  if (supabase) {
+    supabase.auth.onAuthStateChange((event, session) => {
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && !form.hidden === false) inspect();
+    });
+    setTimeout(inspect, location.hash ? 500 : 0);
+  } else showInvalid();
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!supabase || !invitationId) return;
+    errorBox.hidden = true;
+    const name = document.getElementById('invite-name') as HTMLInputElement;
+    const password = document.getElementById('invite-password') as HTMLInputElement;
+    const repeat = document.getElementById('invite-repeat') as HTMLInputElement;
+    const privacy = document.getElementById('invite-privacy') as HTMLInputElement;
+    const strong = password.value.length >= 12 && /[a-z]/.test(password.value) && /[A-Z]/.test(password.value) && /\d/.test(password.value) && /[^A-Za-z0-9]/.test(password.value);
+    if (name.value.trim().length < 2) { errorBox.textContent = 'Please enter your name.'; errorBox.hidden = false; return; }
+    if (!strong) { errorBox.textContent = 'Use at least 12 characters with uppercase, lowercase, a number and a symbol.'; errorBox.hidden = false; return; }
+    if (password.value !== repeat.value) { errorBox.textContent = 'The passwords do not match.'; errorBox.hidden = false; return; }
+    if (!privacy.checked) { errorBox.textContent = 'Privacy acceptance is required to create access.'; errorBox.hidden = false; return; }
+    const button = document.getElementById('invite-submit') as HTMLButtonElement;
+    button.disabled = true;
+    const passwordResult = await supabase.auth.updateUser({ password: password.value });
+    if (passwordResult.error) { button.disabled = false; errorBox.textContent = 'The password could not be saved. Open a fresh invitation or try again.'; errorBox.hidden = false; return; }
+    const { data: role, error } = await supabase.rpc('accept_community_invite', { invite_id: invitationId, invitee_name: name.value.trim(), privacy_accepted: true });
+    if (error) { button.disabled = false; errorBox.textContent = error.message; errorBox.hidden = false; return; }
+    form.hidden = true;
+    intro.textContent = 'ACCESS GRANTED';
+    document.getElementById('invite-done-copy')!.textContent = role === 'partner' ? 'Your Partner Space access is ready.' : 'Your Inside access is ready.';
+    document.getElementById('invite-done')!.hidden = false;
+  });
+</script>

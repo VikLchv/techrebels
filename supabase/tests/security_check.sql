@@ -28,3 +28,28 @@ select column_name,
 from information_schema.columns
 where table_schema = 'public' and table_name = 'bugs'
 order by ordinal_position;
+
+-- 4. Matching tables are admin-only through RLS. Ordinary members read only
+-- their own published result through my_matches(). Run this while signed in as
+-- a non-admin test member: all table counts should be zero and my_matches works.
+select 'matching_rounds' as table_name, count(*) from public.matching_rounds
+union all
+select 'matching_groups', count(*) from public.matching_groups
+union all
+select 'matching_members', count(*) from public.matching_members;
+
+select public.my_matches();
+
+-- 5. Role/invitation tables are readable only through RLS and cannot be
+-- mutated by a browser. Expected: all write columns are false.
+select c.table_name,
+       has_table_privilege('authenticated', 'public.' || c.table_name, 'insert') as auth_insert,
+       has_table_privilege('authenticated', 'public.' || c.table_name, 'update') as auth_update,
+       has_table_privilege('authenticated', 'public.' || c.table_name, 'delete') as auth_delete
+from (values ('user_roles'), ('community_invites'), ('admin_audit_log')) c(table_name);
+
+-- Run as an ordinary authenticated user. Expected: only their own roles and no
+-- invitation/audit rows unless the account is an admin.
+select * from public.user_roles;
+select * from public.community_invites;
+select * from public.admin_audit_log;

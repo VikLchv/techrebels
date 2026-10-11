@@ -1,6 +1,86 @@
 ---
-import Placeholder from '../components/Placeholder.astro';
+import Club from '../layouts/Club.astro';
+import { contactEmail } from '../config/site';
 ---
-<Placeholder file="privacy_policy.txt" title="Privacy" heading="Privacy policy (draft)." tile="var(--green)"
-  text="This is a draft placeholder. The full privacy policy will explain what we collect (your email and your bug), why, how long we keep it and how to delete it. It must be finished before launch."
-  bug={{ role: 'curious', shape: 'round', shell: 'white', pattern: 'plain', eyes: 'sleepy', mouth: 'o', antennae: 'classic', hat: 'none', eyewear: 'monocle', pose: 'stand' }} />
+<Club title="Privacy · techRebels" description="How techRebels handles personal data.">
+  <section class="block first privacy">
+    <header class="privacy-head">
+      <p class="eyebrow">Privacy</p>
+      <h1 class="h2">Your data. No funny business.</h1>
+      <p class="lede">This notice explains what techRebels processes, why, for how long and what you can do about it.</p>
+      <p class="privacy-updated">Draft for legal review · updated 8 October 2026</p>
+    </header>
+
+    <div class="privacy-warning"><strong>Before launch:</strong> replace the bracketed controller and contact details and confirm the final hosting, email and retention setup.</div>
+
+    <div class="privacy-grid">
+      <aside><nav aria-label="Privacy sections">
+        <a href="#controller">Controller</a><a href="#data">Data we use</a><a href="#why">Why and legal basis</a><a href="#sharing">Processors</a><a href="#retention">Retention</a><a href="#rights">Your rights</a><a href="#security">Security</a>
+      </nav></aside>
+      <article class="privacy-copy">
+        <section id="controller"><h2>1. Who controls your data</h2><p>The controller is <strong>[full legal name / business name]</strong>, <strong>[registered address]</strong>, ID <strong>[company or registration number, if applicable]</strong>. Privacy contact: <strong>{contactEmail}</strong>.</p></section>
+
+        <section id="data"><h2>2. What we process</h2><ul>
+          <li><strong>Account:</strong> login email, optional verified personal/company contact emails, notification choices, account identifiers and authentication/security logs.</li>
+          <li><strong>Application and membership:</strong> name, city, your answers, application status, internal review note and dates.</li>
+          <li><strong>Community profile:</strong> optional title, role, company, age range, interests, activities, ambitions and dream project.</li>
+          <li><strong>Participation:</strong> your Rebel Bug, Radar votes and suggestions, matching preferences, approved matches, event or crew submissions and merch interest.</li>
+          <li><strong>Technical data:</strong> IP address, browser/device information and security logs processed by infrastructure providers.</li>
+        </ul><p>We never store or see your plain-text password. Authentication is handled by Supabase Auth, which stores a salted password hash.</p></section>
+
+        <section id="why"><h2>3. Why we use it and our legal basis</h2><div class="privacy-table">
+          <div><strong>Create and secure your account; review and manage membership</strong><span>Steps requested before membership and performance of the community membership arrangement.</span></div>
+          <div><strong>Operate Inside, the Swarm, Radar and member matching</strong><span>Performance of the membership arrangement. Matching only runs when you opt in.</span></div>
+          <div><strong>Keep the service secure and prevent abuse</strong><span>Our legitimate interest in protecting members, the service and our systems.</span></div>
+          <div><strong>Send optional event, matching, merch or general updates</strong><span>Your consent per notification category. Each category is optional and can be withdrawn in Inside at any time.</span></div>
+          <div><strong>Handle legal requests and disputes</strong><span>Compliance with legal obligations and establishment, exercise or defence of legal claims.</span></div>
+        </div><p>We do not sell personal data and do not use it for third-party advertising.</p></section>
+
+        <section id="sharing"><h2>4. Who processes data for us</h2><p>Access is limited to authorised techRebels crew members who need it. Our current or planned processors are:</p><ul>
+          <li><strong>Supabase:</strong> authentication, database and security infrastructure.</li>
+          <li><strong>Cloudflare (planned):</strong> domain, DNS, website delivery and technical/security logs.</li>
+          <li><strong>Resend:</strong> confirmation, password reset and transactional community emails.</li>
+          <li><strong>[analytics provider, if enabled]:</strong> privacy-friendly aggregate website measurement.</li>
+        </ul><p>Some providers may process data outside the EEA. Before launch we will document the actual processing locations and safeguards, such as an adequacy decision or EU Standard Contractual Clauses, in this notice.</p></section>
+
+        <section id="retention"><h2>5. How long we keep it</h2><ul>
+          <li>Pending, rejected and waitlisted applications: <strong>[choose and document a period, recommended 6–12 months]</strong> after the last decision or activity.</li>
+          <li>Member account and profile: while membership is active, then deleted or anonymised within <strong>[choose a period]</strong> after account deletion, except where law requires longer retention.</li>
+          <li>Security and infrastructure logs: according to the documented provider settings, no longer than necessary for security and incident response.</li>
+          <li>Contact-email verification codes: up to 15 minutes; only a salted cryptographic hash is stored while verification is pending.</li>
+          <li>Marketing data: until consent is withdrawn or the contact becomes inactive under the documented deletion schedule.</li>
+        </ul><p>You can delete your account directly in Inside. The deletion flow removes your profile, bug and account; limited records may only be retained where required by law or for legal claims.</p></section>
+
+        <section id="rights"><h2>6. Your rights</h2><p>Depending on the circumstances, you may request access, correction, deletion, restriction, portability or object to processing. You can withdraw consent at any time without affecting earlier lawful processing. We respond without undue delay and normally within one month.</p><p>Write to <strong>{contactEmail}</strong>. You may also complain to the competent supervisory authority; in Czechia this is the Office for Personal Data Protection (ÚOOÚ).</p><p>Membership decisions are reviewed by a human. We do not use solely automated decision-making that produces legal or similarly significant effects.</p></section>
+
+        <section id="security"><h2>7. How we protect it</h2><p>We use role-based access, database Row Level Security, separate applicant/member/admin permissions, email verification, hashed passwords, short-lived reset links and restricted admin functions. No internet service is risk-free, so we review access and security settings as the project changes.</p></section>
+
+        <section><h2>8. Changes</h2><p>We will update this notice when the service, providers or purposes change. Material changes affecting members will be communicated through the service or by email where appropriate.</p></section>
+      </article>
+    </div>
+  </section>
+</Club>
+
+<style is:global>
+  .privacy { display: grid; gap: 28px; }
+  .privacy-head { display: grid; gap: 14px; max-width: 850px; }
+  .privacy-updated { margin: 0; color: var(--muted); font: 500 .76rem var(--f-mono); }
+  .privacy-warning { max-width: 950px; padding: 16px 18px; border: 1.5px solid var(--pink); border-radius: 16px; background: rgba(244,165,212,.08); color: #D6DCD8; }
+  .privacy-warning strong { color: var(--pink); }
+  .privacy-grid { display: grid; grid-template-columns: 220px minmax(0, 760px); gap: clamp(28px, 6vw, 80px); align-items: start; }
+  .privacy aside { position: sticky; top: 100px; }
+  .privacy aside nav { display: grid; gap: 9px; }
+  .privacy aside a { color: var(--muted); text-decoration: none; font: 600 .78rem var(--f-mono); }
+  .privacy aside a:hover { color: var(--lime); }
+  .privacy-copy { display: grid; gap: 42px; }
+  .privacy-copy section { scroll-margin-top: 100px; }
+  .privacy-copy h2 { margin: 0 0 12px; color: var(--pink); font: 800 clamp(1.45rem, 3vw, 2rem)/1 var(--f-display); }
+  .privacy-copy p, .privacy-copy li { color: #C3CBC6; }
+  .privacy-copy p { margin: 0 0 12px; }
+  .privacy-copy ul { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
+  .privacy-copy strong { color: var(--bone); }
+  .privacy-table { display: grid; gap: 1px; margin-bottom: 16px; background: rgba(237,231,220,.1); border: 1px solid rgba(237,231,220,.1); border-radius: 16px; overflow: hidden; }
+  .privacy-table > div { display: grid; grid-template-columns: minmax(180px,.8fr) minmax(0,1.2fr); gap: 18px; padding: 15px; background: var(--night-2); }
+  .privacy-table span { color: #C3CBC6; }
+  @media (max-width: 760px) { .privacy-grid { grid-template-columns: 1fr; } .privacy aside { position: static; } .privacy aside nav { display: flex; flex-wrap: wrap; gap: 8px 14px; } .privacy-table > div { grid-template-columns: 1fr; gap: 5px; } }
+</style>

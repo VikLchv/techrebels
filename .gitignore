@@ -16,3 +16,6 @@ supabase/.branches/
 # os
 .DS_Store
 Thumbs.db
+
+# local copy of the Codex build, never commit
+chat_verze/

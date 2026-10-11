@@ -1,5 +1,5 @@
 ---
-// Bug Lab: build your bug, save it with your email (magic link) = join techRebels.
+// Bug Lab: build a bug, create a password account, verify email and apply.
 import Club from '../layouts/Club.astro';
 import { OPTS, ROLES, SPECIES, COL } from '../lib/bug/render.js';
 import { links } from '../config/site';
@@ -17,7 +17,7 @@ const swatch = (key: string, v: string) => {
     <div class="head">
       <p class="eyebrow">Bug Lab</p>
       <h1 class="h2">Build your bug.</h1>
-      <p class="lede">Pick a role, a body, a pose and an attitude. Name it. Save it. That's your avatar, your name badge and your membership card.</p>
+      <p class="lede">Pick a role, a body, a pose and an attitude. Name it. Save it. That's your avatar and the first step of your membership application.</p>
     </div>
 
     <div class="lab">
@@ -37,7 +37,7 @@ const swatch = (key: string, v: string) => {
         </article>
 
         <div class="lactions">
-          <button type="button" class="pill pill-pink" id="save-btn" data-track="save bug">Save my bug &amp; join the swarm <span aria-hidden="true">→</span></button>
+          <button type="button" class="pill pill-pink" id="save-btn" data-track="save bug">Save my bug &amp; apply to join <span aria-hidden="true">→</span></button>
           <div class="lrow">
             <button type="button" class="pill pill-ghost" id="random-btn">Randomize</button>
             <button type="button" class="pill pill-ghost" id="png-btn">Save as image</button>
@@ -48,22 +48,25 @@ const swatch = (key: string, v: string) => {
         </div>
 
         <form class="ljoin" id="ljoin" hidden novalidate>
-          <h2>Save it. Join the swarm.</h2>
-          <p>We'll email you a magic link. No passwords, no spam. Click it and your bug is saved with its own number.</p>
+          <h2>Save it. Apply to join.</h2>
+          <p>Create your account with a password. We’ll verify your email before saving the bug privately with its own number.</p>
           <label>Your full name<input type="text" id="join-name" name="name" required autocomplete="name" maxlength="80" /></label>
           <label>Email<input type="email" id="join-email" name="email" required autocomplete="email" maxlength="120" /></label>
+          <label>Password<input type="password" id="join-password" required autocomplete="new-password" minlength="12" maxlength="128" aria-describedby="password-hint" /></label>
+          <p class="password-hint" id="password-hint">At least 12 characters with uppercase, lowercase, a number and a symbol. A password manager is best.</p>
+          <label>Repeat password<input type="password" id="join-password-repeat" required autocomplete="new-password" minlength="12" maxlength="128" /></label>
           <label class="check"><input type="checkbox" id="join-privacy" required /> I agree to the <a href="/privacy">privacy policy</a>.</label>
           <label class="check"><input type="checkbox" id="join-news" /> Send me news about Sessions and merch drops.</label>
           <p class="lerr" id="join-err" role="alert" hidden></p>
-          <button class="pill pill-lime" type="submit" id="join-send" data-track="send magic link">Send magic link <span aria-hidden="true">→</span></button>
+          <button class="pill pill-lime" type="submit" id="join-send" data-track="create account">Create account <span aria-hidden="true">→</span></button>
         </form>
 
         <div class="ldone" id="ldone" hidden>
           <h2 id="ldone-h">Welcome to the swarm.</h2>
           <p id="ldone-p"></p>
-          <p>Tell us what you're into and we'll match you with people worth meeting.</p>
+          <p id="ldone-next">Finish your short application so the crew can review it.</p>
           <div class="lrow">
-            <a class="pill pill-pink" href="/inside" data-track="complete profile">Complete your profile <span aria-hidden="true">→</span></a>
+            <a class="pill pill-pink" href="/inside" data-track="complete profile" id="ldone-inside">Finish my application <span aria-hidden="true">→</span></a>
             <a class="pill pill-ghost" id="ldone-swarm" href="/swarm">See yourself in the swarm</a>
           </div>
         </div>
@@ -141,8 +144,9 @@ const swatch = (key: string, v: string) => {
   .ldone h2 { color: var(--lime); }
   .ljoin p, .ldone p, .lexport p { margin: 0; color: #C3CBC6; }
   .ljoin label { display: grid; gap: 7px; font-weight: 700; font-size: .92rem; }
-  .ljoin input[type=email], .ljoin input[type=text] { font: 500 1rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 14px; padding: 13px 15px; }
-  .ljoin input[type=email]:focus, .ljoin input[type=text]:focus { outline: none; border-color: var(--lime); }
+  .ljoin input[type=email], .ljoin input[type=text], .ljoin input[type=password] { font: 500 1rem "Satoshi", system-ui, sans-serif; color: var(--bone); background: var(--night); border: 1.5px solid rgba(237, 231, 220, .16); border-radius: 14px; padding: 13px 15px; }
+  .ljoin input[type=email]:focus, .ljoin input[type=text]:focus, .ljoin input[type=password]:focus { outline: none; border-color: var(--lime); }
+  .ljoin .password-hint { margin-top: -8px; color: var(--muted); font: 500 .76rem/1.45 var(--f-mono); }
   .ljoin .check { display: flex; align-items: flex-start; gap: 10px; font-weight: 500; color: #C3CBC6; }
   .ljoin .check input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--lime); }
   .ljoin .pill { justify-self: start; }
@@ -200,6 +204,7 @@ const swatch = (key: string, v: string) => {
 
   let bugNumber: number | null = null;
   let userId: string | null = null;
+  let membershipStatus = 'pending';
   let hasRow = false;
   let saving = false;
 
@@ -300,7 +305,8 @@ const swatch = (key: string, v: string) => {
     if (!name) { status('Give your bug a name first.'); ($('bug-name') as HTMLInputElement).focus(); return; }
     saving = true;
     status('Saving your bug...');
-    const row = { name, role: String(state.role), species: Number(state.species), config: visual(), is_public: true };
+    const isMember = membershipStatus === 'approved';
+    const row = { name, role: String(state.role), species: Number(state.species), config: visual(), is_public: isMember };
     const res = hasRow
       ? await supabase.from('bugs').update(row).eq('user_id', userId).select('bug_number').single()
       : await supabase.from('bugs').insert(row).select('bug_number').single();
@@ -314,11 +320,37 @@ const swatch = (key: string, v: string) => {
     status(first ? 'Saved.' : 'Updated.');
     track(first ? 'bug_saved' : 'bug_updated', String(state.role));
     $('ljoin').hidden = true;
-    $('ldone-h').textContent = first ? `Welcome to the swarm, ${name}.` : `${name} is updated.`;
-    $('ldone-p').textContent = `You are ${idText()}. Your bug is now part of the swarm.`;
+    $('ldone-h').textContent = isMember ? (first ? `Welcome to the swarm, ${name}.` : `${name} is updated.`) : 'Your bug is saved.';
+    $('ldone-p').textContent = isMember ? `You are ${idText()}. Your bug is now part of the swarm.` : `You are ${idText()}. Your bug stays private while the crew reviews your application.`;
+    $('ldone-next').textContent = isMember ? "Keep your profile fresh and we'll match you with people worth meeting." : 'Finish your short application so the crew can review it.';
+    ($('ldone-inside') as HTMLAnchorElement).innerHTML = isMember ? 'Open my profile <span aria-hidden="true">→</span>' : 'Finish my application <span aria-hidden="true">→</span>';
     ($('ldone-swarm') as HTMLAnchorElement).href = `/swarm?highlight=${bugNumber}`;
+    $('ldone-swarm').hidden = !isMember;
     $('ldone').hidden = false;
     ($('save-btn') as HTMLButtonElement).innerHTML = 'Update my bug <span aria-hidden="true">→</span>';
+    void prepareBugEmailCard(first);
+  }
+
+  async function prepareBugEmailCard(sendWelcome: boolean) {
+    if (!supabase || !userId) return;
+    try {
+      const sp = SPECIES[Number(state.species)] ?? SPECIES[0];
+      const role = ROLES.find((r) => r[0] === state.role)?.[1] ?? 'Dev';
+      const dataUrl = await renderCardPNG(visual(), {
+        id: idText(), name: cleanName(String(state.name)) || 'Unnamed bug',
+        line: `${role} · ${sp[0]} · ${severityOf(visual()).toLowerCase()}`, quip: sp[1],
+      });
+      const blob = await fetch(dataUrl).then((response) => response.blob());
+      const upload = await supabase.storage.from('bug-email').upload(`${userId}/welcome.png`, blob, { contentType: 'image/png', upsert: true });
+      if (upload.error) throw upload.error;
+      if (sendWelcome) {
+        const sent = await supabase.functions.invoke('send-community-email', { body: { kind: 'welcome' } });
+        if (sent.error) throw sent.error;
+      }
+    } catch (error) {
+      // Email preparation must never block saving the bug. Delivery can be retried.
+      console.error('Bug email preparation failed', error);
+    }
   }
 
   $('save-btn').addEventListener('click', () => {
@@ -334,18 +366,24 @@ const swatch = (key: string, v: string) => {
     const err = $('join-err');
     err.hidden = true;
     const email = ($('join-email') as HTMLInputElement);
+    const password = ($('join-password') as HTMLInputElement);
+    const passwordRepeat = ($('join-password-repeat') as HTMLInputElement);
     const fullName = ($('join-name') as HTMLInputElement);
     const nameVal = fullName.value.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 80);
     if (!nameVal) { err.textContent = 'Please tell us your name.'; err.hidden = false; fullName.focus(); return; }
     const privacy = ($('join-privacy') as HTMLInputElement);
     if (!email.checkValidity() || !email.value) { err.textContent = 'Please enter a valid email.'; err.hidden = false; email.focus(); return; }
+    const strongPassword = password.value.length >= 12 && /[a-z]/.test(password.value) && /[A-Z]/.test(password.value) && /\d/.test(password.value) && /[^A-Za-z0-9]/.test(password.value);
+    if (!strongPassword) { err.textContent = 'Use at least 12 characters with uppercase, lowercase, a number and a symbol.'; err.hidden = false; password.focus(); return; }
+    if (password.value !== passwordRepeat.value) { err.textContent = 'The passwords do not match.'; err.hidden = false; passwordRepeat.focus(); return; }
     if (!privacy.checked) { err.textContent = 'Please agree to the privacy policy to join.'; err.hidden = false; privacy.focus(); return; }
     const btn = $('join-send') as HTMLButtonElement;
     btn.disabled = true;
     store.set(PENDING, '1');
     store.set(DRAFT, JSON.stringify(state));
-    const { error } = await supabase!.auth.signInWithOtp({
+    const { error } = await supabase!.auth.signUp({
       email: email.value.trim(),
+      password: password.value,
       options: {
         emailRedirectTo: `${location.origin}/lab`,
         data: { full_name: nameVal, privacy_accepted: true, marketing_consent: ($('join-news') as HTMLInputElement).checked },
@@ -358,8 +396,8 @@ const swatch = (key: string, v: string) => {
       console.error(error);
       return;
     }
-    track('magic_link_sent');
-    $('ljoin').innerHTML = '<h2>Check your inbox.</h2><p>We sent you a magic link. Open it on this device and your bug gets saved. The link works for one hour.</p>';
+    track('signup_confirmation_sent');
+    $('ljoin').innerHTML = '<h2>Check your inbox.</h2><p>If this address can be registered, you’ll receive a confirmation email. Confirm it on this device; then your bug will be saved and you can finish the application.</p>';
   });
 
   function showSigned(email: string | undefined) {
@@ -382,6 +420,11 @@ const swatch = (key: string, v: string) => {
       if (!uid || uid === userId) return;
       userId = uid;
       showSigned(email);
+      const [{ data: profile }, { data: admin }] = await Promise.all([
+        supabase.from('profiles').select('membership_status').eq('id', uid).maybeSingle(),
+        supabase.rpc('is_admin'),
+      ]);
+      membershipStatus = profile?.membership_status === 'approved' || admin ? 'approved' : 'pending';
       await loadMine();
       if (store.get(PENDING)) await saveBug();
     };

@@ -1,0 +1,84 @@
+---
+import Club from '../../layouts/Club.astro';
+import InsideNav from '../../components/InsideNav.astro';
+import { ageRanges, topics, activities, ambitions } from '../../config/profile';
+import '../../styles/inside-pages.css';
+const chips = (name: string, items: string[], type: 'checkbox' | 'radio' = 'checkbox') => items.map((value, i) => ({ id: `${name}-${i}`, name, value, type }));
+---
+<Club title="Profile · Inside · techRebels" description="Your private techRebels matching profile.">
+  <section class="block first inside-page">
+    <div class="page-loading" id="page-loading"><p class="eyebrow">Inside · Profile</p><h1 class="h2">Loading your signal…</h1></div>
+    <div class="page-out" id="page-out" hidden><p class="eyebrow">Inside · Profile</p><h1 class="h2">Member access required.</h1><p class="lede">Log in with an approved member account.</p><a class="pill pill-pink" href="/login?next=%2Finside%2Fprofile">Log in</a></div>
+    <div id="page-app" hidden>
+      <header class="page-head"><div><p class="eyebrow">Inside · Profile</p><h1 class="h2" id="profile-title">Tune your signal.</h1><p class="lede">This private profile helps the crew create useful introductions — titles and companies are never shown publicly.</p></div><a class="pill pill-ghost" href="/lab">Edit my bug</a></header>
+      <InsideNav active="profile" />
+      <form class="page-panel" id="profile-form" novalidate>
+        <div><h2 class="section-title">You, beyond the bug.</h2><p class="section-copy">Fill in as much as feels useful. Profile answers are visible to the crew and used for matching only with your consent.</p></div>
+        <div class="field-grid">
+          <label>Full name<input type="text" id="full_name" maxlength="80" autocomplete="name" required /></label>
+          <label>Title <span class="opt">optional</span><input type="text" id="title" maxlength="40" autocomplete="honorific-prefix" /></label>
+          <label>Job title <span class="opt">optional</span><input type="text" id="job_title" maxlength="80" autocomplete="organization-title" /></label>
+          <label>Company <span class="opt">optional</span><input type="text" id="company" maxlength="80" autocomplete="organization" /></label>
+        </div>
+        <fieldset><legend>Age range</legend><div class="chips">{chips('age_range', ageRanges, 'radio').map((c) => <label class="chip"><input type={c.type} name={c.name} id={c.id} value={c.value} /><span>{c.value}</span></label>)}</div></fieldset>
+        <fieldset><legend>Topics you care about</legend><div class="chips">{chips('topics', topics).map((c) => <label class="chip"><input type="checkbox" name={c.name} id={c.id} value={c.value} /><span>{c.value}</span></label>)}</div></fieldset>
+        <fieldset><legend>Things you like doing</legend><div class="chips">{chips('activities', activities).map((c) => <label class="chip"><input type="checkbox" name={c.name} id={c.id} value={c.value} /><span>{c.value}</span></label>)}</div></fieldset>
+        <fieldset><legend>Where you're heading</legend><div class="chips">{chips('ambitions', ambitions).map((c) => <label class="chip"><input type="checkbox" name={c.name} id={c.id} value={c.value} /><span>{c.value}</span></label>)}</div></fieldset>
+        <label>Your dream project <span class="opt">optional</span><textarea id="dream_project" rows="4" maxlength="500" placeholder="If time and money didn't matter, what would you build?"></textarea></label>
+        <div class="profile-consents">
+          <label class="check"><input type="checkbox" id="matching_consent" /><span><b>Match me with people.</b> Use my profile to suggest a bug buddy and a squad.</span></label>
+          <p class="section-copy">Email and notification choices live in <a href="/inside/account">Account settings</a>.</p>
+        </div>
+        <p class="error" id="profile-error" role="alert" hidden></p>
+        <div class="form-actions"><button class="pill pill-pink" id="profile-save" type="submit">Save profile →</button><span class="status" id="profile-status" role="status"></span></div>
+      </form>
+    </div>
+  </section>
+</Club>
+
+<style is:global>.profile-consents { display:grid; gap:12px; padding-top:18px; border-top:1px solid rgba(237,231,220,.1); }</style>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  let uid = '';
+  const clean = (value: string, max: number) => value.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
+  const picked = (name: string) => [...document.querySelectorAll<HTMLInputElement>(`input[name="${name}"]:checked`)].map((input) => input.value);
+
+  async function start() {
+    if (!supabase) { $('page-loading').hidden = true; $('page-out').hidden = false; return; }
+    const { data } = await supabase.auth.getSession(); const user = data.session?.user;
+    if (!user) { $('page-loading').hidden = true; $('page-out').hidden = false; return; }
+    uid = user.id;
+    const [{ data: member }, { data: admin }, { data: profile }] = await Promise.all([
+      supabase.rpc('is_member'), supabase.rpc('is_admin'),
+      supabase.from('profiles').select('full_name,title,job_title,company,age_range,topics,activities,ambitions,dream_project,matching_consent').eq('id', uid).maybeSingle(),
+    ]);
+    $('page-loading').hidden = true;
+    if (!member && !admin) { location.replace('/inside'); return; }
+    $('page-app').hidden = false;
+    if (!profile) return; const p = profile as any;
+    for (const field of ['full_name','title','job_title','company','dream_project']) ($<HTMLInputElement>(field)).value = p[field] ?? '';
+    for (const name of ['age_range','topics','activities','ambitions']) document.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`).forEach((input) => input.checked = name === 'age_range' ? input.value === p[name] : (p[name] ?? []).includes(input.value));
+    $<HTMLInputElement>('matching_consent').checked = !!p.matching_consent;
+    const first = String(profile.full_name ?? '').split(/\s+/)[0]; if (first) $('profile-title').textContent = `${first}, tune your signal.`;
+  }
+
+  function setupProfilePage() {
+    const form = document.getElementById('profile-form');
+    if (!form) return;
+    form.addEventListener('submit', async (event) => {
+    event.preventDefault(); if (!supabase || !uid) return;
+    const errorBox = $('profile-error'); errorBox.hidden = true;
+    const fullName = clean($<HTMLInputElement>('full_name').value, 80);
+    if (!fullName) { errorBox.textContent = 'Please add your name.'; errorBox.hidden = false; return; }
+    const row = { full_name: fullName, title: clean($<HTMLInputElement>('title').value,40)||null, job_title:clean($<HTMLInputElement>('job_title').value,80)||null, company:clean($<HTMLInputElement>('company').value,80)||null, age_range:picked('age_range')[0]??null, topics:picked('topics').slice(0,20), activities:picked('activities').slice(0,15), ambitions:picked('ambitions').slice(0,10), dream_project:clean($<HTMLTextAreaElement>('dream_project').value,500)||null, matching_consent:$<HTMLInputElement>('matching_consent').checked };
+    const button = $<HTMLButtonElement>('profile-save'); button.disabled = true; $('profile-status').textContent = 'Saving…';
+    const { error } = await supabase.from('profiles').update(row).eq('id', uid); button.disabled = false;
+    if (error) { $('profile-status').textContent = ''; errorBox.textContent = 'Saving failed. Try again.'; errorBox.hidden = false; return; }
+    $('profile-status').textContent = 'Saved ✓';
+    });
+    start();
+  }
+  document.addEventListener('astro:page-load', setupProfilePage);
+</script>

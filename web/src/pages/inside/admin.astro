@@ -1,0 +1,440 @@
+---
+import Club from '../../layouts/Club.astro';
+import AdminNav from '../../components/AdminNav.astro';
+const pathPart = Astro.url.pathname.replace(/\/$/, '').split('/').pop() ?? 'admin';
+const adminSection = pathPart === 'admin' ? 'overview' : pathPart;
+---
+<Club title="Admin · Inside · techRebels" description="Private techRebels crew dashboard.">
+  <section class="block first admin-shell">
+    <div id="adm-loading">
+      <p class="eyebrow">Inside · Admin</p>
+      <h1 class="h2">Opening the control room…</h1>
+    </div>
+
+    <div id="adm-out" hidden>
+      <p class="eyebrow">Inside · Admin</p>
+      <h1 class="h2">Crew only.</h1>
+      <p class="lede" id="adm-out-copy">Log in with an admin account to continue.</p>
+      <a class="pill pill-pink" href="/login">Log in</a>
+    </div>
+
+    <div id="adm-app" hidden>
+      <header class="adm-head">
+        <div>
+          <p class="eyebrow">Inside · Admin</p>
+          <h1 class="h2">The control room.</h1>
+          <p class="lede">One calm place for access, applications, programming and signals from the swarm.</p>
+        </div>
+        <a class="pill pill-ghost" href="/inside">Back to my profile</a>
+      </header>
+
+      <p class="adm-error" id="adm-error" role="alert" hidden></p>
+      <AdminNav active={adminSection} />
+      <div class="adm-stats" id="adm-stats" aria-label="Overview" hidden={adminSection !== 'overview'}></div>
+
+      <section class="admin-clusters" id="admin-clusters" hidden={adminSection !== 'overview'}>
+        <a href="/inside/admin/applications"><span class="cluster-signal" id="cluster-applications">—</span><p class="eyebrow">Membership</p><h2>Applications</h2><p>Review new people, read their motivation and make a decision.</p><b>Open queue →</b></a>
+        <a href="/inside/admin/invitations"><span class="cluster-signal" id="cluster-invitations">—</span><p class="eyebrow">Access</p><h2>Invitations</h2><p>Invite members, partners and admins. Revoke or resend safely.</p><b>Manage invites →</b></a>
+        <a href="/inside/admin/people"><span class="cluster-signal" id="cluster-people">—</span><p class="eyebrow">Community</p><h2>People & roles</h2><p>Suspend access, restore members and manage additive roles.</p><b>Manage people →</b></a>
+        <a href="/inside/admin/matching"><span class="cluster-signal">Drafts</span><p class="eyebrow">Connections</p><h2>Matching studio</h2><p>Generate, review and publish bug buddies and squads.</p><b>Open matching →</b></a>
+        <a href="/inside/admin/content"><span class="cluster-signal" id="cluster-content">—</span><p class="eyebrow">Programming</p><h2>Content inbox</h2><p>Speaker and partner pitches, Radar topics and people tips.</p><b>Open content →</b></a>
+        <a href="/inside/admin/insights"><span class="cluster-signal">30d</span><p class="eyebrow">Signals</p><h2>Insights</h2><p>Activity, merch demand and the numbers worth watching.</p><b>See insights →</b></a>
+      </section>
+
+      <section class="adm-panel" id="invitations" hidden={adminSection !== 'invitations'}>
+        <div class="adm-panel-head"><div><p class="eyebrow">Access</p><h2>Invitations</h2></div><span class="adm-count" id="invitation-count"></span></div>
+        <form class="invite-create" id="invite-create">
+          <label>Email<input id="invite-email" type="email" required maxlength="320" autocomplete="off" placeholder="rebel@example.com" /></label>
+          <label>Access<select id="invite-role"><option value="member">Become member</option><option value="partner">Become partner</option><option value="admin">Become admin</option></select></label>
+          <label>Personal note <span>optional</span><textarea id="invite-message" maxlength="600" placeholder="Why we want you in the swarm…"></textarea></label>
+          <button class="pill pill-lime" id="invite-send" type="submit">Send invitation</button>
+        </form>
+        <p class="adm-note" id="invite-note">The invitation expires in 7 days. Admin access is additive and never removes another role.</p>
+        <div class="adm-table-wrap invite-list"><table><thead><tr><th>Sent</th><th>Email</th><th>Access</th><th>Status</th><th>Expires</th><th>Action</th></tr></thead><tbody id="invitation-rows"></tbody></table></div>
+      </section>
+
+      <section class="adm-panel" id="applications" hidden={adminSection !== 'applications'}>
+        <div class="adm-panel-head"><div><p class="eyebrow">Membership</p><h2>Applications</h2></div><span class="adm-count" id="application-count"></span></div>
+        <div class="adm-table-wrap"><table class="application-table"><thead><tr><th>Applied</th><th>Applicant</th><th>Why techRebels</th><th>Bug</th><th>Decision</th></tr></thead><tbody id="application-rows"></tbody></table></div>
+      </section>
+
+      <section class="adm-panel" id="matching" hidden={adminSection !== 'matching'}>
+        <div class="adm-panel-head">
+          <div><p class="eyebrow">Matching</p><h2>Bug buddies & squads</h2></div>
+          <button class="pill pill-ghost adm-refresh" type="button">Refresh</button>
+        </div>
+        <form class="adm-create" id="match-create">
+          <label>Round name<input id="match-name" required minlength="3" maxlength="80" value="Rebel Match 01" /></label>
+          <label>Target squad size<input id="match-size" type="number" min="3" max="10" value="5" /></label>
+          <button class="pill pill-lime" type="submit">Generate private draft</button>
+        </form>
+        <p class="adm-note" id="match-note">At least two opted-in members with names are required. Generating never publishes automatically.</p>
+        <div class="match-rounds" id="match-rounds"></div>
+      </section>
+
+      <section class="adm-panel" id="submissions" hidden={adminSection !== 'content'}>
+        <div class="adm-panel-head"><div><p class="eyebrow">Inbox</p><h2>Submissions</h2></div><span class="adm-count" id="submission-count"></span></div>
+        <div class="adm-table-wrap"><table><thead><tr><th>Received</th><th>Type</th><th>Person</th><th>Pitch / details</th><th>Contact</th><th>Status</th></tr></thead><tbody id="submission-rows"></tbody></table></div>
+      </section>
+
+      <section class="adm-panel" id="radar-admin" hidden={adminSection !== 'content'}>
+        <div class="adm-panel-head"><div><p class="eyebrow">Rebel Radar</p><h2>Topics & people</h2></div><span class="adm-count" id="topic-count"></span></div>
+        <div class="adm-table-wrap"><table><thead><tr><th>Item</th><th>Kind</th><th>Pillar</th><th>Votes</th><th>Approved</th><th>Status</th></tr></thead><tbody id="topic-rows"></tbody></table></div>
+      </section>
+
+      <section class="adm-panel" id="members" hidden={adminSection !== 'people'}>
+        <div class="adm-panel-head"><div><p class="eyebrow">Community</p><h2>People & access</h2></div><span class="adm-count" id="member-count"></span></div>
+        <div class="adm-table-wrap"><table class="people-table"><thead><tr><th>Joined</th><th>Person</th><th>Access</th><th>Bug</th><th>Profile</th><th>Consent</th><th>Actions</th></tr></thead><tbody id="member-rows"></tbody></table></div>
+      </section>
+
+      <section class="adm-panel" id="access-history" hidden={adminSection !== 'people'}>
+        <div class="adm-panel-head"><div><p class="eyebrow">Security</p><h2>Access history</h2></div><span class="adm-count" id="audit-count"></span></div>
+        <div class="adm-table-wrap"><table><thead><tr><th>When</th><th>Action</th><th>Actor</th><th>Person</th><th>Details</th></tr></thead><tbody id="audit-rows"></tbody></table></div>
+      </section>
+
+      <section class="adm-panel adm-two" hidden={adminSection !== 'insights'}>
+        <div>
+          <div class="adm-panel-head"><div><p class="eyebrow">Founding Drop</p><h2>Merch interest</h2></div></div>
+          <div class="adm-table-wrap"><table><thead><tr><th>Item</th><th>Size</th><th>Count</th></tr></thead><tbody id="merch-rows"></tbody></table></div>
+        </div>
+        <div>
+          <div class="adm-panel-head"><div><p class="eyebrow">Last 30 days</p><h2>Top activity</h2></div></div>
+          <div class="adm-table-wrap"><table><thead><tr><th>Event</th><th>Label</th><th>Clicks</th><th>Sessions</th></tr></thead><tbody id="analytics-rows"></tbody></table></div>
+        </div>
+      </section>
+    </div>
+  </section>
+</Club>
+
+<style is:global>
+  .admin-shell [hidden] { display: none !important; }
+  .admin-shell .h2 { margin: 6px 0 10px; }
+  .adm-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 32px; }
+  .adm-error { position: sticky; top: 80px; z-index: 20; margin: 0 0 18px; padding: 12px 16px; border-radius: 14px; background: var(--pink); color: var(--night); font-weight: 700; }
+  .adm-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .adm-stat { padding: 18px; border-radius: 18px; background: var(--night-2); border: 1px solid rgba(237,231,220,.09); }
+  .adm-stat b { display: block; color: var(--lime); font: 800 clamp(1.8rem, 4vw, 2.8rem)/1 var(--f-display); }
+  .adm-stat span { color: var(--muted); font: 500 .72rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; }
+  .admin-clusters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .admin-clusters > a { position: relative; min-height: 240px; display: flex; flex-direction: column; align-items: flex-start; padding: 24px; border-radius: 24px; background: var(--night-2); border: 1px solid rgba(237,231,220,.09); color: inherit; text-decoration: none; transition: transform .2s ease, border-color .2s ease; }
+  .admin-clusters > a:hover { transform: translateY(-3px); border-color: var(--lime); }
+  .admin-clusters h2 { margin: 8px 0 10px; color: var(--pink); font: 800 clamp(1.45rem,2.7vw,2rem)/1 var(--f-display); }
+  .admin-clusters p:not(.eyebrow) { margin: 0; color: #AEB7B1; font-size: .9rem; line-height: 1.5; }
+  .admin-clusters b { margin-top: auto; padding-top: 20px; color: var(--mint); font-size: .84rem; }
+  .cluster-signal { position: absolute; top: 18px; right: 18px; min-width: 34px; padding: 6px 9px; border-radius: 999px; background: rgba(205,220,39,.12); color: var(--lime); text-align: center; font: 700 .72rem var(--f-mono); }
+  .adm-panel { margin-top: 16px; padding: clamp(18px, 3vw, 30px); border-radius: 24px; background: var(--night-2); border: 1px solid rgba(237,231,220,.09); }
+  .adm-panel-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+  .adm-panel h2 { margin: 6px 0 0; color: var(--pink); font: 800 clamp(1.5rem, 3vw, 2.2rem)/1 var(--f-display); }
+  .adm-count { padding: 6px 10px; border-radius: 999px; color: var(--mint); background: var(--night); font: 600 .75rem var(--f-mono); }
+  .adm-table-wrap { width: 100%; overflow-x: auto; }
+  .adm-panel table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: .88rem; }
+  .adm-panel th { padding: 9px 10px; text-align: left; color: var(--muted); border-bottom: 1px solid rgba(237,231,220,.15); font: 500 .7rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; }
+  .adm-panel td { padding: 11px 10px; vertical-align: top; border-bottom: 1px solid rgba(237,231,220,.07); color: #C3CBC6; }
+  .adm-panel td strong { color: var(--bone); }
+  .adm-panel td small { display: block; color: var(--muted); line-height: 1.4; }
+  .adm-panel select, .adm-panel input, .adm-panel textarea { border: 1px solid rgba(237,231,220,.16); border-radius: 10px; background: var(--night); color: var(--bone); padding: 8px 10px; font: 500 .86rem "Satoshi", system-ui, sans-serif; }
+  .adm-panel input:focus, .adm-panel select:focus, .adm-panel textarea:focus { outline: 2px solid var(--lime); outline-offset: 1px; }
+  .adm-panel input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--lime); }
+  .adm-create { display: grid; grid-template-columns: minmax(180px, 1fr) 160px auto; gap: 12px; align-items: end; }
+  .adm-create label { display: grid; gap: 6px; font-size: .82rem; font-weight: 700; }
+  .adm-create input { width: 100%; }
+  .invite-create { display: grid; grid-template-columns: minmax(220px, 1fr) 190px minmax(260px, 1.35fr) auto; gap: 12px; align-items: end; }
+  .invite-create label { display: grid; gap: 6px; font-size: .82rem; font-weight: 700; }
+  .invite-create label span { color: var(--muted); font-weight: 500; }
+  .invite-create input, .invite-create select, .invite-create textarea { width: 100%; }
+  .invite-create textarea { min-height: 62px; resize: vertical; }
+  .invite-list { margin-top: 20px; }
+  .adm-note { color: var(--muted); font-size: .84rem; margin: 12px 0 0; }
+  .match-rounds { display: grid; gap: 14px; margin-top: 18px; }
+  .adm-round { border-radius: 18px; padding: 16px; background: var(--night); border: 1px solid rgba(237,231,220,.1); }
+  .adm-round-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .adm-round-head h3 { margin: 0; color: var(--bone); font: 750 1.15rem var(--f-display); }
+  .adm-badge { border-radius: 999px; padding: 5px 9px; color: var(--night); background: var(--mint); font: 700 .68rem var(--f-mono); text-transform: uppercase; }
+  .adm-badge.draft { background: var(--lime); }
+  .adm-badge.archived { background: var(--muted); }
+  .adm-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+  .adm-group { padding: 13px; border-radius: 14px; background: rgba(237,231,220,.04); }
+  .adm-group h4 { margin: 0 0 8px; color: var(--pink); }
+  .adm-group ul { margin: 0 0 10px; padding-left: 18px; color: #C3CBC6; }
+  .adm-group-actions { display: grid; gap: 8px; }
+  .adm-group-actions label { display: flex; align-items: center; gap: 8px; font-size: .82rem; }
+  .adm-group-actions label:first-child { display: grid; align-items: initial; }
+  .adm-group-actions input[type=url] { width: 100%; }
+  .adm-mini { padding: 8px 13px; font-size: .8rem; justify-self: start; }
+  .application-table { min-width: 980px !important; }
+  .application-copy { max-width: 360px; }
+  .application-copy small + small { margin-top: 6px; }
+  .application-actions { display: grid; gap: 8px; min-width: 250px; }
+  .application-actions textarea { width: 100%; min-height: 62px; resize: vertical; border: 1px solid rgba(237,231,220,.16); border-radius: 10px; background: var(--night); color: var(--bone); padding: 8px 10px; font: 500 .82rem "Satoshi", system-ui, sans-serif; }
+  .application-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+  .application-buttons .pill { padding: 7px 11px; font-size: .76rem; }
+  .application-buttons .approve { background: var(--lime); color: var(--night); }
+  .application-buttons .reject { color: var(--pink); }
+  .people-table { min-width: 1180px !important; }
+  .people-actions { display: flex; flex-wrap: wrap; gap: 6px; min-width: 240px; }
+  .people-actions .pill { padding: 7px 11px; font-size: .74rem; }
+  .people-actions .danger { color: var(--pink); }
+  .delete-confirm { display: grid; gap: 7px; width: 260px; }
+  .delete-confirm small { color: var(--pink) !important; }
+  .delete-confirm input { width: 100%; }
+  .adm-publish { margin-top: 14px; }
+  .adm-two { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .adm-empty td { color: var(--muted); text-align: center; padding: 22px; }
+  @media (max-width: 1000px) { .invite-create { grid-template-columns: 1fr 1fr; } .admin-clusters { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+  @media (max-width: 900px) { .adm-stats { grid-template-columns: repeat(2, 1fr); } .adm-two, .adm-groups { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { .adm-head { align-items: start; flex-direction: column; } .adm-create { grid-template-columns: 1fr; } .adm-stats { grid-template-columns: 1fr 1fr; } .admin-clusters { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const txt = (value: unknown) => value === null || value === undefined || value === '' ? '—' : String(value);
+  const date = (value: string | null) => value ? new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium' }).format(new Date(value)) : '—';
+  const showError = (message: string) => { const box = $('adm-error'); box.textContent = message; box.hidden = false; };
+  const clearError = () => { $('adm-error').hidden = true; };
+  const td = (content: string | Node, className = '') => { const cell = document.createElement('td'); if (className) cell.className = className; typeof content === 'string' ? cell.textContent = content : cell.append(content); return cell; };
+  const emptyRow = (columns: number, label: string) => { const row = document.createElement('tr'); row.className = 'adm-empty'; const cell = td(label); cell.colSpan = columns; row.append(cell); return row; };
+  const optionSelect = (values: string[], current: string, onChange: (value: string) => Promise<void>) => {
+    const select = document.createElement('select');
+    for (const value of values) { const option = document.createElement('option'); option.value = value; option.textContent = value; option.selected = value === current; select.append(option); }
+    select.addEventListener('change', async () => { select.disabled = true; await onChange(select.value); select.disabled = false; });
+    return select;
+  };
+  const personCell = (name: string | null, email: string | null, company?: string | null) => {
+    const wrap = document.createElement('div'); const strong = document.createElement('strong'); strong.textContent = name || 'Unnamed rebel'; wrap.append(strong);
+    const meta = document.createElement('small'); meta.textContent = [email, company].filter(Boolean).join(' · '); wrap.append(meta); return wrap;
+  };
+
+  let profiles: any[] = [], bugs: any[] = [], submissions: any[] = [], topics: any[] = [], votes: any[] = [], merch: any[] = [];
+  let rounds: any[] = [], groups: any[] = [], memberships: any[] = [], analytics: any[] = [], invitations: any[] = [], communityRoles: any[] = [], auditLog: any[] = [];
+  let adminUid = '';
+
+  async function load() {
+    clearError();
+    const results = await Promise.all([
+      supabase!.rpc('admin_stats'),
+      supabase!.from('profiles').select('id,email,full_name,title,job_title,company,topics,activities,ambitions,matching_consent,marketing_consent,created_at,membership_status,city,application_reason,application_contribution,application_submitted_at,reviewed_at,admin_note,approved_at').order('created_at', { ascending: false }),
+      supabase!.from('community_invites').select('id,email,role,message,status,invited_by,invited_user_id,expires_at,accepted_at,created_at').order('created_at', { ascending: false }),
+      supabase!.from('user_roles').select('user_id,role,created_at'),
+      supabase!.from('admin_audit_log').select('id,actor_id,target_user_id,action,details,created_at').order('created_at', { ascending: false }).limit(100),
+      supabase!.from('bugs').select('user_id,bug_number,name,role,created_at'),
+      supabase!.from('submissions').select('*').order('created_at', { ascending: false }),
+      supabase!.from('topics').select('id,title,description,kind,pillar,category,status,approved,created_at').order('created_at', { ascending: false }),
+      supabase!.from('topic_votes').select('topic_id,user_id'),
+      supabase!.from('merch_interest').select('item,size,user_id,created_at'),
+      supabase!.from('matching_rounds').select('*').order('created_at', { ascending: false }),
+      supabase!.from('matching_groups').select('*').order('kind').order('label'),
+      supabase!.from('matching_members').select('group_id,user_id,score'),
+      supabase!.rpc('analytics_top', { days: 30 }),
+    ]);
+    const failed = results.find((r) => r.error);
+    if (failed?.error) showError(`Some admin data could not be loaded: ${failed.error.message}`);
+    const [statsResult, p, invitesResult, rolesResult, auditResult, b, s, t, v, m, r, g, mm, a] = results;
+    profiles = p.data ?? []; bugs = b.data ?? []; submissions = s.data ?? []; topics = t.data ?? []; votes = v.data ?? []; merch = m.data ?? [];
+    rounds = r.data ?? []; groups = g.data ?? []; memberships = mm.data ?? []; analytics = a.data ?? []; invitations = invitesResult.data ?? []; communityRoles = rolesResult.data ?? []; auditLog = auditResult.data ?? [];
+    renderStats(statsResult.data ?? {}); renderInvitations(); renderApplications(); renderMembers(); renderAudit(); renderSubmissions(); renderTopics(); renderMerch(); renderAnalytics(); renderMatching();
+  }
+
+  function renderStats(stats: Record<string, unknown>) {
+    const items = [
+      ['Members', stats.members], ['Applications', stats.applicants_pending], ['Pending invites', stats.invites_pending], ['Partners', stats.partners],
+      ['Bugs', stats.bugs], ['Matching opt-ins', stats.matching_opt_in], ['Pending Radar', stats.topics_pending], ['Merch signals', stats.merch_interest],
+    ];
+    $('adm-stats').replaceChildren(...items.map(([label, value]) => { const card = document.createElement('div'); card.className = 'adm-stat'; const b = document.createElement('b'); b.textContent = txt(value); const span = document.createElement('span'); span.textContent = String(label); card.append(b, span); return card; }));
+    $('cluster-applications').textContent = txt(stats.applicants_pending);
+    $('cluster-invitations').textContent = txt(stats.invites_pending);
+    $('cluster-people').textContent = txt(stats.members);
+    $('cluster-content').textContent = String(Number(stats.submissions_new ?? 0) + Number(stats.topics_pending ?? 0));
+  }
+
+  function renderInvitations() {
+    const now = Date.now();
+    const pending = invitations.filter((item) => item.status === 'pending' && new Date(item.expires_at).getTime() > now).length;
+    $('invitation-count').textContent = `${pending} pending · ${invitations.length} total`;
+    const rows = invitations.map((item) => {
+      const row = document.createElement('tr');
+      const status = item.status === 'pending' && new Date(item.expires_at).getTime() <= now ? 'expired' : item.status;
+      const badge = document.createElement('span'); badge.className = `adm-badge ${status === 'pending' ? 'draft' : status === 'expired' || status === 'revoked' ? 'archived' : ''}`; badge.textContent = status;
+      const role = document.createElement('strong'); role.textContent = item.role;
+      const action = document.createElement('div'); action.className = 'application-buttons';
+      if (status === 'pending') {
+        const resend = document.createElement('button'); resend.type = 'button'; resend.className = 'pill pill-ghost'; resend.textContent = 'Resend';
+        resend.addEventListener('click', async () => sendInvitation({ email: item.email, role: item.role, message: item.message }, resend));
+        const revoke = document.createElement('button'); revoke.type = 'button'; revoke.className = 'pill pill-ghost reject'; revoke.textContent = 'Revoke';
+        revoke.addEventListener('click', async () => { revoke.disabled = true; clearError(); const { error } = await supabase!.functions.invoke('manage-community', { body: { action: 'revoke', inviteId: item.id } }); if (error) { revoke.disabled = false; showError(error.message); } else await load(); });
+        action.append(resend, revoke);
+      }
+      row.append(td(date(item.created_at)), td(item.email), td(role), td(badge), td(date(item.expires_at)), td(action));
+      return row;
+    });
+    $('invitation-rows').replaceChildren(...(rows.length ? rows : [emptyRow(6, 'No invitations sent yet.')]))
+  }
+
+  async function sendInvitation(values: { email: string; role: string; message?: string | null }, button: HTMLButtonElement) {
+    clearError(); button.disabled = true;
+    $('invite-note').textContent = `Sending ${values.role} invitation to ${values.email}…`;
+    const { error } = await supabase!.functions.invoke('manage-community', { body: { action: 'invite', ...values } });
+    button.disabled = false;
+    if (error) { $('invite-note').textContent = 'Invitation was not sent.'; showError(error.message); return; }
+    $('invite-note').textContent = `Invitation sent to ${values.email}. It expires in 7 days.`;
+    await load();
+  }
+
+  function renderApplications() {
+    const bugByUser = new Map(bugs.map((b) => [b.user_id, b]));
+    const applications = profiles
+      .filter((p) => p.application_submitted_at && p.membership_status !== 'approved')
+      .sort((a, b) => {
+        const rank = (status: string) => status === 'pending' ? 0 : status === 'waitlisted' ? 1 : status === 'rejected' ? 2 : 3;
+        return rank(a.membership_status) - rank(b.membership_status) || String(b.application_submitted_at).localeCompare(String(a.application_submitted_at));
+      });
+    const pending = applications.filter((p) => p.membership_status === 'pending').length;
+    $('application-count').textContent = `${pending} awaiting review · ${applications.length} open`;
+    const rows = applications.map((p) => {
+      const row = document.createElement('tr');
+      const application = document.createElement('div'); application.className = 'application-copy';
+      const strong = document.createElement('strong'); strong.textContent = p.application_reason || 'No reason supplied'; application.append(strong);
+      if (p.application_contribution) { const contribution = document.createElement('small'); contribution.textContent = `Brings: ${p.application_contribution}`; application.append(contribution); }
+      const bug = bugByUser.get(p.id);
+      const actions = document.createElement('div'); actions.className = 'application-actions';
+      const note = document.createElement('textarea'); note.placeholder = 'Private review note (optional)'; note.maxLength = 1000; note.value = p.admin_note ?? '';
+      const buttons = document.createElement('div'); buttons.className = 'application-buttons';
+      const decide = (label: string, status: string, className = '') => { const button = document.createElement('button'); button.type = 'button'; button.className = `pill pill-ghost ${className}`; button.textContent = label; button.addEventListener('click', async () => { clearError(); buttons.querySelectorAll('button').forEach((b) => b.disabled = true); const { error } = await supabase!.rpc('review_membership', { member_id: p.id, new_status: status, note: note.value.trim() || null }); if (error) { showError(error.message); buttons.querySelectorAll('button').forEach((b) => b.disabled = false); } else { if (status === 'approved') { const email = await supabase!.functions.invoke('send-community-email', { body: { kind: 'membership_approved', userId: p.id } }); if (email.error) showError('Member approved, but the welcome email could not be sent. Check Edge Function logs.'); } await load(); } }); return button; };
+      buttons.append(decide('Approve', 'approved', 'approve'), decide('Waitlist', 'waitlisted'), decide('Reject', 'rejected', 'reject'));
+      actions.append(note, buttons);
+      const status = document.createElement('span'); status.className = `adm-badge ${p.membership_status === 'pending' ? 'draft' : ''}`; status.textContent = p.membership_status;
+      const applicant = personCell(p.full_name, p.email, [p.city, p.company].filter(Boolean).join(' · ')); applicant.append(status);
+      row.append(td(date(p.application_submitted_at)), td(applicant), td(application), td(bug ? `BUG-${String(bug.bug_number).padStart(4, '0')} · ${bug.name}` : 'No bug'), td(actions));
+      return row;
+    });
+    $('application-rows').replaceChildren(...(rows.length ? rows : [emptyRow(5, 'No applications waiting.')]));
+  }
+
+  function renderMembers() {
+    const peopleWithRoles = new Set(communityRoles.map((role) => role.user_id));
+    const body = $('member-rows'); const members = profiles.filter((p) => ['approved', 'suspended'].includes(p.membership_status) || peopleWithRoles.has(p.id)); $('member-count').textContent = `${members.length} people`;
+    const bugByUser = new Map(bugs.map((b) => [b.user_id, b]));
+    const rows = members.map((p) => { const row = document.createElement('tr'); const bug = bugByUser.get(p.id); const roles = communityRoles.filter((r) => r.user_id === p.id).map((r) => r.role).sort();
+      const actions = document.createElement('div'); actions.className = 'people-actions';
+      const actionButton = (label: string, action: string, role?: string, danger = false) => { const button = document.createElement('button'); button.type = 'button'; button.className = `pill pill-ghost${danger ? ' danger' : ''}`; button.textContent = label; button.disabled = p.id === adminUid; button.addEventListener('click', async () => { button.disabled = true; await managePerson({ action, targetUserId: p.id, role }); }); return button; };
+      if (p.membership_status === 'approved') actions.append(actionButton('Suspend member', 'suspend_member'));
+      if (p.membership_status === 'suspended') actions.append(actionButton('Restore member', 'restore_member'));
+      if (roles.includes('partner')) actions.append(actionButton('Remove partner', 'remove_role', 'partner'));
+      if (roles.includes('admin')) actions.append(actionButton('Remove admin', 'remove_role', 'admin', true));
+      const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'pill pill-ghost danger'; remove.textContent = 'Delete account'; remove.disabled = p.id === adminUid;
+      remove.addEventListener('click', () => {
+        const confirm = document.createElement('div'); confirm.className = 'delete-confirm';
+        const warning = document.createElement('small'); warning.textContent = `Permanent. Type ${p.email} to confirm.`;
+        const input = document.createElement('input'); input.type = 'email'; input.placeholder = p.email; input.autocomplete = 'off';
+        const buttons = document.createElement('div'); buttons.className = 'application-buttons';
+        const yes = document.createElement('button'); yes.type = 'button'; yes.className = 'pill pill-pink'; yes.textContent = 'Delete forever';
+        const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'pill pill-ghost'; cancel.textContent = 'Cancel';
+        yes.addEventListener('click', async () => { if (input.value.trim().toLowerCase() !== String(p.email).toLowerCase()) { showError('The confirmation email does not match.'); input.focus(); return; } yes.disabled = true; cancel.disabled = true; await managePerson({ action: 'delete_account', targetUserId: p.id, confirmationEmail: input.value.trim() }); });
+        cancel.addEventListener('click', () => renderMembers());
+        buttons.append(yes, cancel); confirm.append(warning, input, buttons); actions.replaceChildren(confirm); input.focus();
+      });
+      actions.append(remove);
+      if (p.id === adminUid) { const own = document.createElement('small'); own.textContent = 'Your account is protected here.'; actions.append(own); }
+      row.append(td(date(p.approved_at ?? p.created_at)), td(personCell(p.full_name, p.email, p.company)), td(`${roles.join(' + ') || 'no role'} · ${p.membership_status}`), td(bug ? `BUG-${String(bug.bug_number).padStart(4, '0')} · ${bug.name}` : 'No bug'), td(`${p.topics?.length ?? 0} topics · ${p.activities?.length ?? 0} activities · ${p.ambitions?.length ?? 0} ambitions`), td(`${p.matching_consent ? 'Matching ✓' : 'Matching —'} · ${p.marketing_consent ? 'News ✓' : 'News —'}`), td(actions)); return row;
+    });
+    body.replaceChildren(...(rows.length ? rows : [emptyRow(7, 'No people with access yet.')]))
+  }
+
+  async function managePerson(body: { action: string; targetUserId: string; role?: string; confirmationEmail?: string }) {
+    clearError();
+    const { error } = await supabase!.functions.invoke('manage-community', { body });
+    if (error) { showError(error.message); renderMembers(); return; }
+    await load();
+  }
+
+  function renderAudit() {
+    const profileById = new Map(profiles.map((profile) => [profile.id, profile]));
+    $('audit-count').textContent = `${auditLog.length} latest`;
+    const rows = auditLog.map((entry) => {
+      const row = document.createElement('tr');
+      const actor = profileById.get(entry.actor_id);
+      const target = profileById.get(entry.target_user_id);
+      const detailEmail = entry.details?.email ?? '';
+      const detailRole = entry.details?.role ? `role: ${entry.details.role}` : '';
+      row.append(td(date(entry.created_at)), td(String(entry.action).replaceAll('_', ' ')), td(actor?.full_name || actor?.email || 'Former admin'), td(target?.full_name || target?.email || detailEmail || 'Deleted account'), td(detailRole || entry.details?.invite_id || '—'));
+      return row;
+    });
+    $('audit-rows').replaceChildren(...(rows.length ? rows : [emptyRow(5, 'No access changes recorded yet.')]))
+  }
+
+  function renderSubmissions() {
+    const body = $('submission-rows'); $('submission-count').textContent = `${submissions.filter((s) => s.status === 'new').length} new · ${submissions.length} total`;
+    const rows = submissions.map((s) => { const row = document.createElement('tr');
+      const details = document.createElement('div'); const strong = document.createElement('strong'); strong.textContent = s.topic || s.kind_detail || s.kind; details.append(strong); const small = document.createElement('small'); small.textContent = [s.details, ...(s.areas ?? [])].filter(Boolean).join(' · '); details.append(small);
+      const contact = document.createElement('div'); contact.textContent = s.email; if (s.link) { const link = document.createElement('a'); link.href = s.link; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = 'Open link ↗'; const sm = document.createElement('small'); sm.append(link); contact.append(sm); }
+      const status = optionSelect(['new','contacted','done','declined'], s.status, async (value) => { const { error } = await supabase!.from('submissions').update({ status: value }).eq('id', s.id); if (error) showError(error.message); else { s.status = value; renderSubmissions(); } });
+      row.append(td(date(s.created_at)), td(s.kind.replace('_', ' ')), td(personCell(s.name, s.email, s.company)), td(details), td(contact), td(status)); return row;
+    }); body.replaceChildren(...(rows.length ? rows : [emptyRow(6, 'Inbox zero. No submissions yet.')]))
+  }
+
+  function renderTopics() {
+    const body = $('topic-rows'); const pending = topics.filter((t) => !t.approved).length; $('topic-count').textContent = `${pending} pending · ${topics.length} total`;
+    const voteCounts = new Map<string, number>(); for (const vote of votes) voteCounts.set(vote.topic_id, (voteCounts.get(vote.topic_id) ?? 0) + 1);
+    const sorted = [...topics].sort((a, b) => Number(a.approved) - Number(b.approved) || (voteCounts.get(b.id) ?? 0) - (voteCounts.get(a.id) ?? 0));
+    const rows = sorted.map((topic) => { const row = document.createElement('tr'); const item = document.createElement('div'); const strong = document.createElement('strong'); strong.textContent = topic.title; item.append(strong); const small = document.createElement('small'); small.textContent = topic.description ?? ''; item.append(small);
+      const approved = document.createElement('input'); approved.type = 'checkbox'; approved.checked = topic.approved; approved.setAttribute('aria-label', `Approve ${topic.title}`); approved.addEventListener('change', async () => { approved.disabled = true; const { error } = await supabase!.from('topics').update({ approved: approved.checked }).eq('id', topic.id); approved.disabled = false; if (error) { approved.checked = !approved.checked; showError(error.message); } else { topic.approved = approved.checked; renderTopics(); } });
+      const status = optionSelect(['open','planned','done'], topic.status, async (value) => { const { error } = await supabase!.from('topics').update({ status: value }).eq('id', topic.id); if (error) showError(error.message); else topic.status = value; });
+      row.append(td(item), td(topic.kind), td(topic.pillar), td(String(voteCounts.get(topic.id) ?? 0)), td(approved), td(status)); return row;
+    }); body.replaceChildren(...(rows.length ? rows : [emptyRow(6, 'Nothing on the Radar yet.')]))
+  }
+
+  function renderMerch() {
+    const counts = new Map<string, number>(); for (const m of merch) { const key = `${m.item}|${m.size ?? '—'}`; counts.set(key, (counts.get(key) ?? 0) + 1); }
+    const rows = [...counts.entries()].sort().map(([key, count]) => { const [item, size] = key.split('|'); const row = document.createElement('tr'); row.append(td(item), td(size), td(String(count))); return row; });
+    $('merch-rows').replaceChildren(...(rows.length ? rows : [emptyRow(3, 'No merch interest yet.')]))
+  }
+
+  function renderAnalytics() {
+    const rows = analytics.slice(0, 20).map((a) => { const row = document.createElement('tr'); row.append(td(a.event), td(a.label ?? a.section ?? '—'), td(String(a.clicks)), td(String(a.sessions))); return row; });
+    $('analytics-rows').replaceChildren(...(rows.length ? rows : [emptyRow(4, 'No analytics events yet.')]))
+  }
+
+  function renderMatching() {
+    const profileById = new Map(profiles.map((p) => [p.id, p]));
+    const cards = rounds.map((round) => { const card = document.createElement('article'); card.className = 'adm-round'; const head = document.createElement('div'); head.className = 'adm-round-head'; const title = document.createElement('h3'); title.textContent = round.name; const badge = document.createElement('span'); badge.className = `adm-badge ${round.status}`; badge.textContent = round.status; head.append(title, badge); card.append(head);
+      const roundGroups = groups.filter((g) => g.round_id === round.id); const grid = document.createElement('div'); grid.className = 'adm-groups';
+      for (const group of roundGroups) { const box = document.createElement('div'); box.className = 'adm-group'; const h4 = document.createElement('h4'); h4.textContent = `${group.label} · ${group.kind}`; const list = document.createElement('ul');
+        for (const member of memberships.filter((m) => m.group_id === group.id).sort((a,b) => b.score - a.score)) { const li = document.createElement('li'); li.textContent = `${profileById.get(member.user_id)?.full_name ?? 'Unknown member'} · score ${member.score}`; list.append(li); }
+        box.append(h4, list);
+        if (round.status === 'draft') { const actions = document.createElement('div'); actions.className = 'adm-group-actions'; const slackLabel = document.createElement('label'); slackLabel.textContent = 'Slack link (optional)'; const slack = document.createElement('input'); slack.type = 'url'; slack.placeholder = 'https://'; slack.value = group.slack_url ?? ''; slackLabel.append(slack); const approveLabel = document.createElement('label'); const approve = document.createElement('input'); approve.type = 'checkbox'; approve.checked = group.approved; approveLabel.append(approve, document.createTextNode('Approved'));
+          const save = document.createElement('button'); save.type = 'button'; save.className = 'pill pill-ghost adm-mini'; save.textContent = 'Save group'; save.addEventListener('click', async () => { save.disabled = true; const { error } = await supabase!.from('matching_groups').update({ slack_url: slack.value.trim() || null, approved: approve.checked }).eq('id', group.id); save.disabled = false; if (error) showError(error.message); else { group.slack_url = slack.value.trim() || null; group.approved = approve.checked; save.textContent = 'Saved ✓'; setTimeout(() => save.textContent = 'Save group', 1500); } }); actions.append(slackLabel, approveLabel, save); box.append(actions); }
+        grid.append(box);
+      }
+      if (!roundGroups.length) { const p = document.createElement('p'); p.className = 'adm-note'; p.textContent = 'No groups in this round.'; card.append(p); } else card.append(grid);
+      if (round.status === 'draft') { const publish = document.createElement('button'); publish.type = 'button'; publish.className = 'pill pill-pink adm-publish'; publish.textContent = 'Publish approved round'; publish.addEventListener('click', async () => { publish.disabled = true; const { error } = await supabase!.rpc('publish_matching_round', { round_to_publish: round.id }); publish.disabled = false; if (error) showError(error.message); else await load(); }); card.append(publish); }
+      return card;
+    });
+    $('match-rounds').replaceChildren(...(cards.length ? cards : [Object.assign(document.createElement('p'), { className: 'adm-note', textContent: 'No matching rounds yet.' })]));
+  }
+
+  $('match-create').addEventListener('submit', async (event) => { event.preventDefault(); clearError(); const button = (event.currentTarget as HTMLFormElement).querySelector('button')!; button.disabled = true; $('match-note').textContent = 'Building the strongest available combinations…'; const { data, error } = await supabase!.rpc('generate_matching_draft', { round_name: ($('match-name') as HTMLInputElement).value.trim(), target_squad_size: Number(($('match-size') as HTMLInputElement).value) }); button.disabled = false; if (error) { $('match-note').textContent = 'Draft was not created.'; showError(error.message); } else { $('match-note').textContent = `Private draft created: ${data}`; await load(); } });
+  $('invite-create').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const email = ($('invite-email') as HTMLInputElement).value.trim().toLowerCase();
+    const role = ($('invite-role') as HTMLSelectElement).value;
+    const message = ($('invite-message') as HTMLTextAreaElement).value.trim() || null;
+    await sendInvitation({ email, role, message }, $('invite-send') as HTMLButtonElement);
+    if (!$('adm-error').hidden) return;
+    (event.currentTarget as HTMLFormElement).reset();
+  });
+  document.querySelectorAll<HTMLButtonElement>('.adm-refresh').forEach((button) => button.addEventListener('click', load));
+
+  async function start() {
+    if (!supabase) { $('adm-loading').hidden = true; $('adm-out').hidden = false; $('adm-out-copy').textContent = 'Supabase is not connected on this site.'; return; }
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) { $('adm-loading').hidden = true; $('adm-out').hidden = false; return; }
+    adminUid = sessionData.session.user.id;
+    const { data: admin, error } = await supabase.rpc('is_admin');
+    $('adm-loading').hidden = true;
+    if (error || !admin) { $('adm-out').hidden = false; $('adm-out-copy').textContent = 'This account does not have crew access.'; return; }
+    $('adm-app').hidden = false;
+    await load();
+  }
+  start();
+</script>
