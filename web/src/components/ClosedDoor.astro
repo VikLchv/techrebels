@@ -1,0 +1,71 @@
+---
+// Outside opening hours the community pages get a door sign. You can only peek through the window.
+// Admins walk straight in.
+---
+<div class="door" id="door" hidden>
+  <div class="door-glass" aria-hidden="true"></div>
+  <div class="door-sign" role="dialog" aria-modal="true" aria-labelledby="door-title">
+    <p class="door-hang" aria-hidden="true"><i></i><i></i></p>
+    <p class="door-closed">CLOSED</p>
+    <h2 id="door-title">Sorry, rebels are sleeping.</h2>
+    <p class="door-hours">Community hours <b>17:00-00:00</b>, Prague time. Every day.</p>
+    <p class="door-in">Doors open in <b id="door-in">...</b></p>
+    <p class="door-peek">You can peek through the window. Touching the glass is free.</p>
+    <div class="door-actions">
+      <a class="pill pill-lime" href="/">Back to the street</a>
+      <a class="pill pill-ghost" href="/inside/profile">Fix my profile meanwhile</a>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .door { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: end center; padding: 16px 16px max(24px, env(safe-area-inset-bottom)); }
+  .door[hidden] { display: none; }
+  .door-glass { position: absolute; inset: 0; background: rgba(11, 15, 13, .94);
+    -webkit-mask: radial-gradient(circle at 50% 32%, transparent 0 min(150px, 30vw), #000 calc(min(150px, 30vw) + 2px));
+            mask: radial-gradient(circle at 50% 32%, transparent 0 min(150px, 30vw), #000 calc(min(150px, 30vw) + 2px)); }
+  .door::before { content: ""; position: absolute; left: 50%; top: 32%; width: calc(min(150px, 30vw) * 2 + 16px); aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; border: 8px solid var(--bug-brown); box-shadow: inset 0 0 40px rgba(205, 220, 39, .25), 0 0 0 2px var(--rebel-brown); backdrop-filter: blur(1.5px) saturate(.7); pointer-events: none; z-index: 1; }
+  .door-sign { position: relative; z-index: 2; width: min(460px, 100%); display: grid; gap: 10px; justify-items: center; text-align: center; padding: 26px 22px 22px; border-radius: 16px; background: var(--bone); color: var(--night); box-shadow: 0 30px 80px rgba(0, 0, 0, .6); transform: rotate(-2deg); animation: door-swing 3.6s ease-in-out infinite; transform-origin: 50% -30px; }
+  @keyframes door-swing { 50% { transform: rotate(1.5deg); } }
+  .door-hang { position: absolute; top: -26px; left: 0; right: 0; margin: 0; display: flex; justify-content: center; gap: 140px; }
+  .door-hang i { width: 2px; height: 30px; background: var(--muted); transform: rotate(var(--r, 20deg)); }
+  .door-hang i:first-child { --r: -20deg; }
+  .door-closed { margin: 0; font: 800 2.6rem/1 var(--f-display); letter-spacing: .06em; color: var(--pink); -webkit-text-stroke: 2px var(--night); }
+  .door-sign h2 { margin: 0; font: 800 1.4rem/1.1 var(--f-display); letter-spacing: -.02em; }
+  .door-sign p { margin: 0; }
+  .door-hours, .door-in { font: 500 .88rem var(--f-mono); }
+  .door-in b { color: var(--green); }
+  .door-peek { font-size: .9rem; color: #4A524E; }
+  .door-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 6px; }
+  .door-actions .pill-ghost { color: var(--night); border-color: rgba(11, 15, 13, .3); }
+  html.door-shut body { overflow: hidden; }
+  @media (prefers-reduced-motion: reduce) { .door-sign { animation: none; } }
+</style>
+
+<script>
+  import { supabase } from '../lib/supabase';
+  import { isOpen, untilChange } from '../lib/hours';
+
+  let timer = 0;
+  const tick = () => { const el = document.getElementById('door-in'); if (el) el.textContent = untilChange(); };
+
+  // runs on first load and after every client-side navigation inside /inside
+  async function check() {
+    clearInterval(timer);
+    document.documentElement.classList.remove('door-shut');
+    const door = document.getElementById('door');
+    // ?closed previews the door sign, ?open skips it; admins are never locked out
+    const q = new URLSearchParams(location.search);
+    const preview = q.has('closed');
+    if (!door || (!preview && (isOpen() || q.has('open')))) return;
+    if (supabase && !preview) {
+      const { data: s } = await supabase.auth.getSession();
+      if (s.session) { const { data: admin } = await supabase.rpc('is_admin'); if (admin) return; }
+    }
+    door.hidden = false;
+    document.documentElement.classList.add('door-shut');
+    tick();
+    timer = window.setInterval(() => { tick(); if (isOpen()) location.reload(); }, 30000);
+  }
+  document.addEventListener('astro:page-load', check);
+</script>

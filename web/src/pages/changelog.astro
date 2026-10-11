@@ -1,0 +1,57 @@
+---
+// Changelog instead of "About us": the techRebels story as commit history.
+import Club from '../layouts/Club.astro';
+import { changelog } from '../config/changelog';
+
+const sha = (s: string) => { let x = 2166136261; for (const ch of s) { x ^= ch.charCodeAt(0); x = Math.imul(x, 16777619); } return (x >>> 0).toString(16).padStart(8, '0').slice(0, 7); };
+---
+<Club title="Changelog · techRebels" description="The techRebels story as patch notes. No About us page, just commits.">
+  <section class="block first cl">
+    <div class="head">
+      <p class="eyebrow">CHANGELOG.md</p>
+      <h1 class="h2">We don't do "About us".</h1>
+      <p class="lede">Here is the whole story as patch notes. Newest on top, bugs included.</p>
+    </div>
+
+    <ol class="cl-log">
+      {changelog.map((r) => (
+        <li class={`cl-rel ${r.status === 'upcoming' ? 'up' : ''}`}>
+          <div class="cl-rail" aria-hidden="true"><i></i></div>
+          <div class="cl-body">
+            <p class="cl-meta"><code>{sha(r.version + r.title)}</code><span class="cl-tag">{r.version}</span><span>{r.date}</span>{r.status === 'upcoming' && <span class="cl-up">not merged yet</span>}</p>
+            <h2>{r.title}</h2>
+            <ul>
+              {r.changes.map((c) => <li><span class={`cl-t t-${c.type}`}>{c.type}</span><span>{c.text}</span></li>)}
+            </ul>
+          </div>
+        </li>
+      ))}
+    </ol>
+
+    <p class="cl-foot"><code>git log --oneline | wc -l</code> → still counting. Want to be in the next release? <a href="/lab">Build your bug</a>.</p>
+  </section>
+</Club>
+
+<style is:global>
+  .cl-log { list-style: none; margin: 30px 0 0; padding: 0; display: grid; }
+  .cl-rel { display: grid; grid-template-columns: 34px 1fr; gap: 14px; }
+  .cl-rail { position: relative; display: flex; justify-content: center; }
+  .cl-rail::before { content: ""; position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(237, 231, 220, .12); }
+  .cl-rail i { position: relative; margin-top: 26px; width: 16px; height: 16px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 5px var(--night); }
+  .cl-rel.up .cl-rail i { background: var(--night); border: 2px dashed var(--pink); }
+  .cl-body { padding: 18px 0 28px; min-width: 0; }
+  .cl-meta { margin: 0; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; font: 500 .8rem var(--f-mono); color: var(--muted); }
+  .cl-meta code { color: var(--mint); }
+  .cl-tag { padding: 2px 9px; border-radius: 999px; background: var(--bone); color: var(--night); font-weight: 700; }
+  .cl-up { color: var(--pink); }
+  .cl-body h2 { margin: 6px 0 12px; font: 800 clamp(1.5rem, 3vw, 2.2rem)/1 var(--f-display); letter-spacing: -.03em; }
+  .cl-body ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .cl-body ul li { display: grid; grid-template-columns: 76px 1fr; gap: 12px; align-items: baseline; color: #C3CBC6; }
+  .cl-t { justify-self: start; padding: 2px 8px; border-radius: 6px; font: 700 .7rem var(--f-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--night); }
+  .t-feat { background: var(--lime); } .t-fix { background: var(--mint); } .t-removed { background: var(--pink); }
+  .t-known { background: var(--bug-brown); color: var(--bone); } .t-chore { background: rgba(237, 231, 220, .7); } .t-planned { background: transparent; color: var(--pink); box-shadow: inset 0 0 0 1.5px var(--pink); }
+  .cl-foot { margin: 20px 0 0; color: var(--muted); }
+  .cl-foot code { color: var(--mint); }
+  .cl-foot a { color: var(--pink); }
+  @media (max-width: 560px) { .cl-body ul li { grid-template-columns: 1fr; gap: 4px; } }
+</style>

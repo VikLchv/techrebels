@@ -66,9 +66,11 @@
     <p><b>Segmentation fault</b> (core dumped)</p>
     <p class="mono">fun.exe has stopped responding</p>
   </div>
-  <div class="bk-win w3" aria-hidden="true">
-    <div class="bk-bar"><i></i><i></i><i></i><span>teapot.err</span></div>
-    <p><b>Error 418:</b> I'm a teapot. Also, the carnival is closed.</p>
+  <div class="bk-win w3 bk-door">
+    <div class="bk-bar" aria-hidden="true"><i></i><i></i><i></i><span>door.sign</span></div>
+    <p class="bk-door-state"><span class="bk-door-dot" aria-hidden="true"></span>Community is <b id="bk-door">open</b></p>
+    <p><b>Opening hours:</b> 17:00-00:00, Prague time. Every day, like a good bar.</p>
+    <p class="mono" id="bk-door-note">The public site never closes.</p>
   </div>
   <div class="bk-win w4 bk-safe">
     <div class="bk-bar" aria-hidden="true"><i></i><i></i><i></i><span>settings.sys</span></div>
@@ -150,7 +152,12 @@
   .bk-bar span { margin-left: 6px; }
   .w1 { width: 280px; right: 8%; top: 22%; transform: rotate(3deg); box-shadow: 6px 6px 0 var(--pink), 0 20px 50px rgba(0, 0, 0, .5); }
   .w2 { width: 250px; left: 4%; bottom: 14%; transform: rotate(-4deg); animation: bk-jit 4s steps(2) infinite; }
-  .w3 { width: 240px; right: 4%; bottom: 10%; transform: rotate(-2deg); box-shadow: 6px 6px 0 var(--lime), 0 20px 50px rgba(0, 0, 0, .5); }
+  .bk-door-state { font: 800 1.05rem var(--f-display) !important; display: flex; align-items: center; gap: 8px; }
+  .bk-door-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 0 4px rgba(61, 219, 154, .2); }
+  .bk-door.shut .bk-door-dot { background: var(--pink); box-shadow: 0 0 0 4px rgba(244, 165, 212, .2); }
+  .bk-door.shut #bk-door { color: var(--pink); }
+  #bk-door { color: var(--mint); }
+  .w3 { width: 260px; right: 4%; bottom: 10%; transform: rotate(-2deg); box-shadow: 6px 6px 0 var(--lime), 0 20px 50px rgba(0, 0, 0, .5); }
   .w4 { width: 230px; left: 44%; top: 9%; transform: rotate(2.5deg); box-shadow: 6px 6px 0 var(--mint), 0 20px 50px rgba(0, 0, 0, .5); }
   .bk-safe-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 700; }
   .bk-switch { position: relative; width: 74px; height: 32px; border-radius: 999px; border: 2px solid var(--bone); background: var(--pink); cursor: pointer; padding: 0; font: 700 .72rem var(--f-mono); color: var(--night); }
@@ -266,7 +273,8 @@
     .bk-stream { width: 70vw; opacity: .35; }
     .w1 { display: none; }
     .w2 { display: none; }
-    .w3 { display: none; }
+    .w3 { left: 4%; right: auto; top: calc(env(safe-area-inset-top, 0px) + 70px); bottom: auto; width: 190px; }
+    .w3 p:nth-of-type(2) { display: none; }
     .w4 { left: auto; right: 4%; top: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 44px); width: 210px; }
     .bk-term { top: 56%; }
     .bk-word { font-size: clamp(3.4rem, 22vw, 6rem); }
@@ -278,6 +286,7 @@
 
 <script>
   import { bugSVG } from '../lib/bug/render.js';
+  import { isOpen, untilChange } from '../lib/hours';
 
   const root = document.documentElement;
   const intro = document.getElementById('intro');
@@ -302,6 +311,14 @@
     const sw = $('bk-switch') as HTMLButtonElement;
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     let solved = false, wrong = 0, hintLevel = 0;
+
+    // ---------- door sign: community opening hours ----------
+    {
+      const open = isOpen();
+      $('bk-door').textContent = open ? 'open' : 'closed';
+      document.querySelector('.bk-door')?.classList.toggle('shut', !open);
+      $('bk-door-note').textContent = open ? `Closes in ${untilChange()}. The public site never closes.` : `Opens in ${untilChange()}. You can still look around outside.`;
+    }
 
     // bugs on the broken page
     const BUGS = [

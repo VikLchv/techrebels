@@ -1,0 +1,42 @@
+---
+// The cookie banner we do not legally need: we have no cookies, we have bugs.
+---
+<aside class="ck" id="ck" hidden aria-label="About cookies" transition:persist="cookie-bugs">
+  <span class="ck-ico" aria-hidden="true">🍪</span>
+  <p><b>We don't have cookies. We have bugs.</b> No tracking cookies, no ad pixels. Just a few hundred tiny insects living in your browser tab.</p>
+  <div class="ck-btns">
+    <button type="button" class="pill pill-lime" data-ck="accept">Accept bugs</button>
+    <button type="button" class="pill pill-ghost" data-ck="also">Also accept bugs</button>
+  </div>
+</aside>
+
+<style is:global>
+  .ck { position: fixed; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); z-index: 95; width: min(430px, calc(100vw - 32px)); display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; align-items: start; padding: 16px 18px; border-radius: 18px; background: var(--night-2); border: 1.5px solid rgba(237, 231, 220, .16); box-shadow: 6px 6px 0 var(--pink), 0 24px 60px rgba(0, 0, 0, .5); animation: ck-in .5s cubic-bezier(.3, 1.4, .5, 1); }
+  .ck[hidden] { display: none; }
+  .ck-ico { font-size: 1.6rem; line-height: 1; filter: grayscale(.2); text-decoration: line-through; }
+  .ck p { margin: 0; font-size: .88rem; color: #C3CBC6; }
+  .ck p b { display: block; color: var(--bone); font-size: 1rem; margin-bottom: 2px; }
+  .ck-btns { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; }
+  .ck-btns .pill { padding: 8px 14px; font-size: .85rem; }
+  @keyframes ck-in { from { transform: translateY(30px) rotate(3deg); opacity: 0; } }
+  @media (max-width: 560px) { .ck { bottom: 70px; } }
+</style>
+
+<script>
+  const KEY = 'tr-cookie-bugs';
+  const ck = document.getElementById('ck');
+  const show = () => {
+    try { if (localStorage.getItem(KEY)) return; } catch {}
+    setTimeout(() => { if (ck) ck.hidden = false; }, 1800);
+  };
+  ck?.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-ck]');
+    if (!b) return;
+    try { localStorage.setItem(KEY, b.dataset.ck!); } catch {}
+    const r = b.getBoundingClientRect();
+    document.dispatchEvent(new CustomEvent('tr:release', { detail: { n: 12, x: r.left + r.width / 2, y: r.top } }));
+    ck.hidden = true;
+  });
+  if (document.documentElement.classList.contains('entered') || !document.getElementById('intro')) show();
+  else document.addEventListener('tr:entered', show, { once: true });
+</script>

@@ -1,0 +1,112 @@
+---
+// 404: a bug ate the page and ran off with the letters. Catch them to put it back together.
+import Club from '../layouts/Club.astro';
+const word = 'PAGE NOT FOUND';
+---
+<Club title="404 · A bug ate this page · techRebels" description="This page got eaten by a bug.">
+  <section class="block first nf">
+    <div class="head">
+      <p class="eyebrow">Error 404 · status: won't fix</p>
+      <h1 class="h2">A bug ate this page.</h1>
+      <p class="lede">It ran off with the letters. Catch the bugs to put the message back together. Or just go home, we won't judge. (We will.)</p>
+    </div>
+
+    <div class="nf-slots" id="nf-slots" aria-label={word}>
+      {[...word].map((ch) => ch === ' ' ? <span class="nf-gap"></span> : <span class="nf-slot" data-ch={ch}>_</span>)}
+    </div>
+    <p class="nf-count" id="nf-count" aria-live="polite">0 of {word.replace(/ /g, '').length} letters back</p>
+    <div class="nf-stage" id="nf-stage" aria-hidden="true"></div>
+
+    <div class="nf-done" id="nf-done" hidden>
+      <p class="nf-done-h">Fixed it. The page still does not exist, but now it is spelled correctly.</p>
+    </div>
+
+    <div class="nf-term" aria-label="Places that do exist">
+      <p><span>rebel@prague</span>:~$ ls /</p>
+      <p class="nf-ls"><a href="/">home/</a> <a href="/lab">bug-lab/</a> <a href="/radar">radar/</a> <a href="/sessions">sessions/</a> <a href="/swarm">swarm/</a> <a href="/changelog">changelog.md</a></p>
+      <p><span>rebel@prague</span>:~$ <i class="nf-cur"></i></p>
+    </div>
+  </section>
+</Club>
+
+<style is:global>
+  .nf-slots { display: flex; flex-wrap: wrap; gap: 6px; margin: 26px 0 8px; }
+  .nf-slot { width: clamp(30px, 6vw, 58px); aspect-ratio: .8; display: grid; place-items: center; border-radius: 10px; background: var(--night-2); border: 1.5px dashed rgba(237, 231, 220, .2); font: 800 clamp(1.3rem, 4vw, 2.6rem) var(--f-display); color: var(--muted); }
+  .nf-slot.got { background: var(--pink); color: var(--night); border: 0; animation: nf-pop .35s cubic-bezier(.3, 1.6, .5, 1); }
+  .nf-gap { width: clamp(10px, 2vw, 22px); }
+  @keyframes nf-pop { from { transform: scale(.4) rotate(-12deg); } }
+  .nf-count { margin: 0 0 12px; font: 500 .85rem var(--f-mono); color: var(--muted); }
+  .nf-stage { position: relative; height: clamp(280px, 40vw, 420px); border-radius: 24px; overflow: hidden; background: radial-gradient(ellipse at 50% 40%, #18241F, var(--night) 75%); border: 1px solid rgba(237, 231, 220, .08); }
+  .nf-bug { position: absolute; left: 0; top: 0; width: 64px; border: 0; padding: 0; background: none; cursor: pointer; display: grid; justify-items: center; will-change: transform; }
+  .nf-bug svg { width: 100%; height: auto; display: block; }
+  .nf-bug b { margin-top: -10px; min-width: 30px; padding: 2px 8px; border-radius: 8px; background: var(--lime); color: var(--night); font: 800 1rem var(--f-display); box-shadow: 0 4px 10px rgba(0, 0, 0, .4); }
+  .nf-bug:focus-visible { outline: 2px solid var(--lime); outline-offset: 4px; border-radius: 12px; }
+  .nf-done { margin-top: 16px; }
+  .nf-done-h { margin: 0; font: 800 1.3rem var(--f-display); color: var(--lime); }
+  .nf-term { margin-top: 28px; padding: 16px 18px; border-radius: 14px; background: var(--night-2); border: 1px solid rgba(237, 231, 220, .1); font: 500 .9rem var(--f-mono); }
+  .nf-term p { margin: 0 0 6px; }
+  .nf-term span { color: var(--mint); }
+  .nf-ls { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+  .nf-ls a { color: var(--lime); }
+  .nf-cur { display: inline-block; width: .55em; height: 1em; vertical-align: -.15em; background: var(--pink); animation: nf-blink 1s steps(1) infinite; }
+  @keyframes nf-blink { 50% { opacity: 0; } }
+</style>
+
+<script>
+  import { bugSVG } from '../lib/bug/render.js';
+  import { track } from '../lib/track';
+
+  const stage = document.getElementById('nf-stage')!;
+  const slots = [...document.querySelectorAll<HTMLElement>('.nf-slot')];
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const SHELLS = ['pink', 'lime', 'mint', 'purple', 'brown', 'white', 'green'];
+  const SHAPES = ['round', 'tall', 'wide'];
+  type F = { el: HTMLButtonElement; slot: HTMLElement; x: number; y: number; vx: number; vy: number };
+  let flyers: F[] = [];
+  let got = 0;
+  track('404', location.pathname);
+
+  slots.forEach((slot, i) => {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'nf-bug';
+    el.setAttribute('aria-label', `Catch the bug carrying ${slot.dataset.ch}`);
+    el.innerHTML = bugSVG({ shell: SHELLS[i % SHELLS.length], shape: SHAPES[i % 3], eyes: i % 2 ? 'googly' : 'sleepy', mouth: 'tongue', pose: 'wave', attitude: 'excited' }, 90);
+    const b = document.createElement('b'); b.textContent = slot.dataset.ch!; el.appendChild(b);
+    stage.appendChild(el);
+    const W = stage.clientWidth, H = stage.clientHeight;
+    const f = { el, slot, x: 40 + Math.random() * (W - 110), y: 30 + Math.random() * (H - 110), vx: (Math.random() - .5) * 3, vy: (Math.random() - .5) * 3 };
+    flyers.push(f);
+    el.addEventListener('click', () => catchIt(f));
+  });
+
+  function catchIt(f: F) {
+    f.el.remove();
+    flyers = flyers.filter((x) => x !== f);
+    f.slot.textContent = f.slot.dataset.ch!;
+    f.slot.classList.add('got');
+    got++;
+    document.getElementById('nf-count')!.textContent = `${got} of ${slots.length} letters back`;
+    if (!flyers.length) {
+      document.getElementById('nf-done')!.hidden = false;
+      document.dispatchEvent(new CustomEvent('tr:release', { detail: 24 }));
+      track('404_fixed');
+    }
+  }
+
+  const frame = () => {
+    requestAnimationFrame(frame);
+    if (reduce || document.hidden) return;
+    const W = stage.clientWidth, H = stage.clientHeight;
+    for (const f of flyers) {
+      f.vx += (Math.random() - .5) * .5; f.vy += (Math.random() - .5) * .5;
+      const sp = Math.hypot(f.vx, f.vy); if (sp > 3.2) { f.vx *= 3.2 / sp; f.vy *= 3.2 / sp; }
+      f.x += f.vx; f.y += f.vy;
+      if (f.x < 4 || f.x > W - 70) { f.vx *= -1; f.x = Math.max(4, Math.min(W - 70, f.x)); }
+      if (f.y < 4 || f.y > H - 90) { f.vy *= -1; f.y = Math.max(4, Math.min(H - 90, f.y)); }
+      f.el.style.transform = `translate(${f.x.toFixed(1)}px, ${f.y.toFixed(1)}px) rotate(${(Math.atan2(f.vy, f.vx) * 8).toFixed(1)}deg)`;
+    }
+  };
+  for (const f of flyers) f.el.style.transform = `translate(${f.x}px, ${f.y}px)`;
+  requestAnimationFrame(frame);
+</script>

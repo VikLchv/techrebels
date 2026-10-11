@@ -3,11 +3,17 @@
 import Base from './Base.astro';
 import '../styles/club.css';
 import Ambient from '../components/Ambient.astro';
+import RebelMode from '../components/RebelMode.astro';
+import CookieBugs from '../components/CookieBugs.astro';
+import ClosedDoor from '../components/ClosedDoor.astro';
 import { links } from '../config/links';
 
 interface Props { title?: string; description?: string }
 const { title, description } = Astro.props;
 const clientRouter = Astro.url.pathname.startsWith('/inside') && !Astro.url.pathname.startsWith('/inside/admin');
+// the community part keeps opening hours (see lib/hours.ts)
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const gated = ['/inside', '/inside/lunapark', '/inside/matches', '/inside/drop'].includes(path);
 ---
 <Base title={title} description={description} clientRouter={clientRouter}>
   <link slot="head" rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" />
@@ -42,6 +48,9 @@ const clientRouter = Astro.url.pathname.startsWith('/inside') && !Astro.url.path
     <main id="main">
       <slot />
     </main>
+    {gated && <ClosedDoor />}
+    <RebelMode />
+    <CookieBugs />
 
     <footer class="foot" transition:persist="club-footer">
       <p class="foot-mark" aria-label="techRebels"><span>tech</span><span>Rebels</span></p>
@@ -57,6 +66,7 @@ const clientRouter = Astro.url.pathname.startsWith('/inside') && !Astro.url.path
             <li><a href="/get-involved">Get involved</a></li>
             <li><a href="/crew">The crew</a></li>
             <li><a href="/inside/lunapark">Lunapark</a></li>
+            <li><a href="/changelog">Changelog</a></li>
           </ul>
         </div>
         <div>

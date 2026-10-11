@@ -1,0 +1,89 @@
+---
+// Rebel mode: a floating ON/OFF switch that messes the whole site up on purpose.
+// Not a theme. Just controlled chaos: tilted sections, glitching headings, wobbly buttons, a bug burst.
+---
+<button type="button" class="rm-btn" id="rm-btn" role="switch" aria-checked="false" transition:persist="rebel-mode">
+  <span class="rm-dot" aria-hidden="true"></span><span>REBEL MODE</span><b id="rm-state">OFF</b>
+</button>
+
+<style is:global>
+  .rm-btn { position: fixed; left: 16px; bottom: max(16px, env(safe-area-inset-bottom)); z-index: 90; display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px; border: 1.5px solid rgba(237, 231, 220, .2); background: rgba(19, 26, 23, .92); backdrop-filter: blur(8px); color: var(--bone); font: 700 .74rem var(--f-mono); letter-spacing: .08em; cursor: pointer; box-shadow: 0 10px 30px rgba(0, 0, 0, .4); }
+  .rm-btn:hover { border-color: var(--pink); }
+  .rm-btn:focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+  .rm-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+  .rm-btn b { color: var(--muted); }
+  html.rebel-mode .rm-btn { background: var(--pink); color: var(--night); border-color: var(--night); animation: rm-wob .5s steps(2) infinite; }
+  html.rebel-mode .rm-btn b { color: var(--night); }
+  html.rebel-mode .rm-dot { background: var(--lime); box-shadow: 0 0 0 3px var(--night); }
+
+  /* the mess */
+  html.rebel-mode .club main > section:nth-of-type(odd) { transform: rotate(-1.2deg) translateX(-10px); }
+  html.rebel-mode .club main > section:nth-of-type(even) { transform: rotate(1deg) translateX(12px); }
+  html.rebel-mode .club main > section { transition: transform .6s cubic-bezier(.3, 1.6, .5, 1); }
+  html.rebel-mode .club h1, html.rebel-mode .club h2 { text-shadow: -3px 0 var(--pink), 3px 0 var(--mint); animation: rm-glitch 2.8s steps(1) infinite; }
+  html.rebel-mode .club h2:nth-of-type(3n) { font-family: var(--f-mono); letter-spacing: -.06em; }
+  html.rebel-mode .club h2:nth-of-type(3n+1) { font-style: italic; transform: skewX(-8deg); }
+  html.rebel-mode .club .pill { transform: rotate(var(--rm-r, -3deg)); }
+  html.rebel-mode .club .pill:nth-of-type(2n) { --rm-r: 4deg; }
+  html.rebel-mode .club .eyebrow { background: var(--lime); color: var(--night); padding: 2px 8px; display: inline-block; transform: rotate(-2deg); }
+  html.rebel-mode .club p { word-spacing: .12em; }
+  html.rebel-mode .club img, html.rebel-mode .club svg { filter: hue-rotate(var(--rm-hue, 0deg)); }
+  html.rebel-mode .club { --rm-hue: 70deg; cursor: crosshair; }
+  html.rebel-mode body { background-image: repeating-linear-gradient(90deg, rgba(244, 165, 212, .05) 0 1px, transparent 1px 64px), repeating-linear-gradient(0deg, rgba(205, 220, 39, .05) 0 1px, transparent 1px 64px); background-position: 13px 7px; }
+  html.rebel-mode .club main :is(.roles, .news-list, .hx-chips, .rd-list, .lp-rides, .cl-log, .foot-cols) > :nth-child(odd) { transform: rotate(-4deg) translate(-6px, 12px); }
+  html.rebel-mode .club main :is(.roles, .news-list, .hx-chips, .rd-list, .lp-rides, .cl-log, .foot-cols) > :nth-child(even) { transform: rotate(3.5deg) translate(8px, -10px); }
+  html.rebel-mode .club main :is(.roles, .news-list) > :nth-child(3n) { transform: rotate(-7deg) scale(.92) translateY(24px); }
+  html.rebel-mode .club :is(.roles, .news-list, .hx-chips, .rd-list, .lp-rides) > * { transition: transform .7s cubic-bezier(.3, 1.6, .5, 1); }
+  html.rebel-mode .nav nav a:nth-child(odd) { transform: rotate(-9deg) translateY(4px); display: inline-block; }
+  html.rebel-mode .nav nav a:nth-child(even) { transform: rotate(7deg) translateY(-3px); display: inline-block; }
+  html.rebel-mode .nav-mark { transform: rotate(-10deg) scale(1.08); }
+  html.rebel-mode .ticker-track { animation-direction: reverse; animation-duration: 14s; }
+  html.rebel-mode .ticker { transform: rotate(-2.5deg) scale(1.04); background: var(--pink); }
+  html.rebel-mode .ticker b { color: var(--night) !important; }
+  html.rebel-mode .club .hero-h, html.rebel-mode .club .final-h { letter-spacing: .02em; }
+  html.rebel-mode .club h1 { transform: skewY(-3deg); }
+  html.rebel-mode .foot-mark { transform: rotate(180deg); }
+  .rm-hit { animation: rm-slice .32s steps(3) 1 !important; }
+  @keyframes rm-glitch { 0%, 92% { clip-path: none; } 93% { clip-path: inset(10% 0 55% 0); transform: translateX(-6px); } 95% { clip-path: inset(60% 0 8% 0); transform: translateX(5px); } 97% { clip-path: none; transform: none; } }
+  @keyframes rm-slice { 33% { clip-path: inset(0 0 60% 0); transform: translate(8px, -2px); } 66% { clip-path: inset(45% 0 0 0); transform: translate(-8px, 3px); } }
+  @keyframes rm-wob { 50% { transform: rotate(-3deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    html.rebel-mode .club h1, html.rebel-mode .club h2, html.rebel-mode .rm-btn { animation: none; }
+  }
+</style>
+
+<script>
+  const KEY = 'tr-rebel-mode';
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let glitchTimer = 0;
+
+  const glitchSomething = () => {
+    const pool = document.querySelectorAll<HTMLElement>('.club main h1, .club main h2, .club main img, .club main .pill, .club main p');
+    const el = pool[(Math.random() * pool.length) | 0];
+    if (!el) return;
+    el.classList.remove('rm-hit'); void el.offsetWidth; el.classList.add('rm-hit');
+    setTimeout(() => el.classList.remove('rm-hit'), 400);
+  };
+
+  function set(on: boolean, burst = false) {
+    document.documentElement.classList.toggle('rebel-mode', on);
+    const btn = document.getElementById('rm-btn');
+    btn?.setAttribute('aria-checked', String(on));
+    const st = document.getElementById('rm-state');
+    if (st) st.textContent = on ? 'ON' : 'OFF';
+    clearInterval(glitchTimer);
+    if (on && !reduce) glitchTimer = window.setInterval(glitchSomething, 900);
+    if (on && burst && btn) {
+      const r = btn.getBoundingClientRect();
+      document.dispatchEvent(new CustomEvent('tr:release', { detail: { n: 30, x: r.left + r.width / 2, y: r.top } }));
+    }
+    try { on ? localStorage.setItem(KEY, '1') : localStorage.removeItem(KEY); } catch {}
+  }
+
+  let saved = false;
+  try { saved = localStorage.getItem(KEY) === '1'; } catch {}
+  set(saved);
+  document.getElementById('rm-btn')?.addEventListener('click', () => set(!document.documentElement.classList.contains('rebel-mode'), true));
+  // keep the class after client-side navigations inside /inside
+  document.addEventListener('astro:after-swap', () => set(document.getElementById('rm-btn')?.getAttribute('aria-checked') === 'true'));
+</script>
