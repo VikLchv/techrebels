@@ -39,6 +39,11 @@ import '../../styles/inside-pages.css';
   .inf-tag { position: absolute; right: 14px; top: 14px; font: 700 .68rem var(--f-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
   .inf-vial.live .inf-tag { color: var(--lime-text); }
   .inf-vial.used .inf-tag { color: var(--pink-text); }
+  .inf-mail { display: grid; gap: 8px; }
+  .inf-mail[hidden] { display: none; }
+  .inf-mail input { font: 500 .9rem "Satoshi", system-ui, sans-serif; color: var(--fg); background: var(--bg-2); border: 1.5px solid rgba(var(--fg-rgb), .18); border-radius: 10px; padding: 9px 11px; }
+  .inf-mail input:focus { outline: none; border-color: var(--lime); }
+  .inf-mail .pill { justify-self: start; }
   .inf-note { min-height: 1.2em; margin: 12px 0; font: 500 .82rem var(--f-mono); color: var(--mint-text); }
   @media (max-width: 760px) { .inf-vials { grid-template-columns: 1fr; } .inf-vial { min-height: 0; } }
 </style>
@@ -47,7 +52,7 @@ import '../../styles/inside-pages.css';
   import { supabase } from '../../lib/supabase';
   import { track } from '../../lib/track';
 
-  type Code = { code: string; created_at: string; claimed: boolean; claimed_at: string | null; joined: boolean; bug_number: number | null; bug_name: string | null };
+  type Code = { code: string; created_at: string; claimed: boolean; claimed_at: string | null; emailed_at?: string | null; joined: boolean; bug_number: number | null; bug_name: string | null };
   const $ = (id: string) => document.getElementById(id)!;
   const linkFor = (code: string) => `${location.origin}/lab?infect=${code}`;
 
@@ -75,15 +80,36 @@ import '../../styles/inside-pages.css';
       el.append(tag, code, h, p);
     } else {
       tag.textContent = 'live';
-      h.textContent = 'Ready to spread';
-      p.textContent = 'Send the link. They build a bug, apply and skip the queue.';
+      h.textContent = c.emailed_at ? 'Sent, waiting to be caught' : 'Ready to spread';
+      p.textContent = c.emailed_at ? 'The infection is in their inbox. You can still copy the link.' : 'Email it or send the link. They build a bug, apply and skip the queue.';
       const b = document.createElement('button'); b.type = 'button'; b.className = 'pill pill-pink'; b.textContent = 'Copy infection link';
       b.addEventListener('click', async () => {
         try { await navigator.clipboard.writeText(linkFor(c.code)); $('inf-note').textContent = 'Link copied. Handle with care.'; }
         catch { $('inf-note').textContent = linkFor(c.code); }
         track('infection_copied');
       });
-      el.append(tag, code, h, p, b);
+      const mail = document.createElement('button'); mail.type = 'button'; mail.className = 'pill pill-lime'; mail.textContent = c.emailed_at ? 'Email again' : 'Send by email';
+      const form = document.createElement('form'); form.className = 'inf-mail'; form.hidden = true; form.noValidate = true;
+      form.innerHTML = '<input type="email" required maxlength="254" placeholder="friend@example.com" aria-label="Their email" /><input type="text" maxlength="280" placeholder="A note from you (optional)" aria-label="A note from you" /><button class="pill pill-pink" type="submit">Infect →</button>';
+      mail.addEventListener('click', () => { form.hidden = !form.hidden; if (!form.hidden) (form.querySelector('input') as HTMLInputElement).focus(); });
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const [emailInput, noteInput] = form.querySelectorAll('input');
+        if (!emailInput.checkValidity()) { $('inf-note').textContent = 'That email does not look right.'; return; }
+        $('inf-note').textContent = 'Releasing the infection…';
+        const { data, error } = await supabase!.functions.invoke('send-infection', { body: { code: c.code, email: emailInput.value.trim(), note: noteInput.value.trim() } });
+        if (error || data?.error) {
+          let msg = '';
+          try { msg = (await (error as { context?: Response })?.context?.json())?.error ?? ''; } catch {}
+          msg = msg || data?.error || '';
+          $('inf-note').textContent = msg.includes('enough') ? 'This vial was emailed three times. Copy the link instead.' : msg.includes('wait') ? 'Give it a few minutes before resending.' : msg.includes('yourself') ? 'Infecting yourself is not how this works.' : msg.includes('caught') ? 'Someone already caught this one.' : 'The email did not go out. Is the email setup finished?';
+          return;
+        }
+        $('inf-note').textContent = 'Infection sent. Patient incoming.';
+        track('infection_emailed');
+        load();
+      });
+      el.append(tag, code, h, p, b, mail, form);
     }
     return el;
   }
