@@ -1,4 +1,4 @@
-/* techRebels OS: shared UI (menu bar, windows, buttons, footer) */
+/* tech rebels OS: shared UI (menu bar, windows, buttons, footer) */
 
 .wordmark { font: 800 1em/.8 var(--f-display); letter-spacing: -.05em; color: var(--pink); margin: 0; }
 .wordmark span { display: block; }

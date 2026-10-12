@@ -1,4 +1,4 @@
-/* techRebels V2 (club) page styles, shared by all club pages */
+/* tech rebels V2 (club) page styles, shared by all club pages */
 
   /* hero */
   .hero { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(32px, 5vw, 72px); align-items: center; padding-top: clamp(40px, 7vw, 96px); }

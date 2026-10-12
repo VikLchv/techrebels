@@ -50,8 +50,8 @@ Deno.serve(async (request) => {
       if (error) throw error;
       const first = escapeHtml(String(own.full_name || 'rebel').split(/\s+/)[0]);
       const label = kind === 'company' ? 'company' : 'personal';
-      const html = emailShell('Verify your contact email', 'Your techRebels verification code.', `<p style="margin:0 0 10px;color:#3DDB9A;font:700 12px monospace;letter-spacing:2px;text-transform:uppercase">Contact settings</p><h1 style="margin:0 0 16px;color:#EDE7DC;font-size:38px;line-height:1">Hey ${first}, verify this ${label} email.</h1><p style="margin:0;color:#C3CBC6;font-size:17px;line-height:1.55">Enter this one-time code in Inside. It expires in 15 minutes.</p><p style="margin:22px 0;color:#CDDC27;font:800 32px monospace;letter-spacing:7px">${code}</p><p style="margin:0;color:#87928C;font-size:12px">If you did not request this, ignore the email.</p>`);
-      await sendResend({ to: email, subject: 'Verify your techRebels contact email', html, text: `Your techRebels verification code is ${code}. It expires in 15 minutes.` });
+      const html = emailShell('Verify your contact email', 'Your tech rebels verification code.', `<p style="margin:0 0 10px;color:#3DDB9A;font:700 12px monospace;letter-spacing:2px;text-transform:uppercase">Contact settings</p><h1 style="margin:0 0 16px;color:#EDE7DC;font-size:38px;line-height:1">Hey ${first}, verify this ${label} email.</h1><p style="margin:0;color:#C3CBC6;font-size:17px;line-height:1.55">Enter this one-time code in Inside. It expires in 15 minutes.</p><p style="margin:22px 0;color:#CDDC27;font:800 32px monospace;letter-spacing:7px">${code}</p><p style="margin:0;color:#87928C;font-size:12px">If you did not request this, ignore the email.</p>`);
+      await sendResend({ to: email, subject: 'Verify your tech rebels contact email', html, text: `Your tech rebels verification code is ${code}. It expires in 15 minutes.` });
       return Response.json({ ok: true }, { headers: cors });
     }
 

@@ -1,4 +1,4 @@
-// The Swarm orbit: saved bugs circling the techRebels wordmark on elliptical rings.
+// The Swarm orbit: saved bugs circling the tech rebels wordmark on elliptical rings.
 // DOM elements moved with CSS transforms; front half bigger and above the wordmark.
 import { bugSVG } from '../bug/render.js';
 

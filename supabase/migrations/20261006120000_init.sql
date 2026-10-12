@@ -1,4 +1,4 @@
--- techRebels: initial schema
+-- tech rebels: initial schema
 -- Members, their bugs (one per member), topic voting, guest suggestions, merch interest.
 --
 -- Security model

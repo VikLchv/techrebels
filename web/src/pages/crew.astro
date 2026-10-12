@@ -1,10 +1,10 @@
 ---
-// The crew: who's behind techRebels. Linked from the nav and the footer.
+// The crew: who's behind tech rebels. Linked from the nav and the footer.
 import Club from '../layouts/Club.astro';
 import Bug from '../components/Bug';
 import { crew } from '../config/site';
 ---
-<Club title="The crew · techRebels" description="The people behind techRebels, a community for curious people in tech in Prague.">
+<Club title="The crew · tech rebels" description="The people behind tech rebels, a community for curious people in tech in Prague.">
   <!-- Crew -->
   <section class="block crew crew-page" id="crew">
     <div class="head">
@@ -17,7 +17,7 @@ import { crew } from '../config/site';
         <article class="member" data-bug-number={m.bugNumber ?? undefined}>
           <div class="member-photo" style={`--tile:${m.tile}`}>
             {m.photo
-              ? <img src={m.photo} alt={`${m.name}, ${m.role} of techRebels`} width="512" height="512" loading="lazy" decoding="async" />
+              ? <img src={m.photo} alt={`${m.name}, ${m.role} of tech rebels`} width="512" height="512" loading="lazy" decoding="async" />
               : <div class="member-nophoto" data-live-bug style={`background:${m.tile}`}><Bug config={m.bug} size={320} label={`${m.short}'s bug, ${m.bugName}`} /></div>}
             {m.photo && <div class="member-bug" data-live-bug><Bug config={m.bug} size={200} label={`${m.short}'s bug, ${m.bugName}`} /></div>}
             <span class="member-tag">{m.bugNumber !== undefined && m.bugName && !m.bugName.startsWith('[') ? `BUG-${String(m.bugNumber).padStart(4, '0')} · ${m.bugName}` : m.bugName}</span>

@@ -63,16 +63,16 @@ Deno.serve(async (request) => {
     const html = emailShell(`${bugId} infected you`, 'Symptoms: curiosity, strong opinions, sudden urge to build things.', `
       <p style="margin:0 0 12px;display:inline-block;padding:6px 10px;border-radius:8px;background:#CDDC27;color:#0B0F0D;font:800 12px monospace;letter-spacing:2px">⚠ INFECTION DETECTED · ${pretty}</p>
       <h1 style="margin:0 0 16px;color:#EDE7DC;font-size:40px;line-height:1">You've been infected.</h1>
-      <p style="margin:0;color:#C3CBC6;font-size:17px;line-height:1.55"><b style="color:#F4A5D4">${first}</b> (${escapeHtml(bugId)}${bugName ? ` · ${bugName}` : ''}) thinks you belong in <b style="color:#EDE7DC">techRebels</b>, a Prague club for people who build, break and rethink tech. Devs, designers, marketers, founders and the just curious.</p>
+      <p style="margin:0;color:#C3CBC6;font-size:17px;line-height:1.55"><b style="color:#F4A5D4">${first}</b> (${escapeHtml(bugId)}${bugName ? ` · ${bugName}` : ''}) thinks you belong in <b style="color:#EDE7DC">tech rebels</b>, a Prague club for people who build, break and rethink tech. Devs, designers, marketers, founders and the just curious.</p>
       ${noteHtml}
       ${image}
       <p style="margin:18px 0 0;color:#87928C;font:700 12px monospace;letter-spacing:1px">SYMPTOMS</p>
       <p style="margin:6px 0 0;color:#C3CBC6;font-size:15px;line-height:1.6">Curiosity · strong opinions about tabs vs spaces · a sudden urge to build things · laughing at stand-up jokes nobody else gets.</p>
       ${button('Catch the bug', link, '#CDDC27')}
       <p style="margin:8px 0 0;color:#87928C;font-size:13px;line-height:1.5">Treatment: build your own bug, apply, and your application skips the queue. The code works once.<br>You got this because ${first} typed your address. We do not keep it and will not email you again.</p>`);
-    const text = `You've been infected.\n\n${member?.full_name?.split(/\s+/)[0] ?? 'A rebel'} (${bugId}) thinks you belong in techRebels, a Prague club for people who build, break and rethink tech.${note ? `\n\nNote: ${note}` : ''}\n\nCatch the bug: ${link}\nInfection code: ${pretty} (works once)\n\nYou got this because a member typed your address. We do not keep it.`;
+    const text = `You've been infected.\n\n${member?.full_name?.split(/\s+/)[0] ?? 'A rebel'} (${bugId}) thinks you belong in tech rebels, a Prague club for people who build, break and rethink tech.${note ? `\n\nNote: ${note}` : ''}\n\nCatch the bug: ${link}\nInfection code: ${pretty} (works once)\n\nYou got this because a member typed your address. We do not keep it.`;
 
-    await sendResend({ to, subject: `${bugId} infected you with techRebels`, html, text, attachments: attachments.length ? attachments : undefined });
+    await sendResend({ to, subject: `${bugId} infected you with tech rebels`, html, text, attachments: attachments.length ? attachments : undefined });
     await admin.from('infections').update({ emailed_at: new Date().toISOString(), email_count: (inf.email_count ?? 0) + 1 }).eq('id', inf.id);
     return Response.json({ ok: true }, { headers: cors });
   } catch (error) {

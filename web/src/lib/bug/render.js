@@ -1,5 +1,5 @@
 /**
- * techRebels Bug renderer (v1)
+ * tech rebels Bug renderer (v1)
  * Source of truth for how a Rebel Bug is drawn. Ported from Bug Lab.
  * Pure functions, no DOM. bugSVG(config, widthPx) returns an SVG string.
  *

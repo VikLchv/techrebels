@@ -8,9 +8,9 @@ export const emailShell = (title: string, preview: string, body: string) => `<!d
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${escapeHtml(preview)}</div>
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#0B0F0D"><tr><td align="center" style="padding:28px 12px">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;border:1px solid #29302C;border-radius:24px;background:#111713;overflow:hidden">
-<tr><td style="padding:28px 32px 18px"><div style="font-size:25px;font-weight:900;line-height:.8;letter-spacing:-1px;color:#F4A5D4">tech<br>Rebels</div></td></tr>
+<tr><td style="padding:28px 32px 18px"><div style="font-size:25px;font-weight:900;line-height:.8;letter-spacing:-1px;color:#F4A5D4">tech<br>rebels</div></td></tr>
 <tr><td style="padding:12px 32px 34px">${body}</td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #29302C;color:#87928C;font-family:monospace;font-size:12px">STATUS: WON'T FIX · PRAGUE<br>This is a transactional account email from techRebels.</td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #29302C;color:#87928C;font-family:monospace;font-size:12px">STATUS: WON'T FIX · PRAGUE<br>This is a transactional account email from tech rebels.</td></tr>
 </table></td></tr></table></body></html>`;
 
 export const button = (label: string, href: string, color = '#F4A5D4') =>
@@ -26,9 +26,9 @@ export function invitationEmail(options: {
 }) {
   const variants = {
     member: {
-      subject: 'Your place in the techRebels swarm',
+      subject: 'Your place in the tech rebels swarm',
       title: 'There’s a place in the swarm with your name on it.',
-      copy: 'The crew invited you to join techRebels as a member. Inside, the Radar, matching and member drops will open as soon as you accept.',
+      copy: 'The crew invited you to join tech rebels as a member. Inside, the Radar, matching and member drops will open as soon as you accept.',
       cta: 'Join the swarm',
       color: '#F4A5D4',
       label: 'member',
@@ -36,15 +36,15 @@ export function invitationEmail(options: {
     partner: {
       subject: 'Let’s build something strange together',
       title: 'You’re invited behind the scenes.',
-      copy: 'The crew invited you into the private techRebels Partner Space. This invitation adds partner access without changing any access you already have.',
+      copy: 'The crew invited you into the private tech rebels Partner Space. This invitation adds partner access without changing any access you already have.',
       cta: 'Open partner invitation',
       color: '#3DDB9A',
       label: 'partner',
     },
     admin: {
-      subject: 'The techRebels control room is calling',
+      subject: 'The tech rebels control room is calling',
       title: 'The control room wants you.',
-      copy: 'You’ve been invited to techRebels with admin access. Accepting opens both member Inside and the private Control Room.',
+      copy: 'You’ve been invited to tech rebels with admin access. Accepting opens both member Inside and the private Control Room.',
       cta: 'Enter the control room',
       color: '#CDDC27',
       label: 'admin',

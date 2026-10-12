@@ -1,4 +1,4 @@
--- techRebels: cookieless website analytics.
+-- tech rebels: cookieless website analytics.
 -- The site logs anonymous events (page views, clicks, scroll depth, form steps).
 -- No cookies, no IP, no email: a random per-tab session id only.
 -- Anyone may INSERT (that is how the browser logs), nobody but admins may read.

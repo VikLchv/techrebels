@@ -4,7 +4,7 @@ import AdminNav from '../../components/AdminNav.astro';
 const pathPart = Astro.url.pathname.replace(/\/$/, '').split('/').pop() ?? 'admin';
 const adminSection = pathPart === 'admin' ? 'overview' : pathPart;
 ---
-<Club title="Admin · Inside · techRebels" description="Private techRebels crew dashboard.">
+<Club title="Admin · Inside · tech rebels" description="Private tech rebels crew dashboard.">
   <section class="block first admin-shell">
     <div id="adm-loading">
       <p class="eyebrow">Inside · Admin</p>
@@ -55,7 +55,7 @@ const adminSection = pathPart === 'admin' ? 'overview' : pathPart;
 
       <section class="adm-panel" id="applications" hidden={adminSection !== 'applications'}>
         <div class="adm-panel-head"><div><p class="eyebrow">Membership</p><h2>Applications</h2></div><span class="adm-count" id="application-count"></span></div>
-        <div class="adm-table-wrap"><table class="application-table"><thead><tr><th>Applied</th><th>Applicant</th><th>Why techRebels</th><th>Bug</th><th>Decision</th></tr></thead><tbody id="application-rows"></tbody></table></div>
+        <div class="adm-table-wrap"><table class="application-table"><thead><tr><th>Applied</th><th>Applicant</th><th>Why tech rebels</th><th>Bug</th><th>Decision</th></tr></thead><tbody id="application-rows"></tbody></table></div>
       </section>
 
       <section class="adm-panel" id="matching" hidden={adminSection !== 'matching'}>
