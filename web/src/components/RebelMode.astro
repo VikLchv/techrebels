@@ -47,6 +47,20 @@
   @keyframes rm-glitch { 0%, 92% { clip-path: none; } 93% { clip-path: inset(10% 0 55% 0); transform: translateX(-6px); } 95% { clip-path: inset(60% 0 8% 0); transform: translateX(5px); } 97% { clip-path: none; transform: none; } }
   @keyframes rm-slice { 33% { clip-path: inset(0 0 60% 0); transform: translate(8px, -2px); } 66% { clip-path: inset(45% 0 0 0); transform: translate(-8px, 3px); } }
   @keyframes rm-wob { 50% { transform: rotate(-3deg); } }
+  @media (max-width: 560px) {
+    .rm-btn {
+      left: auto;
+      right: 12px;
+      bottom: max(76px, calc(env(safe-area-inset-bottom) + 66px));
+      gap: 6px;
+      min-height: 36px !important;
+      padding: 7px 10px;
+      font-size: .61rem;
+      opacity: .76;
+      box-shadow: 0 7px 20px rgba(0, 0, 0, .32);
+    }
+    .rm-btn:hover, .rm-btn:focus-visible, html.rebel-mode .rm-btn { opacity: 1; }
+  }
   @media (prefers-reduced-motion: reduce) {
     html.rebel-mode .club h1, html.rebel-mode .club h2, html.rebel-mode .rm-btn { animation: none; }
   }
