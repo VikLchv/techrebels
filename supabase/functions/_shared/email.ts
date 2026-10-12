@@ -16,6 +16,66 @@ export const emailShell = (title: string, preview: string, body: string) => `<!d
 export const button = (label: string, href: string, color = '#F4A5D4') =>
   `<a href="${escapeHtml(href)}" style="display:inline-block;margin:18px 0 8px;padding:14px 22px;border-radius:999px;background:${color};color:#0B0F0D;text-decoration:none;font-weight:800">${escapeHtml(label)} →</a>`;
 
+export type InvitationRole = 'member' | 'partner' | 'admin';
+
+export function invitationEmail(options: {
+  role: InvitationRole;
+  link: string;
+  message?: string | null;
+  newAccount: boolean;
+}) {
+  const variants = {
+    member: {
+      subject: 'Your place in the techRebels swarm',
+      title: 'There’s a place in the swarm with your name on it.',
+      copy: 'The crew invited you to join techRebels as a member. Inside, the Radar, matching and member drops will open as soon as you accept.',
+      cta: 'Join the swarm',
+      color: '#F4A5D4',
+      label: 'member',
+    },
+    partner: {
+      subject: 'Let’s build something strange together',
+      title: 'You’re invited behind the scenes.',
+      copy: 'The crew invited you into the private techRebels Partner Space. This invitation adds partner access without changing any access you already have.',
+      cta: 'Open partner invitation',
+      color: '#3DDB9A',
+      label: 'partner',
+    },
+    admin: {
+      subject: 'The techRebels control room is calling',
+      title: 'The control room wants you.',
+      copy: 'You’ve been invited to techRebels with admin access. Accepting opens both member Inside and the private Control Room.',
+      cta: 'Enter the control room',
+      color: '#CDDC27',
+      label: 'admin',
+    },
+  }[options.role];
+  const next = options.newAccount
+    ? 'The secure link signs you in. Choose a password and accept the invitation within 7 days.'
+    : 'The secure link signs you into your existing account. Review and accept the new access within 7 days; your password will not change.';
+  const personal = options.message
+    ? `<div style="margin:22px 0 2px;padding:16px 18px;border-left:3px solid #CDDC27;border-radius:0 12px 12px 0;background:#171E1A"><p style="margin:0 0 7px;color:#87928C;font:700 11px monospace;letter-spacing:1.5px;text-transform:uppercase">A note from the crew</p><p style="margin:0;color:#EDE7DC;font-size:16px;line-height:1.55">“${escapeHtml(options.message)}”</p></div>`
+    : '';
+  const preview = `${variants.title} Private invitation · expires in 7 days.`;
+  const html = emailShell(variants.title, preview, `
+    <p style="margin:0 0 10px;color:#3DDB9A;font:700 12px monospace;letter-spacing:2px;text-transform:uppercase">Private invitation · ${variants.label} · expires in 7 days</p>
+    <h1 style="margin:0 0 16px;color:#EDE7DC;font-size:38px;line-height:1">${variants.title}</h1>
+    <p style="margin:0 0 12px;color:#C3CBC6;font-size:17px;line-height:1.55">${variants.copy}</p>
+    <p style="margin:0;color:#87928C;font-size:14px;line-height:1.55">${next}</p>
+    ${personal}
+    ${button(variants.cta, options.link, variants.color)}
+    <p style="margin:14px 0 0;color:#87928C;font-size:12px;line-height:1.5">This is a private, one-time sign-in link for ${variants.label} access. If you were not expecting it, ignore this email; no access is granted until the invitation is accepted.</p>`);
+  const text = [
+    variants.title,
+    variants.copy,
+    next,
+    options.message ? `A note from the crew: “${options.message}”` : '',
+    `${variants.cta}: ${options.link}`,
+    'If you were not expecting this invitation, ignore this email.',
+  ].filter(Boolean).join('\n\n');
+  return { ...variants, html, text };
+}
+
 export async function sendResend(message: {
   to: string; subject: string; html: string; text: string;
   attachments?: Array<{ filename: string; content: string; content_id: string; content_type: string }>;
