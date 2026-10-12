@@ -26,8 +26,8 @@ body{background:#0B0F0D;background-image:linear-gradient(rgba(237,231,220,.05) 1
 .tile{position:absolute;right:70px;top:70px;width:420px;padding:14px;background:#CDDC27;border-radius:26px;transform:rotate(-3deg);box-shadow:10px 10px 0 #F4A5D4}
 .tile svg{display:block;width:100%;height:auto}
 </style></head><body>
-<div class="os">TECHREBELS.OS</div>
-<div class="wm"><span>tech</span><span>Rebels</span></div>
+<div class="os">tech rebels OS</div>
+<div class="wm"><span>tech</span><span>rebels</span></div>
 <div class="claim">SERIOUS TECH. UNSERIOUS PEOPLE.</div>
 <div class="tile">${og}</div>
 </body></html>`);

@@ -14,7 +14,7 @@ It creates a private Storage bucket for inline bug cards and a server-only idemp
 2. Add the SPF and DKIM records Resend provides to DNS.
 3. Add a DMARC record, initially with reporting enabled; tighten the policy after delivery has been verified.
 4. Create an API key limited to sending email.
-5. Use a sender such as `techRebels <hello@techrebels.com>` or preferably a dedicated subdomain such as `techRebels <hello@mail.techrebels.com>`.
+5. Use a sender such as `tech rebels <hello@techrebels.com>` or preferably a dedicated subdomain such as `tech rebels <hello@mail.techrebels.com>`.
 6. Disable open and click tracking for authentication and account-security emails.
 
 ## 3. Edge Function secrets

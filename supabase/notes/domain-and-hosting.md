@@ -34,7 +34,7 @@ Proposed DNS layout:
 - `techrebels.com` and `www.techrebels.com` → website;
 - `mail.techrebels.com` → Resend transactional sender domain;
 - `hello@techrebels.com` → human inbox or forwarding destination;
-- `techRebels <hello@mail.techrebels.com>` → transactional From address;
+- `tech rebels <hello@mail.techrebels.com>` → transactional From address;
 - `hello@techrebels.com` → Reply-To.
 
 Using a sending subdomain protects the reputation of the main domain. Authentication email tracking should remain disabled.

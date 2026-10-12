@@ -12,14 +12,14 @@
 </script>
 
 <!-- psst. the recovery console hides more than it shows. real rebels list everything: ls -a -->
-<div id="intro" role="dialog" aria-modal="true" aria-label="techRebels is stuck in safe mode. Turn it off to enter.">
+<div id="intro" role="dialog" aria-modal="true" aria-label="tech rebels is stuck in safe mode. Turn it off to enter.">
   <div class="bk-noise" aria-hidden="true"></div>
 
   <!-- fake boot that freezes at 99% and crashes -->
   <div class="bk-boot" id="bk-boot" aria-hidden="true">
-    <p class="bk-boot-mark"><span>tech</span><span>Rebels</span></p>
+    <p class="bk-boot-mark"><span>tech</span><span>rebels</span></p>
     <div class="bk-boot-bar"><i id="bk-boot-fill"></i></div>
-    <p class="bk-boot-txt" id="bk-boot-txt">loading techRebels... 0%</p>
+    <p class="bk-boot-txt" id="bk-boot-txt">loading tech rebels... 0%</p>
   </div>
 
   <!-- the stream of errors behind everything -->
@@ -28,7 +28,7 @@
   <!-- unstyled HTML, as if the stylesheet failed -->
   <div class="bk-raw" aria-hidden="true">
     <div class="bk-raw-in">
-      <h1>techRebels</h1>
+      <h1>tech rebels</h1>
       <p>Loading stylesheet <a href="#">/styles/club.css</a> ... <b>failed (404)</b></p>
       <ul><li><a href="#">Manifesto</a></li><li><a href="#">Sessions</a></li><li><a href="#">Bug Lab</a></li><li><a href="#">The Drop</a></li></ul>
       <button type="button" tabindex="-1">Join the swarm</button>
@@ -52,7 +52,7 @@
   <div class="bk-page" aria-hidden="true">
     <p class="bk-eyebrow">A COMMUNITY FOR CURIOUS PEOPLE IN TECH · PRAGUE</p>
     <p class="bk-word" data-text="tech">tech</p>
-    <p class="bk-word bk-word2" data-text="Rebels" id="bk-word2">Rebels</p>
+    <p class="bk-word bk-word2" data-text="rebels" id="bk-word2">rebels</p>
     <p class="bk-claim">Rebels don't do <span>s̷a̴f̶e̵ ̷m̸o̵d̷e̶</span>.</p>
   </div>
 
@@ -60,7 +60,7 @@
   <div class="bk-win w1" aria-hidden="true">
     <div class="bk-bar"><i></i><i></i><i></i><span>bugs.log</span></div>
     <p><b>Uncaught BugException:</b> too many rebels in production.</p>
-    <p class="mono">at techRebels.os:404:1337</p>
+    <p class="mono">at tech rebels OS:404:1337</p>
   </div>
   <div class="bk-win w2" aria-hidden="true">
     <div class="bk-bar"><i></i><i></i><i></i><span>kernel.panic</span></div>
@@ -85,8 +85,8 @@
 
   <!-- recovery console -->
   <section class="bk-term" aria-labelledby="bk-title">
-    <div class="bk-bar" aria-hidden="true"><i></i><i></i><i></i><span>techRebels.os · recovery console</span></div>
-    <h2 id="bk-title" class="sr-only">techRebels is broken. Fix it to get in.</h2>
+    <div class="bk-bar" aria-hidden="true"><i></i><i></i><i></i><span>tech rebels OS · recovery console</span></div>
+    <h2 id="bk-title" class="sr-only">tech rebels is broken. Fix it to get in.</h2>
     <div class="bk-log" id="bk-log" aria-live="polite">
       <p><span class="err">!</span> system unstable. 404 bugs detected.</p>
       <p><span class="err">!</span> the site is stuck in <b>safe mode</b>.</p>
@@ -502,8 +502,8 @@
     if (reduce) { boot.hidden = true; start(); }
     else {
       const steps = [12, 34, 58, 77, 91, 99];
-      steps.forEach((v, i) => setTimeout(() => { fill.style.width = `${v}%`; txt.textContent = `loading techRebels... ${v}%`; }, 180 * (i + 1)));
-      setTimeout(() => { txt.textContent = 'loading techRebels... 99% (still loading)'; }, 1500);
+      steps.forEach((v, i) => setTimeout(() => { fill.style.width = `${v}%`; txt.textContent = `loading tech rebels... ${v}%`; }, 180 * (i + 1)));
+      setTimeout(() => { txt.textContent = 'loading tech rebels... 99% (still loading)'; }, 1500);
       setTimeout(() => { txt.textContent = 'FATAL: too many bugs'; boot.classList.add('crash'); }, 2100);
       setTimeout(() => { boot.hidden = true; start(); }, 2600);
     }

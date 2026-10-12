@@ -16,7 +16,7 @@ select id from auth.users where lower(email) = lower('YOUR-EMAIL@example.com')
 on conflict (user_id) do nothing;
 ```
 
-The email must already belong to a registered techRebels member. This does not create a new account.
+The email must already belong to a registered tech rebels member. This does not create a new account.
 
 Verify:
 

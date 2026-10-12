@@ -1,6 +1,6 @@
-# techRebels
+# tech rebels
 
-Website for techRebels, a community for curious people in tech. Less conference, more carnival.
+Website for tech rebels, a community for curious people in tech. Less conference, more carnival.
 
 ## Structure
 - `supabase/migrations/` database schema, run in order (SQL editor or Supabase CLI)

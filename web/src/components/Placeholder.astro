@@ -7,7 +7,7 @@ import Bug from './Bug';
 interface Props { file: string; title: string; heading: string; text: string; tile?: string; bug: Record<string, string> }
 const { file, title, heading, text, tile = 'var(--lime)', bug } = Astro.props;
 ---
-<Os title={`${title} · techRebels`}>
+<Os title={`${title} · tech rebels`}>
   <div class="ph">
     <Win title={file} perms="--x--x--x" class="sh-pink" style="--rot:-.8deg" bodyClass="ph-body">
       <div class="ph-tile" style={`background:${tile}`}><Bug config={bug} size={260} label={`Rebel bug, ${title}`} /></div>

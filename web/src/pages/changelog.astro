@@ -1,11 +1,11 @@
 ---
-// Changelog instead of "About us": the techRebels story as commit history.
+// Changelog instead of "About us": the tech rebels story as commit history.
 import Club from '../layouts/Club.astro';
 import { changelog } from '../config/changelog';
 
 const sha = (s: string) => { let x = 2166136261; for (const ch of s) { x ^= ch.charCodeAt(0); x = Math.imul(x, 16777619); } return (x >>> 0).toString(16).padStart(8, '0').slice(0, 7); };
 ---
-<Club title="Changelog · techRebels" description="The techRebels story as patch notes. No About us page, just commits.">
+<Club title="Changelog · tech rebels" description="The tech rebels story as patch notes. No About us page, just commits.">
   <section class="block first cl">
     <div class="head">
       <p class="eyebrow">CHANGELOG.md</p>
