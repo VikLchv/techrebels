@@ -1,4 +1,4 @@
-// The techRebels story as patch notes. Newest first. Edit freely: dates are rough on purpose.
+// The tech rebels story as patch notes. Newest first. Edit freely: dates are rough on purpose.
 export type Change = { type: 'feat' | 'fix' | 'removed' | 'known' | 'chore' | 'planned'; text: string };
 export type Release = { version: string; date: string; title: string; status?: 'released' | 'upcoming'; changes: Change[] };
 
@@ -47,7 +47,7 @@ export const changelog: Release[] = [
   {
     version: 'v0.2.0', date: 'autumn 2026', title: 'Naming things',
     changes: [
-      { type: 'feat', text: 'Name: techRebels. Claim: Rebels don\'t do safe mode.' },
+      { type: 'feat', text: 'Name: tech rebels. Claim: Rebels don\'t do safe mode.' },
       { type: 'removed', text: 'The idea of a single mascot. We went with a whole swarm.' },
       { type: 'known', text: 'Naming things is still one of the two hard problems.' },
     ],

@@ -65,14 +65,14 @@ Deno.serve(async (request) => {
         cta: 'Finish my application', href: `${siteUrl}/inside`, preview: 'Your Rebel Bug is saved. One last step.',
       },
       application_received: {
-        subject: 'Your techRebels application is with the crew', title: `Got it, ${first}.`,
+        subject: 'Your tech rebels application is with the crew', title: `Got it, ${first}.`,
         copy: `Your application and ${bugId} are with the crew. We review every application personally; your status will update in Inside.`,
         cta: 'Check my status', href: `${siteUrl}/inside`, preview: 'The crew has your application.',
       },
       membership_approved: {
         subject: `You’re in. Welcome to the swarm.`, title: `You’re in, ${first}.`,
         copy: `${bugId} · ${bugName} has joined the public swarm. Inside is now fully open: profile, Radar, matching and the Drop.`,
-        cta: 'Enter Inside', href: `${siteUrl}/inside`, preview: 'Your techRebels membership is approved.',
+        cta: 'Enter Inside', href: `${siteUrl}/inside`, preview: 'Your tech rebels membership is approved.',
       },
     }[kind];
     const html = emailShell(variants.title, variants.preview, `<p style="margin:0 0 10px;color:#3DDB9A;font:700 12px monospace;letter-spacing:2px;text-transform:uppercase">${escapeHtml(bugId)} · transactional update</p><h1 style="margin:0 0 16px;color:#EDE7DC;font-size:38px;line-height:1">${variants.title}</h1><p style="margin:0;color:#C3CBC6;font-size:17px;line-height:1.55">${variants.copy}</p>${image}${button(variants.cta, variants.href, kind === 'membership_approved' ? '#CDDC27' : '#F4A5D4')}`);

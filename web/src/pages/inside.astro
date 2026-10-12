@@ -12,7 +12,7 @@ const chips = (name: string, items: string[], type: 'checkbox' | 'radio' = 'chec
 const nextSession = news.find((item) => item.when === 'next' && item.tag === 'Session');
 const nextSessionDate = nextSession?.date.startsWith('[') ? 'Date TBA' : nextSession?.date ?? 'Soon';
 ---
-<Club title="Inside · techRebels" description="Your techRebels profile.">
+<Club title="Inside · tech rebels" description="Your tech rebels profile.">
   <section class="block first inside">
     <!-- logged out -->
     <div id="in-out" hidden>
@@ -44,7 +44,7 @@ const nextSessionDate = nextSession?.date.startsWith('[') ? 'Date TBA' : nextSes
       <form class="application-form" id="application-form" novalidate>
         <div class="pf-head">
           <p class="eyebrow">Your application</p>
-          <h2>Why techRebels?</h2>
+          <h2>Why tech rebels?</h2>
           <p>No CV theatre. A few honest sentences are enough.</p>
         </div>
         <label>City <span class="opt">optional</span><input type="text" id="application-city" maxlength="80" autocomplete="address-level2" placeholder="Prague" /></label>
@@ -71,7 +71,7 @@ const nextSessionDate = nextSession?.date.startsWith('[') ? 'Date TBA' : nextSes
         <div>
           <p class="eyebrow" id="in-id">Inside</p>
           <h1 class="h2" id="in-hello">Hey, rebel.</h1>
-          <p class="lede" id="in-sub">This is your corner of techRebels.</p>
+          <p class="lede" id="in-sub">This is your corner of tech rebels.</p>
           <div class="role-strip" id="role-strip" aria-label="Your access"></div>
           <div class="lrow"><a class="pill pill-ghost" href="/lab">Edit my bug</a><a class="pill pill-ghost" href={links.slackInvite}>Join the Slack</a><a class="pill pill-lime" id="in-admin" href="/inside/admin" hidden>Open admin</a></div>
         </div>
@@ -103,7 +103,7 @@ const nextSessionDate = nextSession?.date.startsWith('[') ? 'Date TBA' : nextSes
       <form class="pf inside-detail-legacy" id="pf" novalidate>
         <div class="pf-head">
           <h2>Your profile</h2>
-          <p>We use this to match you with people worth meeting: a bug buddy and a small squad with shared interests. Only the techRebels crew sees your answers, and titles, job titles and companies are never shown on the site. Fill in as much as you like.</p>
+          <p>We use this to match you with people worth meeting: a bug buddy and a small squad with shared interests. Only the tech rebels crew sees your answers, and titles, job titles and companies are never shown on the site. Fill in as much as you like.</p>
         </div>
 
         <div class="pf-grid">
@@ -128,7 +128,7 @@ const nextSessionDate = nextSession?.date.startsWith('[') ? 'Date TBA' : nextSes
         <label class="pf-wide">Your dream project <span class="opt">optional</span><textarea id="pf-dream_project" rows="3" maxlength="500" placeholder="If time and money didn't matter, what would you build?"></textarea></label>
 
         <div class="pf-consents">
-          <label class="check"><input type="checkbox" id="pf-matching_consent" /> <span><b>Match me with people.</b> techRebels may use my profile to suggest a bug buddy and a squad, and introduce me to them by name and shared interests. I can turn this off any time.</span></label>
+          <label class="check"><input type="checkbox" id="pf-matching_consent" /> <span><b>Match me with people.</b> tech rebels may use my profile to suggest a bug buddy and a squad, and introduce me to them by name and shared interests. I can turn this off any time.</span></label>
           <label class="check"><input type="checkbox" id="pf-marketing_consent" /> <span>Send me news about Sessions and merch drops.</span></label>
         </div>
 

@@ -1,7 +1,7 @@
 export { links, session, plausibleDomain, crew, contactEmail } from './links';
 
 export const site = {
-  name: 'techRebels',
+  name: 'tech rebels',
   title: 'tech rebels',
   description: 'A tech lunapark in Prague for curious people in tech. Real projects, real bugs, zero status games.',
 

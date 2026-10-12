@@ -25,7 +25,7 @@ export const news: NewsItem[] = [
   },
   {
     when: 'past', date: 'October 2026', tag: 'Brand',
-    title: 'techRebels got its look.',
+    title: 'tech rebels got its look.',
     text: 'No single mascot: a whole swarm of bugs. Plus a brand manual, three claim pillars and the first merch concepts.',
     href: '/manifesto', cta: 'Read the manifesto',
   },

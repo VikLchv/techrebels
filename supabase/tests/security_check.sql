@@ -1,4 +1,4 @@
--- techRebels: read-only security check. Run in the Supabase SQL editor after the init migration.
+-- tech rebels: read-only security check. Run in the Supabase SQL editor after the init migration.
 -- Expected: every row has rls_on = true, anon_* = false, and only the listed functions are callable by anon.
 
 -- 1. Tables: RLS on, and what anon / authenticated may do
