@@ -52,6 +52,10 @@ const roleBugs = [
     </div>
 
     <div class="hero-art hx-board">
+      <div class="hx-scene-head">
+        <span>Live from the swarm</span>
+        <strong>Meet the bugs.</strong>
+      </div>
       <div class="hx-peek hx-peek-a" aria-hidden="true"><Bug config={hero.right} size={200} /></div>
       <div class="hx-peek hx-peek-b" aria-hidden="true"><Bug config={hero.left} size={200} /></div>
       <div class="hx-win">
@@ -73,6 +77,8 @@ const roleBugs = [
       </div>
       <span class="stamp">Status:<br />won't fix</span>
     </div>
+
+    <div class="hx-rebel-slot" id="hx-rebel-slot"></div>
 
     <div class="hx-status" aria-label="Status">
       <span class="hx-st-main">⎇ main</span>
@@ -202,6 +208,7 @@ const roleBugs = [
   .hx-chips li:nth-child(3) { background: var(--mint); --r: -1deg; }
 
   /* the bug tracker */
+  .hx-scene-head, .hx-rebel-slot { display: none; }
   .hx-board { aspect-ratio: auto; display: grid; place-items: center; padding: 6% 4%; }
   .hx-peek { position: absolute; width: 34%; border-radius: 24px; padding: 12px; box-shadow: 0 24px 60px rgba(0, 0, 0, .45); }
   .hx-peek svg { display: block; width: 100%; height: auto; }
@@ -254,11 +261,78 @@ const roleBugs = [
     .hx { grid-template-columns: minmax(0, 1fr); }
     .hx-board { max-width: 560px; width: 100%; justify-self: center; }
   }
+  @media (max-width: 900px), (hover: none) and (pointer: coarse) {
+    .hx-rebel-slot { display: flex; justify-content: flex-end; width: min(100%, 560px); justify-self: center; }
+    .hx-rebel-slot .rm-btn {
+      position: static;
+      min-height: 36px !important;
+      padding: 7px 10px;
+      font-size: .61rem;
+      opacity: .76;
+      box-shadow: 0 7px 20px rgba(0, 0, 0, .32);
+    }
+    .hx-rebel-slot .rm-btn:hover, .hx-rebel-slot .rm-btn:focus-visible, html.rebel-mode .hx-rebel-slot .rm-btn { opacity: 1; }
+    .hx-status { display: none; }
+  }
   @media (max-width: 560px) {
-    .hx-issue { grid-template-columns: 1fr; }
-    .hx-tile { max-width: 220px; }
-    .hx-status .hx-st-right { display: none; }
-    .hx .stamp { width: 86px; font-size: .64rem; bottom: auto; top: 2%; right: -2%; }
+    .hero.hx {
+      row-gap: 20px;
+      padding-top: 20px;
+    }
+    .hx .hero-copy { gap: 15px; }
+    .hx-prompt { font-size: .72rem; letter-spacing: -.025em; }
+    .hx .hero-h { font-size: clamp(2.75rem, 13.6vw, 3.65rem) !important; line-height: .88; }
+    .hx-toggle { gap: 9px; }
+    .hx-switch { gap: 9px; padding: 6px 12px 6px 6px; font-size: .7rem; }
+    .hx-track { width: 46px; height: 25px; }
+    .hx-knob { top: 3px; left: 24px; width: 19px; height: 19px; }
+    .hx-switch[aria-checked="false"] .hx-knob { left: 3px; }
+    .hx-hint { font-size: .69rem; }
+    .hx .hero-lede { max-width: 36ch; font-size: .96rem; line-height: 1.48; }
+    .hx-chips { margin-top: 0; gap: 7px; }
+    .hx-chips li { padding: 6px 10px; border-radius: 8px; font-size: .78rem; box-shadow: 0 4px 12px rgba(0, 0, 0, .24); }
+    .hx .hero-cta { margin-top: 2px; }
+    .hx .hero-cta .pill { min-height: 48px; padding-block: 11px; }
+    .hx .hero-cta .pill-ghost { display: none; }
+
+    .hx-board {
+      width: calc(100% + 8px);
+      max-width: none;
+      justify-self: center;
+      display: grid;
+      grid-template-rows: auto auto;
+      place-items: initial;
+      gap: 14px;
+      margin-top: 10px;
+      padding: 20px 10px 22px;
+      border: 1px solid rgba(var(--fg-rgb), .08);
+      border-radius: 26px;
+      background: radial-gradient(circle at 90% 18%, rgba(244, 165, 212, .13), transparent 32%), rgba(var(--bg2-rgb), .42);
+      overflow: hidden;
+    }
+    .hx-scene-head { position: relative; z-index: 3; display: grid; gap: 3px; padding-inline: 8px; }
+    .hx-scene-head span { color: var(--mint-text); font: 700 .66rem var(--f-mono); letter-spacing: .13em; text-transform: uppercase; }
+    .hx-scene-head strong { color: var(--fg); font: 800 1.6rem/.95 var(--f-display); letter-spacing: -.035em; }
+    .hx-win { width: 100%; border-radius: 16px; transform: rotate(-.65deg); box-shadow: 0 24px 54px rgba(0, 0, 0, .45); }
+    .hx-bar { padding: 9px 11px; font-size: .7rem; }
+    .hx-bar i { width: 9px; height: 9px; }
+    .hx-issue { grid-template-columns: minmax(112px, 42%) minmax(0, 1fr); gap: 13px; padding: 14px; }
+    .hx-tile { max-width: none; padding: 6px; border-radius: 13px; }
+    .hx-info { gap: 6px; }
+    .hx-id { font-size: .64rem; }
+    .hx-name { font-size: clamp(1.12rem, 5.7vw, 1.45rem); }
+    .hx-fields { gap: 4px; }
+    .hx-fields div { gap: 6px; padding-bottom: 4px; }
+    .hx-fields dt { font-size: .58rem; }
+    .hx-fields dd { font-size: .75rem; }
+    .hx-feed { display: none; }
+    .hx-yours { margin: 7px 14px 14px; padding: 9px 10px; font-size: .78rem; }
+    .hx-yours span { font-size: .64rem; }
+    .hx-peek { z-index: 2; width: 78px; padding: 5px; border-radius: 13px; opacity: .9; box-shadow: 0 12px 28px rgba(0, 0, 0, .35); }
+    .hx-peek-a { right: -18px; top: 8px; }
+    .hx-peek-b { left: -16px; bottom: 4px; width: 68px; }
+    .hx .stamp { display: none; }
+    .hx-rebel-slot { margin-top: -10px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .hx-cur, .hx-hint, .hx-live em { animation: none; }
@@ -276,6 +350,21 @@ const roleBugs = [
   type B = { bug_number: number; name: string; role: string; species?: number; config: Record<string, string | number | undefined>; created_at: string };
   const $ = (id: string) => document.getElementById(id)!;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // On phones and tablets Rebel Mode belongs to the composition instead of
+  // floating over the swarm card (and fighting the browser toolbar).
+  const compactComposition = matchMedia('(max-width: 900px), (hover: none) and (pointer: coarse)');
+  const placeRebelMode = () => {
+    const button = document.getElementById('rm-btn');
+    const slot = document.getElementById('hx-rebel-slot');
+    const club = document.querySelector('.club');
+    const footer = document.querySelector('.club > .foot');
+    if (!button || !slot || !club || !footer) return;
+    if (compactComposition.matches) slot.append(button);
+    else club.insertBefore(button, footer);
+  };
+  placeRebelMode();
+  compactComposition.addEventListener('change', placeRebelMode);
 
   // ---- safe mode switch: it turns off, it never turns back on ----
   const sw = $('hx-switch');
