@@ -1,5 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { button, emailShell, escapeHtml, sendResend } from '../_shared/email.ts';
+import { invitationEmail, sendResend } from '../_shared/email.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -15,10 +15,6 @@ const roles: InviteRole[] = ['member', 'partner', 'admin'];
 
 function validEmail(value: string) {
   return value.length <= 320 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-}
-
-function roleLabel(role: InviteRole) {
-  return role === 'admin' ? 'techRebels admin' : role === 'partner' ? 'techRebels partner' : 'techRebels member';
 }
 
 Deno.serve(async (request) => {
@@ -87,27 +83,31 @@ Deno.serve(async (request) => {
     const redirectTo = `${siteUrl}/accept-invite?invite=${encodeURIComponent(invitationId)}`;
 
     const { data: profile } = await admin.from('profiles').select('id').eq('email', email).maybeSingle();
-    if (profile?.id) {
-      await admin.from('community_invites').update({ invited_user_id: profile.id }).eq('id', invitationId);
-      const label = roleLabel(role);
-      const personal = message ? `<p style="margin:18px 0 0;padding:16px;border-left:3px solid #CDDC27;color:#EDE7DC">${escapeHtml(message)}</p>` : '';
-      const html = emailShell(`Invitation to become a ${label}`, 'A new techRebels role is waiting for you.', `<p style="margin:0 0 10px;color:#3DDB9A;font:700 12px monospace;letter-spacing:2px;text-transform:uppercase">Crew invitation · expires in 7 days</p><h1 style="margin:0 0 16px;color:#EDE7DC;font-size:38px;line-height:1">Become a ${escapeHtml(label)}.</h1><p style="margin:0;color:#C3CBC6;font-size:17px;line-height:1.55">The crew invited this account to accept a new role. Sign in with this email to continue.</p>${personal}${button('Review invitation', redirectTo, '#CDDC27')}`);
-      await sendResend({ to: email, subject: `Your ${label} invitation`, html, text: `You have been invited to become a ${label}.\n\n${message ? `${message}\n\n` : ''}${redirectTo}` });
-    } else {
-      const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(email, {
-        redirectTo,
-        data: { community_invite_id: invitationId, community_invite_role: role },
-      });
-      if (inviteError) {
-        await admin.from('community_invites').update({ status: 'revoked' }).eq('id', invitationId);
-        throw inviteError;
-      }
-      if (invited.user) await admin.from('community_invites').update({ invited_user_id: invited.user.id }).eq('id', invitationId);
+    const newAccount = !profile?.id;
+    const linkResult = newAccount
+      ? await admin.auth.admin.generateLink({
+          type: 'invite', email,
+          options: {
+            redirectTo,
+            data: {
+              community_invite_id: invitationId,
+              community_invite_role: role,
+              community_invite_new_account: true,
+            },
+          },
+        })
+      : await admin.auth.admin.generateLink({ type: 'magiclink', email, options: { redirectTo } });
+    if (linkResult.error || !linkResult.data?.properties?.action_link) {
+      throw linkResult.error ?? new Error('secure invitation link could not be created');
     }
+    const invitedUserId = linkResult.data.user?.id ?? profile?.id;
+    if (invitedUserId) await admin.from('community_invites').update({ invited_user_id: invitedUserId }).eq('id', invitationId);
+    const invite = invitationEmail({ role, link: linkResult.data.properties.action_link, message, newAccount });
+    await sendResend({ to: email, subject: invite.subject, html: invite.html, text: invite.text });
 
     await admin.from('admin_audit_log').insert({
-      actor_id: userData.user.id, target_user_id: profile?.id ?? null, action: existing ? 'invite_resent' : 'invite_created',
-      details: { invite_id: invitationId, email, role, expires_at: expiresAt },
+      actor_id: userData.user.id, target_user_id: invitedUserId ?? null, action: existing ? 'invite_resent' : 'invite_created',
+      details: { invite_id: invitationId, email, role, expires_at: expiresAt, new_account: newAccount },
     });
     return Response.json({ ok: true, invitationId }, { headers: cors });
   } catch (error) {

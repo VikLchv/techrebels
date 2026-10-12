@@ -27,6 +27,19 @@ supabase functions deploy send-auth-email --no-verify-jwt
 
 The second deploy publishes the updated role-specific invitation wording. Keep JWT verification enabled for `manage-community`.
 
+`manage-community` sends invitations itself through Resend. It generates a
+single-use Supabase Auth link without invoking the default Supabase mailer, so
+the recipient gets exactly one branded invitation:
+
+- a new address gets an invite link, then creates a password on acceptance;
+- an existing account gets a magic sign-in link and keeps its current password;
+- both paths include the optional personal crew note;
+- resending rotates the secure link and extends the invitation by 7 days.
+
+No additional SQL migration is required for this email-flow update. If these
+functions return `404`, the code exists only in the repository and has not been
+deployed to the selected Supabase project yet.
+
 ## 3. Supabase URL configuration
 
 In **Authentication → URL Configuration → Redirect URLs**, allow both the production URL and the local test URL:
@@ -42,7 +55,7 @@ Supabase may match the query string automatically; the invitation ID is added as
 
 1. Open `/inside/admin` as an admin.
 2. Invite a fresh email as **member**.
-3. Open the email, set a strong password, accept privacy, and enter Inside.
+3. Open the one branded email, set a strong password, accept privacy, and enter Inside.
 4. Invite an existing account as **partner** and verify the link asks them to log in before opening Partner Space.
 5. Invite a disposable test account as **admin** and verify it sees both Inside and Control Room.
 6. Revoke one pending invitation and verify the old link no longer works.

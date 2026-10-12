@@ -72,6 +72,7 @@ order by d.created_at desc;
 ## 7. Production checks
 
 - test Gmail, Outlook and Apple Mail;
+- send one fresh-account invitation and one existing-account invitation and confirm each recipient gets exactly one email;
 - verify plain-text fallback and links;
 - confirm that signup and reset links use only the production HTTPS URL;
 - check SPF, DKIM and DMARC alignment;

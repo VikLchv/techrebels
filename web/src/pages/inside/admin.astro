@@ -49,7 +49,7 @@ const adminSection = pathPart === 'admin' ? 'overview' : pathPart;
           <label>Personal note <span>optional</span><textarea id="invite-message" maxlength="600" placeholder="Why we want you in the swarm…"></textarea></label>
           <button class="pill pill-lime" id="invite-send" type="submit">Send invitation</button>
         </form>
-        <p class="adm-note" id="invite-note">The invitation expires in 7 days. Admin access is additive and never removes another role.</p>
+        <p class="adm-note" id="invite-note">One branded email is sent through Resend and expires in 7 days. Existing accounts keep their password. Admin access is additive.</p>
         <div class="adm-table-wrap invite-list"><table><thead><tr><th>Sent</th><th>Email</th><th>Access</th><th>Status</th><th>Expires</th><th>Action</th></tr></thead><tbody id="invitation-rows"></tbody></table></div>
       </section>
 
@@ -278,7 +278,7 @@ const adminSection = pathPart === 'admin' ? 'overview' : pathPart;
     const { error } = await supabase!.functions.invoke('manage-community', { body: { action: 'invite', ...values } });
     button.disabled = false;
     if (error) { $('invite-note').textContent = 'Invitation was not sent.'; showError(error.message); return; }
-    $('invite-note').textContent = `Invitation sent to ${values.email}. It expires in 7 days.`;
+    $('invite-note').textContent = `One branded invitation was sent to ${values.email}. It expires in 7 days.`;
     await load();
   }
 

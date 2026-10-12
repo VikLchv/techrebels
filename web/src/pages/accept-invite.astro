@@ -24,12 +24,14 @@ import Club from '../layouts/Club.astro';
         <div class="invite-role"><span>You’re joining as</span><strong id="invite-role">—</strong></div>
         <blockquote id="invite-message" hidden></blockquote>
         <label>Your name<input type="text" id="invite-name" required minlength="2" maxlength="80" autocomplete="name" /></label>
-        <label>Create a password<input type="password" id="invite-password" required minlength="12" maxlength="128" autocomplete="new-password" aria-describedby="invite-password-hint" /></label>
-        <p class="invite-hint" id="invite-password-hint">At least 12 characters with uppercase, lowercase, a number and a symbol.</p>
-        <label>Repeat password<input type="password" id="invite-repeat" required minlength="12" maxlength="128" autocomplete="new-password" /></label>
+        <div class="invite-password-fields" id="invite-password-fields">
+          <label>Create a password<input type="password" id="invite-password" required minlength="12" maxlength="128" autocomplete="new-password" aria-describedby="invite-password-hint" /></label>
+          <p class="invite-hint" id="invite-password-hint">At least 12 characters with uppercase, lowercase, a number and a symbol.</p>
+          <label>Repeat password<input type="password" id="invite-repeat" required minlength="12" maxlength="128" autocomplete="new-password" /></label>
+        </div>
         <label class="invite-check"><input type="checkbox" id="invite-privacy" required /> <span>I accept the <a href="/privacy" target="_blank">Privacy Notice</a> and the processing needed to manage my account and role.</span></label>
         <p class="invite-error" id="invite-error" role="alert" hidden></p>
-        <button class="pill pill-lime" id="invite-submit" type="submit">Accept & enter <span aria-hidden="true">→</span></button>
+        <button class="pill pill-lime" id="invite-submit" type="submit"><span id="invite-submit-label">Accept & enter</span> <span aria-hidden="true">→</span></button>
       </form>
 
       <div class="invite-state invite-done" id="invite-done" hidden>
@@ -44,6 +46,8 @@ import Club from '../layouts/Club.astro';
 <style is:global>
   .invite-card { max-width: 680px; display: grid; gap: 18px; }
   .invite-card form { display: grid; gap: 14px; padding-top: 6px; }
+  .invite-password-fields { display: grid; gap: 14px; }
+  .invite-password-fields[hidden] { display: none; }
   .invite-card label { display: grid; gap: 7px; font-weight: 700; }
   .invite-card input[type=text], .invite-card input[type=password] { width: 100%; border: 1.5px solid rgba(var(--fg-rgb), .16); border-radius: 14px; padding: 13px 15px; background: var(--bg-2); color: var(--fg); font: 500 1rem "Satoshi", system-ui, sans-serif; }
   .invite-card input:focus { outline: none; border-color: var(--lime); }
@@ -74,6 +78,7 @@ import Club from '../layouts/Club.astro';
   const form = document.getElementById('invite-form') as HTMLFormElement;
   const errorBox = document.getElementById('invite-error')!;
   let sessionUser: any = null;
+  let needsPassword = false;
 
   const showInvalid = () => { intro.textContent = 'We could not verify this invitation.'; form.hidden = true; login.hidden = true; invalid.hidden = false; };
   const roleCopy = (role: string) => role === 'admin' ? 'admin' : role === 'partner' ? 'partner' : 'member';
@@ -100,12 +105,21 @@ import Club from '../layouts/Club.astro';
     if (invitation.message) { message.textContent = `“${invitation.message}”`; message.hidden = false; }
     const name = document.getElementById('invite-name') as HTMLInputElement;
     name.value = String(sessionUser.user_metadata?.full_name ?? sessionUser.user_metadata?.name ?? '');
+    needsPassword = sessionUser.user_metadata?.community_invite_new_account === true;
+    const passwordFields = document.getElementById('invite-password-fields')!;
+    const password = document.getElementById('invite-password') as HTMLInputElement;
+    const repeat = document.getElementById('invite-repeat') as HTMLInputElement;
+    passwordFields.hidden = !needsPassword;
+    password.required = needsPassword;
+    repeat.required = needsPassword;
+    const submitLabel = document.getElementById('invite-submit-label');
+    if (submitLabel) submitLabel.textContent = invitation.role === 'admin' ? 'Accept admin access' : invitation.role === 'partner' ? 'Accept partner access' : 'Accept member access';
     form.hidden = false;
   }
 
   if (supabase) {
     supabase.auth.onAuthStateChange((event, session) => {
-      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && !form.hidden === false) inspect();
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && form.hidden) inspect();
     });
     setTimeout(inspect, location.hash ? 500 : 0);
   } else showInvalid();
@@ -118,20 +132,25 @@ import Club from '../layouts/Club.astro';
     const password = document.getElementById('invite-password') as HTMLInputElement;
     const repeat = document.getElementById('invite-repeat') as HTMLInputElement;
     const privacy = document.getElementById('invite-privacy') as HTMLInputElement;
-    const strong = password.value.length >= 12 && /[a-z]/.test(password.value) && /[A-Z]/.test(password.value) && /\d/.test(password.value) && /[^A-Za-z0-9]/.test(password.value);
     if (name.value.trim().length < 2) { errorBox.textContent = 'Please enter your name.'; errorBox.hidden = false; return; }
-    if (!strong) { errorBox.textContent = 'Use at least 12 characters with uppercase, lowercase, a number and a symbol.'; errorBox.hidden = false; return; }
-    if (password.value !== repeat.value) { errorBox.textContent = 'The passwords do not match.'; errorBox.hidden = false; return; }
+    if (needsPassword) {
+      const strong = password.value.length >= 12 && /[a-z]/.test(password.value) && /[A-Z]/.test(password.value) && /\d/.test(password.value) && /[^A-Za-z0-9]/.test(password.value);
+      if (!strong) { errorBox.textContent = 'Use at least 12 characters with uppercase, lowercase, a number and a symbol.'; errorBox.hidden = false; return; }
+      if (password.value !== repeat.value) { errorBox.textContent = 'The passwords do not match.'; errorBox.hidden = false; return; }
+    }
     if (!privacy.checked) { errorBox.textContent = 'Privacy acceptance is required to create access.'; errorBox.hidden = false; return; }
     const button = document.getElementById('invite-submit') as HTMLButtonElement;
     button.disabled = true;
-    const passwordResult = await supabase.auth.updateUser({ password: password.value });
-    if (passwordResult.error) { button.disabled = false; errorBox.textContent = 'The password could not be saved. Open a fresh invitation or try again.'; errorBox.hidden = false; return; }
+    if (needsPassword) {
+      const passwordResult = await supabase.auth.updateUser({ password: password.value });
+      if (passwordResult.error) { button.disabled = false; errorBox.textContent = 'The password could not be saved. Open a fresh invitation or try again.'; errorBox.hidden = false; return; }
+    }
     const { data: role, error } = await supabase.rpc('accept_community_invite', { invite_id: invitationId, invitee_name: name.value.trim(), privacy_accepted: true });
     if (error) { button.disabled = false; errorBox.textContent = error.message; errorBox.hidden = false; return; }
+    if (needsPassword) await supabase.auth.updateUser({ data: { community_invite_new_account: false } });
     form.hidden = true;
     intro.textContent = 'ACCESS GRANTED';
-    document.getElementById('invite-done-copy')!.textContent = role === 'partner' ? 'Your Partner Space access is ready.' : 'Your Inside access is ready.';
+    document.getElementById('invite-done-copy')!.textContent = role === 'admin' ? 'Your Inside and Control Room access is ready.' : role === 'partner' ? 'Your Partner Space access is ready.' : 'Your Inside access is ready.';
     document.getElementById('invite-done')!.hidden = false;
   });
 </script>
