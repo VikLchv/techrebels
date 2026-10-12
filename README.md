@@ -9,7 +9,7 @@ Website for techRebels, a community for curious people in tech. Less conference,
 
 ## Supabase
 - Project ref: `eomffbhpevrxqtnjtout` (West EU, Paris)
-- Auth: email magic link only
+- Auth: email + password, branded verification/recovery links, and one-time invitation sign-in
 - The public never reads tables directly. The Swarm uses `get_swarm()` / `swarm_count()` and the Realtime channel `swarm` (event `new_bug`).
 
 Never commit `.env` files, the database password or the service role key.

@@ -1,5 +1,5 @@
 import { Webhook } from 'npm:standardwebhooks@1.0.0';
-import { button, emailShell, escapeHtml, sendResend, verifyLink } from '../_shared/email.ts';
+import { button, emailShell, escapeHtml, invitationEmail, sendResend, verifyLink } from '../_shared/email.ts';
 
 type HookUser = { email: string; new_email?: string; user_metadata?: Record<string, unknown> };
 type EmailData = {
@@ -21,10 +21,13 @@ function content(type: string, link?: string, token?: string, metadata: Record<s
     password_changed: { subject: 'Your techRebels password was changed', title: 'Password changed.', copy: 'Your password has just been updated. If this was not you, reset it immediately and contact the crew.' },
   };
   let item: AuthCopy = variants[type] ?? { subject: 'Security notice from techRebels', title: 'Account security notice.', copy: 'There was a security-related change or request on your techRebels account.' };
-  if (type === 'invite' && ['member', 'partner', 'admin'].includes(String(metadata.community_invite_role ?? ''))) {
-    const role = String(metadata.community_invite_role);
-    const label = role === 'admin' ? 'techRebels admin' : role === 'partner' ? 'techRebels partner' : 'techRebels member';
-    item = { subject: `You’re invited to become a ${label}`, title: `Become a ${label}.`, copy: 'The crew saved a place for you. Confirm this email, choose a secure password and accept the invitation within 7 days.', cta: 'Accept invitation' };
+  if (type === 'invite' && link && ['member', 'partner', 'admin'].includes(String(metadata.community_invite_role ?? ''))) {
+    return invitationEmail({
+      role: String(metadata.community_invite_role) as 'member' | 'partner' | 'admin',
+      link,
+      message: String(metadata.community_invite_message ?? '').trim() || null,
+      newAccount: true,
+    });
   }
   const otp = !link && token ? `<p style="margin:18px 0;color:#CDDC27;font:800 28px monospace;letter-spacing:5px">${escapeHtml(token)}</p>` : '';
   const html = emailShell(item.title, item.copy, `<p style="margin:0 0 10px;color:#3DDB9A;font:700 12px monospace;letter-spacing:2px;text-transform:uppercase">Account security</p><h1 style="margin:0 0 16px;color:#EDE7DC;font-size:38px;line-height:1">${escapeHtml(item.title)}</h1><p style="margin:0;color:#C3CBC6;font-size:17px;line-height:1.55">${escapeHtml(item.copy)}</p>${link && item.cta ? button(item.cta, link) : otp}<p style="margin:16px 0 0;color:#87928C;font-size:12px;line-height:1.5">Never send us your password. This link/code is for you only and expires automatically.</p>`);
