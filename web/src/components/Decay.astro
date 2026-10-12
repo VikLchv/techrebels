@@ -47,6 +47,25 @@
   .dc-gone { color: transparent !important; text-shadow: none !important; border-bottom: 2px dotted rgba(var(--fg-rgb), .25); }
   @keyframes dc-flicker { 0%, 88%, 100% { opacity: 1; } 89% { opacity: .25; } 91% { opacity: .9; } 93% { opacity: .1; } 95% { opacity: 1; } }
   @media (max-width: 760px) { .dc-bar { top: 64px; } .dc-in { font-size: .85rem; } }
+  @media (max-width: 560px) {
+    .dc-bar { padding: 8px 14px 0; }
+    .dc-in {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px 10px;
+      padding: 10px 38px 10px 12px;
+      border-radius: 12px;
+      box-shadow: 3px 3px 0 var(--pink);
+    }
+    .dc-msg { font-size: .72rem; line-height: 1.35; }
+    .dc-msg b { display: block; margin: 0 0 1px; }
+    .dc-msg #dc-why { display: none; }
+    .dc-msg::after { content: "Community quiet. Make some noise."; color: var(--soft); }
+    .dc-fix { display: block; }
+    .dc-fix .dc-label, .dc-fix a:not(:first-of-type) { display: none; }
+    .dc-fix a:first-of-type { display: inline-flex; align-items: center; min-height: 36px; padding: 5px 10px; font-size: .72rem; white-space: nowrap; }
+    .dc-x { top: 50%; right: 8px; min-height: 36px !important; transform: translateY(-50%); }
+  }
   @media (prefers-reduced-motion: reduce) { html.decay-hard .club main h1, html.decay-hard .club main h2 { animation: none; } }
 </style>
 
